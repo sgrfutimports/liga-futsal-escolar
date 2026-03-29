@@ -52,112 +52,158 @@ export default function Home() {
 
   return (
     <div className="w-full">
-      {/* Featured Carousel Banner */}
-      <section className="relative h-[85vh] min-h-[600px] w-full overflow-hidden bg-dark">
+      {/* Premium Hero Carousel */}
+      <section className="relative h-[90vh] min-h-[700px] w-full overflow-hidden bg-dark">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
             className="absolute inset-0"
           >
-            {/* Background Image */}
+            {/* Background Image with Ken Burns effect */}
             <div className="absolute inset-0 z-0">
-              <motion.img
-                initial={{ scale: 1.1 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 8 }}
-                src={carouselItems[currentIndex].image}
-                alt={carouselItems[currentIndex].title}
-                className="w-full h-full object-cover opacity-50"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/60 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-dark via-dark/40 to-transparent" />
+              <motion.div 
+                className="w-full h-full transform-origin-center"
+                initial={{ scale: 1.15, rotate: 1 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ duration: 10, ease: "easeOut" }}
+              >
+                <img
+                  src={carouselItems[currentIndex].image}
+                  alt={carouselItems[currentIndex].title}
+                  className="w-full h-full object-cover opacity-60 mix-blend-overlay"
+                  referrerPolicy="no-referrer"
+                />
+              </motion.div>
+              {/* Premium Gradient Overlays */}
+              <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/80 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-dark via-dark/60 to-transparent" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0)_0%,rgba(0,0,0,0.5)_100%)]" />
             </div>
 
-            {/* Content */}
+            {/* Content Container */}
             <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-start">
               <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5, duration: 0.8 }}
-                className="max-w-3xl"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
+                className="max-w-3xl backdrop-blur-xl bg-dark/40 border border-white/10 p-8 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden group"
               >
-                <span className={cn(
-                  "inline-block py-1 px-3 rounded-full font-display text-sm tracking-widest mb-6 border",
-                  carouselItems[currentIndex].accent === "primary" 
-                    ? "bg-primary/20 text-primary border-primary/30" 
-                    : carouselItems[currentIndex].accent === "secondary"
-                    ? "bg-secondary/20 text-secondary border-secondary/30"
-                    : "bg-accent/20 text-accent border-accent/30"
-                )}>
-                  {carouselItems[currentIndex].subtitle}
-                </span>
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold text-white mb-6 leading-none tracking-tight uppercase">
-                  {carouselItems[currentIndex].title.split(' ').map((word, i) => (
-                    <span key={i} className={i === 1 ? (
-                      carouselItems[currentIndex].accent === "primary" ? "text-primary" : 
-                      carouselItems[currentIndex].accent === "secondary" ? "text-secondary" : "text-accent"
-                    ) : ""}>
-                      {word}{' '}
-                      {i === 1 && <br />}
-                    </span>
-                  ))}
-                </h1>
-                <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-xl font-sans leading-relaxed">
-                  {carouselItems[currentIndex].description}
-                </p>
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <Link
-                    to={carouselItems[currentIndex].ctaLink}
-                    className={cn(
-                      "w-full sm:w-auto px-8 py-4 font-display text-xl rounded transition-all transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg",
-                      carouselItems[currentIndex].accent === "primary"
-                        ? "bg-primary text-dark hover:bg-primary-dark shadow-primary/20"
-                        : carouselItems[currentIndex].accent === "secondary"
-                        ? "bg-secondary text-dark hover:bg-secondary shadow-secondary/20"
-                        : "bg-accent text-white hover:bg-accent shadow-accent/20"
-                    )}
-                  >
-                    {carouselItems[currentIndex].ctaText}
-                    <ChevronRight className="w-6 h-6" />
-                  </Link>
+                {/* Glow effect behind text */}
+                <div className={cn(
+                  "absolute -inset-20 blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-1000",
+                  carouselItems[currentIndex].accent === "primary" ? "bg-primary" : 
+                  carouselItems[currentIndex].accent === "secondary" ? "bg-secondary" : "bg-accent"
+                )} />
+
+                <div className="relative z-10">
+                  <span className={cn(
+                    "inline-flex items-center gap-2 py-1.5 px-4 rounded-full font-display text-xs tracking-[0.2em] mb-6 border uppercase shadow-lg",
+                    carouselItems[currentIndex].accent === "primary" 
+                      ? "bg-primary/20 text-primary border-primary/40 shadow-primary/20" 
+                      : carouselItems[currentIndex].accent === "secondary"
+                      ? "bg-secondary/20 text-secondary border-secondary/40 shadow-secondary/20"
+                      : "bg-accent/20 text-accent border-accent/40 shadow-accent/20"
+                  )}>
+                    <Trophy className="w-3 h-3" />
+                    {carouselItems[currentIndex].subtitle}
+                  </span>
+                  
+                  <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-black text-white mb-6 leading-[0.9] tracking-tighter uppercase drop-shadow-2xl">
+                    {carouselItems[currentIndex].title.split(' ').map((word, i) => (
+                      <span key={i} className={i === 1 ? (
+                        carouselItems[currentIndex].accent === "primary" ? "text-primary drop-shadow-[0_0_15px_rgba(204,255,0,0.5)]" : 
+                        carouselItems[currentIndex].accent === "secondary" ? "text-secondary drop-shadow-[0_0_15px_rgba(255,136,0,0.5)]" : "text-accent drop-shadow-[0_0_15px_rgba(0,255,136,0.5)]"
+                      ) : "text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400"}>
+                        {word}{' '}
+                        {i === 1 && <br />}
+                      </span>
+                    ))}
+                  </h1>
+                  
+                  <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-xl font-sans leading-relaxed drop-shadow-md">
+                    {carouselItems[currentIndex].description}
+                  </p>
+                  
+                  <div className="flex flex-col sm:flex-row items-center gap-6">
+                    <Link
+                      to={carouselItems[currentIndex].ctaLink}
+                      className={cn(
+                        "group relative w-full sm:w-auto px-8 py-4 font-display text-xl rounded-xl transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden",
+                        carouselItems[currentIndex].accent === "primary"
+                          ? "bg-primary text-dark hover:bg-white hover:text-dark shadow-[0_0_30px_rgba(204,255,0,0.3)]"
+                          : carouselItems[currentIndex].accent === "secondary"
+                          ? "bg-secondary text-dark hover:bg-white hover:text-dark shadow-[0_0_30px_rgba(255,136,0,0.3)]"
+                          : "bg-accent text-white hover:bg-white hover:text-dark shadow-[0_0_30px_rgba(0,255,136,0.3)]"
+                      )}
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        {carouselItems[currentIndex].ctaText}
+                        <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                      </span>
+                    </Link>
+                    
+                    {/* Secondary CTA/Info */}
+                    <div className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors cursor-pointer group">
+                      <div className="w-12 h-12 rounded-full border border-dark-border bg-dark/50 flex items-center justify-center group-hover:border-white/50 transition-colors">
+                        <Play className="w-5 h-5 ml-1" />
+                      </div>
+                      <span className="font-display text-sm tracking-wider uppercase">Ver Vídeo</span>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             </div>
           </motion.div>
         </AnimatePresence>
 
-        {/* Navigation Arrows */}
-        <div className="absolute bottom-10 right-10 z-20 flex gap-4">
+        {/* Navigation Controls */}
+        <div className="absolute right-6 bottom-10 md:right-10 md:bottom-1/2 md:translate-y-1/2 z-20 flex flex-row md:flex-col gap-4">
           <button 
             onClick={prevSlide}
-            className="p-4 rounded-full border border-white/20 text-white hover:bg-white/10 hover:border-white/40 transition-all backdrop-blur-sm"
+            className="group w-14 h-14 flex items-center justify-center rounded-full border border-white/10 bg-dark/30 hover:bg-white/10 hover:border-white/40 transition-all backdrop-blur-md shadow-lg"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-6 h-6 text-white group-hover:-translate-x-1 transition-transform" />
           </button>
           <button 
             onClick={nextSlide}
-            className="p-4 rounded-full border border-white/20 text-white hover:bg-white/10 hover:border-white/40 transition-all backdrop-blur-sm"
+            className="group w-14 h-14 flex items-center justify-center rounded-full border border-white/10 bg-dark/30 hover:bg-white/10 hover:border-white/40 transition-all backdrop-blur-md shadow-lg"
           >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className="w-6 h-6 text-white group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
 
-        {/* Indicators */}
-        <div className="absolute bottom-10 left-10 z-20 flex gap-2">
+        {/* Enhanced Indicators */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 md:left-10 md:translate-x-0 z-20 flex gap-3 bg-dark/50 backdrop-blur-md px-6 py-3 rounded-full border border-white/5">
           {carouselItems.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}
-              className={cn(
-                "h-1 transition-all duration-500 rounded-full",
-                currentIndex === i ? "w-12 bg-primary" : "w-6 bg-white/30 hover:bg-white/50"
+              className="relative group py-2"
+            >
+              <div className={cn(
+                "h-1.5 transition-all duration-500 rounded-full",
+                currentIndex === i 
+                  ? "w-12 bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]" 
+                  : "w-4 bg-white/30 group-hover:bg-white/60"
+              )} />
+              {/* Progress filling effect for active slide */}
+              {currentIndex === i && (
+                <motion.div 
+                  className={cn(
+                    "absolute top-2 left-0 h-1.5 rounded-full",
+                    carouselItems[currentIndex].accent === "primary" ? "bg-primary" :
+                    carouselItems[currentIndex].accent === "secondary" ? "bg-secondary" : "bg-accent"
+                  )}
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 8, ease: "linear" }}
+                />
               )}
-            />
+            </button>
           ))}
         </div>
       </section>

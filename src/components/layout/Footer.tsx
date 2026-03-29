@@ -9,17 +9,17 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-1 md:col-span-1">
             <Link to="/" className="flex items-center gap-3 mb-4 group">
-              <div className="w-10 h-10 flex items-center justify-center">
+              <div className="relative w-10 h-10 flex items-center justify-center">
                 <img 
-                  src="https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/liga-futsal-logo.png" 
+                  src={localStorage.getItem('league_logo') || "https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/liga-futsal-logo.png"} 
                   alt="Liga de Futsal Escolar" 
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain overflow-hidden rounded-full"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     e.currentTarget.parentElement?.classList.add('bg-primary', 'rounded');
                   }}
                 />
-                <Trophy className="w-5 h-5 text-dark absolute opacity-0 group-data-[error=true]:opacity-100" />
+                <Trophy className="w-5 h-5 text-dark absolute inset-0 m-auto opacity-0 group-data-[error=true]:opacity-100" />
               </div>
               <div className="flex flex-col leading-none">
                 <span className="font-display text-xl font-bold tracking-tight text-white group-hover:text-primary transition-colors">

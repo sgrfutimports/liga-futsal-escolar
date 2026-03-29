@@ -24,9 +24,9 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-3 group">
             <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-105 transition-transform">
               <img 
-                src="https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/liga-futsal-logo.png" 
+                src={localStorage.getItem('league_logo') || "https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/liga-futsal-logo.png"} 
                 alt="Liga de Futsal Escolar" 
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain overflow-hidden rounded-full"
                 onError={(e) => {
                   // Fallback if image not found
                   e.currentTarget.style.display = 'none';

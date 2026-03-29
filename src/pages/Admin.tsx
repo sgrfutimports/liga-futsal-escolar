@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Lock, Settings, Users, Trophy, Calendar, Database, Search, Filter, Check, X, Eye, Plus, Edit, Trash, Activity } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { Lock, Settings, Users, Trophy, Calendar, Database, Search, Filter, Check, X, Eye, Plus, Edit, Trash, Activity, Shield, Upload } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
 // --- Mock Data ---
@@ -52,6 +52,7 @@ export default function Admin() {
   const [teams, setTeams] = useState(initialTeams);
   const [athletes, setAthletes] = useState(initialAthletes);
   const [games, setGames] = useState(initialGames);
+  const [leagueLogo, setLeagueLogo] = useState<string | null>(localStorage.getItem('league_logo'));
 
   // Modal States
   const [isTeamModalOpen, setTeamModalOpen] = useState(false);
@@ -299,10 +300,40 @@ export default function Admin() {
     </div>
   );
 
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        setLeagueLogo(base64);
+        localStorage.setItem('league_logo', base64);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const renderSettings = () => (
     <div className="bg-dark-card border border-dark-border rounded-xl p-6 max-w-2xl">
       <h3 className="font-display text-xl text-white mb-6">CONFIGURAÇÕES GERAIS</h3>
-      <form onSubmit={(e) => { e.preventDefault(); alert("Configurações salvas (Mock)!"); }}>
+      <form onSubmit={(e) => { e.preventDefault(); alert("Configurações salvas com sucesso!"); }}>
+        <div className="mb-6 flex flex-col items-start gap-4">
+          <label className={labelClass}>Logo do Campeonato</label>
+          <div className="flex items-center gap-6">
+            <div className="w-24 h-24 rounded-full border border-dark-border bg-dark flex items-center justify-center overflow-hidden">
+              {leagueLogo ? <img src={leagueLogo} alt="Logo" className="w-full h-full object-cover" /> : <Trophy className="w-8 h-8 text-gray-500" />}
+            </div>
+            <label className="flex items-center gap-2 px-4 py-2 bg-dark border border-dark-border text-gray-300 rounded hover:text-white hover:border-primary transition-all cursor-pointer">
+              <Upload className="w-4 h-4" />
+              <span>Escolher Imagem</span>
+              <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+            </label>
+            {leagueLogo && (
+               <button type="button" onClick={() => { setLeagueLogo(null); localStorage.removeItem('league_logo'); }} className="text-danger hover:underline text-sm ml-2">Remover</button>
+            )}
+          </div>
+        </div>
+
         <label className={labelClass}>Nome do Evento</label>
         <input type="text" className={inputClass} defaultValue="Liga de Futsal Escolar" />
         
@@ -348,8 +379,13 @@ export default function Admin() {
     <div className="min-h-screen bg-dark flex flex-col md:flex-row">
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-dark-card border-r border-dark-border flex-shrink-0">
-        <div className="p-6 border-b border-dark-border">
-          <h2 className="font-display text-2xl text-white">PAINEL ADMIN</h2>
+        <div className="p-6 border-b border-dark-border flex items-center gap-3">
+          {leagueLogo ? (
+            <img src={leagueLogo} alt="Liga" className="w-10 h-10 rounded-full border border-dark-border object-cover" />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-dark border border-dark-border flex items-center justify-center"><Trophy className="w-5 h-5 text-primary" /></div>
+          )}
+          <h2 className="font-display text-2xl text-white">ADMIN</h2>
         </div>
         <nav className="p-4 space-y-2">
           {[
