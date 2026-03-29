@@ -3,11 +3,11 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Oswald", ui-sans-serif, system-ui, sans-serif;
-  --color-primary: #99CC00;
-  --color-primary-dark: #86B300;
-  --color-secondary: #FF8800;
-  --color-accent: #0088CC;
-  --color-danger: #CC0000;
+  --color-primary: #76A911; /* Vibrant Logo Green */
+  --color-primary-dark: #5C850D;
+  --color-secondary: #E85F01; /* Deep Logo Orange */
+  --color-accent: #0162CA; /* Royal Logo Blue */
+  --color-danger: #C81010; /* Text Red */
   --color-dark: #0a0a0a;
   --color-dark-card: #171717;
   --color-dark-border: #262626;

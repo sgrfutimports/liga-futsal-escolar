@@ -18,8 +18,23 @@ export default function Home() {
 
   // Safety fallbacks
   const carouselItems = banners?.length > 0 ? banners : defaultData.banners;
+  const premiumSponsorItems = sponsorsPremium?.length > 0 ? sponsorsPremium : defaultData.sponsorsPremium;
+  const officialSponsorItems = sponsorsOfficial?.length > 0 ? sponsorsOfficial : defaultData.sponsorsOfficial;
   const loadedTeams = teams || [];
   const nextGames = (games || []).filter((g: any) => g.status !== 'Finalizado').slice(0, 4);
+
+  // Auto-fetch popular logos robustly (avoids hotlink 403s & minor spelling differences)
+  const getLogo = (sponsor: any) => {
+    if (sponsor.logo) return sponsor.logo;
+    const name = (sponsor.name || "").toUpperCase().trim();
+    if (name.includes("FERREIRA")) return "https://upload.wikimedia.org/wikipedia/commons/7/7b/Ferreira_Costa_logo.svg";
+    if (name.includes("UNICOMPRA")) return "https://logo.clearbit.com/unicompra.com.br";
+    if (name.includes("SESC")) return "https://upload.wikimedia.org/wikipedia/commons/c/ca/SESC_logo.svg";
+    if (name.includes("GARANHUNS") || name.includes("PREFEITURA")) return "https://upload.wikimedia.org/wikipedia/commons/1/13/Bras%C3%A3o_Garanhuns.png";
+    if (name.includes("BOTICÁRIO") || name.includes("BOTICARIO")) return "https://upload.wikimedia.org/wikipedia/commons/d/dd/O_Botic%C3%A1rio_Logo.svg";
+    if (name.includes("BÔNUS") || name.includes("BONUS")) return "https://logo.clearbit.com/supermercadosbonus.com.br";
+    return null;
+  };
 
   // Calculate simple standings from games
   const standings = loadedTeams.map((t: any) => {
@@ -331,18 +346,18 @@ export default function Home() {
       )}
 
       {/* Premium Sponsors Section */}
-      {sponsorsPremium?.length > 0 && (
+      {premiumSponsorItems?.length > 0 && (
         <section className="py-24 bg-dark relative overflow-hidden flex flex-col items-center">
           {/* Subtle background glows */}
-          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-yellow-500/10 rounded-full blur-[150px] pointer-events-none" />
+          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[150px] pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[150px] pointer-events-none" />
           
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-16 relative z-10 flex flex-col items-center">
-            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-yellow-500/10 via-yellow-500/5 to-transparent border border-yellow-500/30 text-yellow-500 font-display text-xs mb-6 uppercase tracking-[0.3em] shadow-[0_0_20px_rgba(234,179,8,0.15)]">
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-secondary/10 via-secondary/5 to-transparent border border-secondary/30 text-secondary font-display text-xs mb-6 uppercase tracking-[0.3em] shadow-[0_0_20px_rgba(232,95,1,0.15)]">
               <Star className="w-4 h-4 fill-current" /> COTA MASTER
             </div>
             <h2 className="text-4xl md:text-6xl lg:text-7xl font-display font-black text-white mb-6 uppercase tracking-tighter drop-shadow-lg">
-              PATROCINADORES <br className="md:hidden"/><span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-500 to-yellow-600 drop-shadow-[0_0_15px_rgba(234,179,8,0.4)]">PREMIUM</span>
+              PATROCINADORES <br className="md:hidden"/><span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary via-secondary to-[#a54200] drop-shadow-[0_0_15px_rgba(232,95,1,0.4)]">PREMIUM</span>
             </h2>
             <p className="text-gray-400 font-sans max-w-2xl mx-auto text-lg md:text-xl leading-relaxed">
               As marcas gigantes que acreditam no esporte, tornam este espetáculo possível e investem no futuro dos nossos atletas.
@@ -351,20 +366,20 @@ export default function Home() {
 
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center items-stretch">
-              {sponsorsPremium.map((sponsor: any) => (
-                <div key={sponsor.id} className="group relative bg-[#0a0a0a] rounded-3xl p-px flex items-center justify-center overflow-hidden transition-all duration-700 cursor-pointer shadow-2xl hover:shadow-[0_0_60px_rgba(234,179,8,0.2)] hover:-translate-y-3">
+              {premiumSponsorItems.map((sponsor: any) => (
+                <div key={sponsor.id} className="group relative bg-[#0a0a0a] rounded-3xl p-px flex items-center justify-center overflow-hidden transition-all duration-700 cursor-pointer shadow-2xl hover:shadow-[0_0_60px_rgba(232,95,1,0.2)] hover:-translate-y-3">
                   {/* Sweep Border effect */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-3xl" />
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-b from-yellow-500/60 via-yellow-500/10 to-transparent rounded-3xl transition-opacity duration-700" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-b from-secondary/60 via-secondary/10 to-transparent rounded-3xl transition-opacity duration-700" />
                   
                   {/* Inner Card */}
                   <div className="relative z-10 w-full h-full bg-gradient-to-b from-[#141414] to-[#0a0a0a] rounded-[23px] p-12 md:p-16 flex flex-col items-center justify-center m-[1px]">
-                    <div className="absolute inset-0 bg-yellow-500/5 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-[23px]"></div>
+                    <div className="absolute inset-0 bg-secondary/5 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-[23px]"></div>
                     
-                    {sponsor.logo ? (
-                      <img src={sponsor.logo} alt={sponsor.name} className="h-28 md:h-32 max-w-[280px] object-contain filter drop-shadow-[0_0_10px_rgba(255,255,255,0.05)] group-hover:drop-shadow-[0_0_25px_rgba(234,179,8,0.4)] transition-all duration-700 transform group-hover:scale-110" />
+                    {getLogo(sponsor) ? (
+                      <img src={getLogo(sponsor)} alt={sponsor.name} className="h-28 md:h-32 max-w-[280px] object-contain filter drop-shadow-[0_0_10px_rgba(255,255,255,0.05)] group-hover:drop-shadow-[0_0_25px_rgba(232,95,1,0.4)] transition-all duration-700 transform group-hover:scale-110" />
                     ) : (
-                      <Shield className="w-28 h-28 text-gray-700 group-hover:text-yellow-500 transition-colors duration-700 drop-shadow-xl group-hover:drop-shadow-[0_0_25px_rgba(234,179,8,0.5)]" />
+                      <Shield className="w-28 h-28 text-gray-700 group-hover:text-secondary transition-colors duration-700 drop-shadow-xl group-hover:drop-shadow-[0_0_25px_rgba(232,95,1,0.5)]" />
                     )}
                     <span className="font-display text-sm md:text-base text-gray-600 group-hover:text-white tracking-[0.3em] text-center mt-8 uppercase transition-colors duration-700 relative z-20">{sponsor.name}</span>
                   </div>
@@ -376,11 +391,11 @@ export default function Home() {
       )}
 
       {/* Official Sponsors Section */}
-      {sponsorsOfficial?.length > 0 && (
+      {officialSponsorItems?.length > 0 && (
         <section className="py-24 bg-dark-card/50 border-t border-dark-border overflow-hidden relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-16 relative z-10 flex flex-col items-center">
             <h2 className="text-3xl md:text-5xl font-display font-black text-white mb-4 uppercase tracking-tighter drop-shadow-md">
-              PATROCINADORES <span className="text-primary drop-shadow-[0_0_15px_rgba(204,255,0,0.3)]">OFICIAIS</span>
+              PATROCINADORES <span className="text-primary drop-shadow-[0_0_15px_rgba(118,169,17,0.3)]">OFICIAIS</span>
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
           </div>
@@ -392,14 +407,14 @@ export default function Home() {
             <div className="flex animate-marquee whitespace-nowrap items-center group-hover/marquee:[animation-play-state:paused] transition-all duration-500">
               {[...Array(4)].map((_, idx) => (
                 <div key={idx} className="flex items-center gap-20 md:gap-32 px-10 md:px-16">
-                  {sponsorsOfficial.map((sponsor: any) => (
+                  {officialSponsorItems.map((sponsor: any) => (
                     <div key={sponsor.id} className="flex flex-col items-center justify-center gap-6 group cursor-pointer grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-                      {sponsor.logo ? (
-                        <img src={sponsor.logo} className="h-20 md:h-24 max-w-[220px] object-contain filter drop-shadow-lg group-hover:drop-shadow-[0_0_20px_rgba(204,255,0,0.3)] transition-all duration-500 transform group-hover:scale-105" alt={sponsor.name} />
+                      {getLogo(sponsor) ? (
+                        <img src={getLogo(sponsor)} className="h-20 md:h-24 max-w-[220px] object-contain filter drop-shadow-lg group-hover:drop-shadow-[0_0_20px_rgba(118,169,17,0.3)] transition-all duration-500 transform group-hover:scale-105" alt={sponsor.name} />
                       ) : (
-                        <Goal className="w-16 h-16 text-primary drop-shadow-[0_0_15px_rgba(204,255,0,0.4)]" />
+                        <Goal className="w-16 h-16 text-primary drop-shadow-[0_0_15px_rgba(118,169,17,0.4)]" />
                       )}
-                      {!sponsor.logo && <span className="text-2xl md:text-3xl font-display font-black text-white tracking-widest uppercase mt-2">{sponsor.name}</span>}
+                      {!getLogo(sponsor) && <span className="text-2xl md:text-3xl font-display font-black text-white tracking-widest uppercase mt-2">{sponsor.name}</span>}
                     </div>
                   ))}
                 </div>

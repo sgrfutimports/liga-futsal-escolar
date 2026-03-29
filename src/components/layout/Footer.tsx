@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
-          <div className="col-span-1 md:col-span-1">
+          <div className="col-span-1 md:col-span-2 pr-0 md:pr-12">
             <Link to="/" className="flex items-center gap-3 mb-4 group">
               <div className="relative w-10 h-10 flex items-center justify-center">
                 <img 
@@ -70,30 +70,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Sponsors */}
-          <div>
-            <h3 className="font-display text-lg mb-4 text-white">Patrocinadores Master</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="h-12 bg-dark rounded border border-dark-border flex items-center justify-center p-2">
-                <span className="text-gray-400 font-display text-[10px] text-center">FERREIRA COSTA</span>
-              </div>
-              <div className="h-12 bg-dark rounded border border-dark-border flex items-center justify-center p-2">
-                <span className="text-gray-400 font-display text-[10px] text-center">UNICOMPRA</span>
-              </div>
-              <div className="h-12 bg-dark rounded border border-dark-border flex items-center justify-center p-2">
-                <span className="text-gray-400 font-display text-[10px] text-center">BÔNUS SUPERMERCADOS</span>
-              </div>
-              <div className="h-12 bg-dark rounded border border-dark-border flex items-center justify-center p-2">
-                <span className="text-gray-400 font-display text-[10px] text-center">SESC PERNAMBUCO</span>
-              </div>
-              <div className="h-12 bg-dark rounded border border-dark-border flex items-center justify-center p-2">
-                <span className="text-gray-400 font-display text-[10px] text-center">PREFEITURA DE GARANHUNS</span>
-              </div>
-              <div className="h-12 bg-dark rounded border border-dark-border flex items-center justify-center p-2">
-                <span className="text-gray-400 font-display text-[10px] text-center">O BOTICÁRIO</span>
-              </div>
-            </div>
-          </div>
         </div>
 
         <div className="border-t border-dark-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">

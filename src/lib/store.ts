@@ -49,15 +49,14 @@ export const defaultData = {
     }
   ],
   sponsorsPremium: [
-    { id: 1, name: "FERREIRA COSTA", logo: "" },
-    { id: 2, name: "UNICOMPRA", logo: "" }
+    { id: 1, name: "FERREIRA COSTA", logo: "https://logodownload.org/wp-content/uploads/2019/11/ferreira-costa-logo-0.png" },
+    { id: 2, name: "UNICOMPRA", logo: "https://logodownload.org/wp-content/uploads/2021/08/unicompra-logo.png" }
   ],
   sponsorsOfficial: [
     { id: 1, name: "BÔNUS", logo: "" },
-    { id: 2, name: "SESC PE", logo: "" },
-    { id: 3, name: "PREFEITURA", logo: "" },
-    { id: 4, name: "O BOTICÁRIO", logo: "" },
-    { id: 5, name: "GARANHUNS", logo: "" }
+    { id: 2, name: "SESC PE", logo: "https://logodownload.org/wp-content/uploads/2018/10/sesc-logo.png" },
+    { id: 3, name: "O BOTICÁRIO", logo: "https://logodownload.org/wp-content/uploads/2014/11/o-boticario-logo-0.png" },
+    { id: 4, name: "PREFEITURA DE GARANHUNS", logo: "https://garanhuns.pe.gov.br/wp-content/uploads/2021/01/brasao.png" }
   ],
   settings: {
     eventName: "Liga de Futsal Escolar",
