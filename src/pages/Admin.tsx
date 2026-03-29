@@ -1,39 +1,17 @@
-import React, { useState, useMemo } from "react";
-import { Lock, Settings, Users, Trophy, Calendar, Database, Search, Filter, Check, X, Eye, Plus, Edit, Trash, Activity, Shield, Upload } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Lock, Settings, Users, Trophy, Calendar, Database, Search, Filter, Check, X, Eye, Plus, Edit, Trash, Activity, Shield, Upload, Image, Video, Star } from "lucide-react";
 import { cn } from "@/src/lib/utils";
-
-// --- Mock Data ---
-const initialRegistrations = [
-  { id: 1, date: "2026-03-27", school: "Colégio Santa Cruz", resp: "Carlos Silva", status: "Pendente" },
-  { id: 2, date: "2026-03-26", school: "Colégio Diocesano", resp: "Marcos Paulo", status: "Aprovado" },
-  { id: 3, date: "2026-03-25", school: "Colégio Santa Sofia", resp: "Ana Souza", status: "Aprovado" },
-  { id: 4, date: "2026-03-24", school: "Escola Simoa Gomes", resp: "Paulo Freire", status: "Rejeitado" },
-];
-
-const initialTeams = [
-  { id: 1, name: "Colégio Diocesano", city: "Garanhuns", founded: 1915, categories: "SUB-15, SUB-17" },
-  { id: 2, name: "Colégio Santa Sofia", city: "Garanhuns", founded: 1940, categories: "SUB-15, SUB-17" },
-];
-
-const initialAthletes = [
-  { id: 1, name: "João Silva", teamId: 1, number: 10, category: "SUB-17", goals: 5 },
-  { id: 2, name: "Pedro Santos", teamId: 2, number: 9, category: "SUB-15", goals: 3 },
-];
-
-const initialGames = [
-  { id: 1, date: "2026-04-10", time: "14:00", location: "Ginásio do SESC", homeTeamId: 1, awayTeamId: 2, homeScore: 0, awayScore: 0, status: "Agendado" },
-];
+import { getStoredData, setStoredData, resizeImage, defaultData } from "@/src/lib/store";
 
 // --- Sub-components ---
-
 function Modal({ isOpen, onClose, title, children }: any) {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <div className="bg-dark-card border border-dark-border rounded-xl w-full max-w-lg overflow-hidden flex flex-col">
+      <div className="bg-dark-card border border-dark-border rounded-xl w-full max-w-2xl overflow-hidden flex flex-col">
         <div className="p-4 border-b border-dark-border flex justify-between items-center bg-dark">
           <h3 className="text-xl font-display text-white">{title}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white"><X className="w-5 h-5" /></button>
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-white"><X className="w-5 h-5" /></button>
         </div>
         <div className="p-6 overflow-y-auto max-h-[80vh]">
           {children}
@@ -48,58 +26,87 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState("Dashboard");
 
   // Global State
-  const [registrations, setRegistrations] = useState(initialRegistrations);
-  const [teams, setTeams] = useState(initialTeams);
-  const [athletes, setAthletes] = useState(initialAthletes);
-  const [games, setGames] = useState(initialGames);
-  const [leagueLogo, setLeagueLogo] = useState<string | null>(localStorage.getItem('league_logo'));
+  const [registrations, setRegistrations] = useState<any[]>([]);
+  const [teams, setTeams] = useState<any[]>([]);
+  const [athletes, setAthletes] = useState<any[]>([]);
+  const [games, setGames] = useState<any[]>([]);
+  const [banners, setBanners] = useState<any[]>([]);
+  const [sponsorsPremium, setSponsorsPremium] = useState<any[]>([]);
+  const [sponsorsOfficial, setSponsorsOfficial] = useState<any[]>([]);
+  const [settings, setSettings] = useState<any>(defaultData.settings);
 
-  // Modal States
-  const [isTeamModalOpen, setTeamModalOpen] = useState(false);
-  const [currentTeam, setCurrentTeam] = useState<any>(null);
+  // Load Initial Data
+  useEffect(() => {
+    setRegistrations(getStoredData('registrations') || []);
+    setTeams(getStoredData('teams') || []);
+    setAthletes(getStoredData('athletes') || []);
+    setGames(getStoredData('games') || []);
+    setBanners(getStoredData('banners') || []);
+    setSponsorsPremium(getStoredData('sponsorsPremium') || []);
+    setSponsorsOfficial(getStoredData('sponsorsOfficial') || []);
+    
+    // Check old localstorage for backward compat on league_logo
+    let savedSettings = getStoredData('settings');
+    if (!savedSettings) savedSettings = defaultData.settings;
+    if (!savedSettings.leagueLogo && localStorage.getItem('league_logo')) {
+      savedSettings.leagueLogo = localStorage.getItem('league_logo');
+    }
+    setSettings(savedSettings);
+  }, []);
 
-  const [isAthleteModalOpen, setAthleteModalOpen] = useState(false);
-  const [currentAthlete, setCurrentAthlete] = useState<any>(null);
+  // Update localStorage when state changes
+  useEffect(() => { setStoredData('registrations', registrations); }, [registrations]);
+  useEffect(() => { setStoredData('teams', teams); }, [teams]);
+  useEffect(() => { setStoredData('athletes', athletes); }, [athletes]);
+  useEffect(() => { setStoredData('games', games); }, [games]);
+  useEffect(() => { setStoredData('banners', banners); }, [banners]);
+  useEffect(() => { setStoredData('sponsorsPremium', sponsorsPremium); }, [sponsorsPremium]);
+  useEffect(() => { setStoredData('sponsorsOfficial', sponsorsOfficial); }, [sponsorsOfficial]);
+  useEffect(() => { 
+    setStoredData('settings', settings); 
+    // Synchronize to the old key "league_logo" just in case other parts of the app use it directly
+    if (settings.leagueLogo) {
+      localStorage.setItem('league_logo', settings.leagueLogo);
+    } else {
+      localStorage.removeItem('league_logo');
+    }
+  }, [settings]);
 
-  const [isGameModalOpen, setGameModalOpen] = useState(false);
-  const [currentGame, setCurrentGame] = useState<any>(null);
+  // Modals Data Setup
+  const [modalType, setModalType] = useState<string | null>(null);
+  const [currentData, setCurrentData] = useState<any>({});
 
-  // Common styles
+  const closeModal = () => {
+    setModalType(null);
+    setCurrentData({});
+  };
+
+  const handleSave = (e: React.FormEvent, type: string, collection: any[], setCollection: any) => {
+    e.preventDefault();
+    if (currentData.id) {
+      setCollection(collection.map((item: any) => item.id === currentData.id ? currentData : item));
+    } else {
+      setCollection([...collection, { ...currentData, id: Date.now() }]);
+    }
+    closeModal();
+  };
+
+  // Image Upload Handler setup for Forms
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      resizeImage(file, 800, 800).then(base64 => {
+         setCurrentData((prev: any) => ({ ...prev, [fieldName]: base64 }));
+      });
+    }
+  };
+
+  // Common UI classes
   const inputClass = "w-full px-4 py-2 bg-dark border border-dark-border rounded focus:outline-none focus:border-primary text-white transition-colors text-sm mb-4";
   const labelClass = "block text-xs font-medium text-gray-400 mb-1 uppercase tracking-wider";
 
-  // Handlers
-  const handleSaveTeam = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (currentTeam.id) {
-      setTeams(teams.map(t => t.id === currentTeam.id ? currentTeam : t));
-    } else {
-      setTeams([...teams, { ...currentTeam, id: Date.now() }]);
-    }
-    setTeamModalOpen(false);
-  };
+  // --- Render Functions ---
 
-  const handleSaveAthlete = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (currentAthlete.id) {
-      setAthletes(athletes.map(a => a.id === currentAthlete.id ? currentAthlete : a));
-    } else {
-      setAthletes([...athletes, { ...currentAthlete, id: Date.now(), goals: currentAthlete.goals || 0 }]);
-    }
-    setAthleteModalOpen(false);
-  };
-
-  const handleSaveGame = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (currentGame.id) {
-      setGames(games.map(g => g.id === currentGame.id ? currentGame : g));
-    } else {
-      setGames([...games, { ...currentGame, id: Date.now() }]);
-    }
-    setGameModalOpen(false);
-  };
-
-  // Render Functions for Tabs
   const renderDashboard = () => (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
@@ -118,239 +125,236 @@ export default function Admin() {
       <div className="bg-dark-card border border-dark-border rounded-xl p-6">
         <h3 className="font-display text-xl text-white mb-6">AÇÕES RÁPIDAS</h3>
         <div className="flex flex-wrap gap-4">
-          <button onClick={() => { setCurrentTeam({}); setTeamModalOpen(true); }} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded hover:bg-primary hover:text-dark transition-all">
+          <button onClick={() => { setCurrentData({}); setModalType('team'); }} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded hover:bg-primary hover:text-dark transition-all">
             <Plus className="w-4 h-4" /> Nova Equipe
           </button>
-          <button onClick={() => { setCurrentAthlete({}); setAthleteModalOpen(true); }} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded hover:bg-primary hover:text-dark transition-all">
+          <button onClick={() => { setCurrentData({}); setModalType('athlete'); }} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded hover:bg-primary hover:text-dark transition-all">
             <Plus className="w-4 h-4" /> Novo Atleta
           </button>
-          <button onClick={() => { setCurrentGame({}); setGameModalOpen(true); }} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded hover:bg-primary hover:text-dark transition-all">
+          <button onClick={() => { setCurrentData({}); setModalType('game'); }} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded hover:bg-primary hover:text-dark transition-all">
             <Plus className="w-4 h-4" /> Novo Jogo
+          </button>
+          <button onClick={() => { setCurrentData({}); setModalType('banner'); }} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded hover:bg-primary hover:text-dark transition-all">
+            <Plus className="w-4 h-4" /> Novo Banner (Home)
           </button>
         </div>
       </div>
     </>
   );
 
-  const renderTeams = () => (
-    <div className="bg-dark-card border border-dark-border rounded-xl p-6">
+  const handleApproveRegistration = (reg: any) => {
+    if(reg.status === 'Homologada') return;
+    
+    // Create new Team from Registration
+    const newTeamId = Date.now();
+    const newTeam = {
+      id: newTeamId,
+      name: reg.school,
+      city: reg.city || "Garanhuns",
+      categories: reg.categories,
+      logo: reg.logo || ""
+    };
+    
+    // Create Athletes
+    const newAthletes = (reg.athletes || []).map((a: any) => ({
+      ...a,
+      id: Date.now() + Math.random(),
+      teamId: newTeamId
+    }));
+    
+    // Update Stores
+    setTeams([...teams, newTeam]);
+    if(newAthletes.length > 0) setAthletes([...athletes, ...newAthletes]);
+    
+    // Update Registration Status
+    setRegistrations(registrations.map(r => r.id === reg.id ? { ...r, status: 'Homologada', teamId: newTeamId } : r));
+    alert(`Inscrição da escola ${reg.school} homologada com sucesso!\nEquipe e atletas criados!`);
+  };
+
+  const DataTable = ({ title, data, columns, onAdd, onEdit, onDelete }: any) => (
+    <div className="bg-dark-card border border-dark-border rounded-xl p-6 mb-8">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="font-display text-xl text-white">GERENCIAR EQUIPES</h3>
-        <button onClick={() => { setCurrentTeam({}); setTeamModalOpen(true); }} className="flex items-center gap-2 px-4 py-2 bg-primary text-dark rounded hover:bg-primary-dark transition-all text-sm font-semibold">
-          <Plus className="w-4 h-4" /> Adicionar Equipe
+        <h3 className="font-display text-xl text-white">{title}</h3>
+        <button onClick={onAdd} className="flex items-center gap-2 px-4 py-2 bg-primary text-dark rounded hover:bg-primary-dark transition-all text-sm font-semibold">
+          <Plus className="w-4 h-4" /> Adicionar
         </button>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
             <tr className="text-gray-500 font-display text-xs border-b border-dark-border">
-              <th className="pb-4">ID</th>
-              <th className="pb-4">NOME DA EQUIPE</th>
-              <th className="pb-4">CIDADE</th>
-              <th className="pb-4">CATEGORIAS</th>
+              {columns.map((col: any, idx: number) => <th key={idx} className="pb-4">{col.label}</th>)}
               <th className="pb-4 text-right">AÇÕES</th>
             </tr>
           </thead>
           <tbody>
-            {teams.map(team => (
-              <tr key={team.id} className="border-b border-dark-border/50 hover:bg-dark">
-                <td className="py-4 text-sm text-gray-400">#{team.id}</td>
-                <td className="py-4 font-display text-white">{team.name}</td>
-                <td className="py-4 text-sm text-gray-400">{team.city}</td>
-                <td className="py-4 text-sm text-gray-400">{team.categories}</td>
+            {data.map((item: any) => (
+              <tr key={item.id} className="border-b border-dark-border/50 hover:bg-dark">
+                {columns.map((col: any, idx: number) => (
+                  <td key={idx} className="py-4 text-sm text-gray-300">
+                    {col.render ? col.render(item) : item[col.key]}
+                  </td>
+                ))}
                 <td className="py-4 text-right">
-                  <button onClick={() => { setCurrentTeam(team); setTeamModalOpen(true); }} className="p-2 text-primary hover:bg-primary/10 rounded mr-2"><Edit className="w-4 h-4" /></button>
-                  <button onClick={() => setTeams(teams.filter(t => t.id !== team.id))} className="p-2 text-danger hover:bg-danger/10 rounded"><Trash className="w-4 h-4" /></button>
+                  <button onClick={() => onEdit(item)} className="p-2 text-primary hover:bg-primary/10 rounded mr-2"><Edit className="w-4 h-4" /></button>
+                  <button onClick={() => onDelete(item.id)} className="p-2 text-danger hover:bg-danger/10 rounded"><Trash className="w-4 h-4" /></button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        {data.length === 0 && <div className="text-center py-8 text-gray-500">Nenhum registro encontrado.</div>}
       </div>
     </div>
+  );
+
+  const renderTeams = () => (
+    <DataTable 
+      title="GERENCIAR EQUIPES" data={teams}
+      columns={[
+        { label: "LOGO", render: (t: any) => t.logo ? <img src={t.logo} className="w-10 h-10 object-contain bg-white rounded-full p-1" /> : <Shield className="w-8 h-8 text-gray-500" /> },
+        { label: "NOME", key: "name", render: (t: any) => <span className="font-display text-white">{t.name}</span> },
+        { label: "CIDADE", key: "city" },
+        { label: "CATEGORIAS", key: "categories" }
+      ]}
+      onAdd={() => { setCurrentData({}); setModalType('team'); }}
+      onEdit={(team: any) => { setCurrentData(team); setModalType('team'); }}
+      onDelete={(id: number) => setTeams(teams.filter(t => t.id !== id))}
+    />
   );
 
   const renderAthletes = () => (
-    <div className="bg-dark-card border border-dark-border rounded-xl p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="font-display text-xl text-white">GERENCIAR ATLETAS</h3>
-        <button onClick={() => { setCurrentAthlete({}); setAthleteModalOpen(true); }} className="flex items-center gap-2 px-4 py-2 bg-primary text-dark rounded hover:bg-primary-dark transition-all text-sm font-semibold">
-          <Plus className="w-4 h-4" /> Adicionar Atleta
-        </button>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="text-gray-500 font-display text-xs border-b border-dark-border">
-              <th className="pb-4">NOME</th>
-              <th className="pb-4">EQUIPE</th>
-              <th className="pb-4">NÚMERO</th>
-              <th className="pb-4">CATEGORIA</th>
-              <th className="pb-4 text-right">AÇÕES</th>
-            </tr>
-          </thead>
-          <tbody>
-            {athletes.map(athlete => {
-              const team = teams.find(t => t.id === Number(athlete.teamId));
-              return (
-                <tr key={athlete.id} className="border-b border-dark-border/50 hover:bg-dark">
-                  <td className="py-4 font-display text-white">{athlete.name}</td>
-                  <td className="py-4 text-sm text-gray-400">{team ? team.name : "Desconhecida"}</td>
-                  <td className="py-4 text-sm text-gray-400">{athlete.number}</td>
-                  <td className="py-4 text-sm text-gray-400">{athlete.category}</td>
-                  <td className="py-4 text-right">
-                    <button onClick={() => { setCurrentAthlete({ ...athlete, teamId: Number(athlete.teamId) }); setAthleteModalOpen(true); }} className="p-2 text-primary hover:bg-primary/10 rounded mr-2"><Edit className="w-4 h-4" /></button>
-                    <button onClick={() => setAthletes(athletes.filter(a => a.id !== athlete.id))} className="p-2 text-danger hover:bg-danger/10 rounded"><Trash className="w-4 h-4" /></button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <DataTable 
+      title="GERENCIAR ATLETAS" data={athletes}
+      columns={[
+        { label: "FOTO", render: (a: any) => a.photo ? <img src={a.photo} className="w-10 h-10 object-cover rounded-full" /> : <Users className="w-8 h-8 text-gray-500" /> },
+        { label: "NOME", key: "name", render: (a: any) => <span className="font-display text-white">{a.name}</span> },
+        { label: "EQUIPE", render: (a: any) => teams.find(t => t.id === Number(a.teamId))?.name || "Desconhecida" },
+        { label: "NÚMERO", key: "number" },
+        { label: "CATEGORIA", key: "category" }
+      ]}
+      onAdd={() => { setCurrentData({}); setModalType('athlete'); }}
+      onEdit={(athlete: any) => { setCurrentData(athlete); setModalType('athlete'); }}
+      onDelete={(id: number) => setAthletes(athletes.filter(a => a.id !== id))}
+    />
   );
 
-  const renderGames = () => (
-    <div className="bg-dark-card border border-dark-border rounded-xl p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="font-display text-xl text-white">GERENCIAR JOGOS & PLACARES</h3>
-        <button onClick={() => { setCurrentGame({}); setGameModalOpen(true); }} className="flex items-center gap-2 px-4 py-2 bg-primary text-dark rounded hover:bg-primary-dark transition-all text-sm font-semibold">
-          <Plus className="w-4 h-4" /> Agendar Jogo
-        </button>
+  const renderBanners = () => (
+    <>
+      <div className="bg-primary/10 border border-primary/20 text-primary p-4 rounded mb-6 flex gap-3 text-sm">
+        <Image className="w-5 h-5 flex-shrink-0" />
+        <p>Estes banners são exibidos no carrossel principal da página inicial. Use imagens de alta qualidade (1920x1080) recomendadas e links do Unsplash para não pesar no armazenamento local. Para a logo e patrocinadores, faça upload.</p>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="text-gray-500 font-display text-xs border-b border-dark-border">
-              <th className="pb-4">DATA / HORA</th>
-              <th className="pb-4">CONFRONTO</th>
-              <th className="pb-4">PLACAR</th>
-              <th className="pb-4">STATUS</th>
-              <th className="pb-4 text-right">AÇÕES</th>
-            </tr>
-          </thead>
-          <tbody>
-            {games.map(game => {
-              const home = teams.find(t => t.id === Number(game.homeTeamId))?.name || "Time A";
-              const away = teams.find(t => t.id === Number(game.awayTeamId))?.name || "Time B";
-              return (
-                <tr key={game.id} className="border-b border-dark-border/50 hover:bg-dark">
-                  <td className="py-4 text-sm text-gray-400">{game.date} às {game.time}</td>
-                  <td className="py-4 font-display text-white">{home} vs {away}</td>
-                  <td className="py-4 font-display text-primary">{game.status === 'Finalizado' ? `${game.homeScore} - ${game.awayScore}` : '-'}</td>
-                  <td className="py-4">
-                    <span className={cn(
-                      "px-2 py-1 text-[10px] font-display rounded uppercase tracking-wider border",
-                      game.status === "Finalizado" ? "bg-primary/10 text-primary border-primary/20" : "bg-secondary/10 text-secondary border-secondary/20"
-                    )}>{game.status}</span>
-                  </td>
-                  <td className="py-4 text-right">
-                    <button onClick={() => { setCurrentGame({ ...game, homeTeamId: Number(game.homeTeamId), awayTeamId: Number(game.awayTeamId) }); setGameModalOpen(true); }} className="p-2 text-primary hover:bg-primary/10 rounded mr-2"><Edit className="w-4 h-4" /></button>
-                    <button onClick={() => setGames(games.filter(g => g.id !== game.id))} className="p-2 text-danger hover:bg-danger/10 rounded"><Trash className="w-4 h-4" /></button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <DataTable 
+        title="BANNERS DA HOME (CARROSSEL)" data={banners}
+        columns={[
+          { label: "IMAGEM", render: (b: any) => <img src={b.image} className="w-24 h-12 object-cover rounded" /> },
+          { label: "TÍTULO", key: "title", render: (b: any) => <span className="font-display text-white">{b.title}</span> },
+          { label: "COR TEMA", key: "accent" }
+        ]}
+        onAdd={() => { setCurrentData({ accent: 'primary' }); setModalType('banner'); }}
+        onEdit={(banner: any) => { setCurrentData(banner); setModalType('banner'); }}
+        onDelete={(id: number) => setBanners(banners.filter(b => b.id !== id))}
+      />
+    </>
   );
 
-  const renderRegistrations = () => (
-    <div className="bg-dark-card border border-dark-border rounded-xl p-6">
-      <h3 className="font-display text-xl text-white mb-6">INSCRIÇÕES</h3>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="text-gray-500 font-display text-xs border-b border-dark-border">
-              <th className="pb-4">DATA</th>
-              <th className="pb-4">ESCOLA</th>
-              <th className="pb-4">STATUS</th>
-              <th className="pb-4 text-right">AÇÕES</th>
-            </tr>
-          </thead>
-          <tbody>
-            {registrations.map(reg => (
-              <tr key={reg.id} className="border-b border-dark-border/50 hover:bg-dark">
-                <td className="py-4 text-sm text-gray-400">{reg.date}</td>
-                <td className="py-4 font-display text-white">{reg.school}</td>
-                <td className="py-4">
-                  <span className={cn(
-                    "px-2 py-1 text-[10px] font-display rounded uppercase tracking-wider border",
-                    reg.status === "Aprovado" ? "bg-primary/10 text-primary border-primary/20" : 
-                    reg.status === "Rejeitado" ? "bg-danger/10 text-danger border-danger/20" :
-                    "bg-secondary/10 text-secondary border-secondary/20"
-                  )}>{reg.status}</span>
-                </td>
-                <td className="py-4 text-right">
-                  {reg.status === 'Pendente' && (
-                    <>
-                      <button onClick={() => setRegistrations(registrations.map(r => r.id === reg.id ? { ...r, status: 'Aprovado' } : r))} className="p-2 text-primary hover:bg-primary/10 rounded mr-2"><Check className="w-4 h-4" /></button>
-                      <button onClick={() => setRegistrations(registrations.map(r => r.id === reg.id ? { ...r, status: 'Rejeitado' } : r))} className="p-2 text-danger hover:bg-danger/10 rounded"><X className="w-4 h-4" /></button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+  const renderSponsors = () => (
+    <>
+      <DataTable 
+        title="PATROCINADORES MASTER (Premium)" data={sponsorsPremium}
+        columns={[
+          { label: "LOGO", render: (s: any) => s.logo ? <img src={s.logo} className="w-12 h-12 object-contain bg-white p-1 rounded" /> : <Star className="w-8 h-8 text-gray-500" /> },
+          { label: "NOME", key: "name", render: (s: any) => <span className="font-display text-white">{s.name}</span> }
+        ]}
+        onAdd={() => { setCurrentData({ type: 'premium' }); setModalType('sponsor'); }}
+        onEdit={(sponsor: any) => { setCurrentData({ ...sponsor, type: 'premium' }); setModalType('sponsor'); }}
+        onDelete={(id: number) => setSponsorsPremium(sponsorsPremium.filter(s => s.id !== id))}
+      />
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result as string;
-        setLeagueLogo(base64);
-        localStorage.setItem('league_logo', base64);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+      <DataTable 
+        title="PATROCINADORES OFICIAIS (Marquee)" data={sponsorsOfficial}
+        columns={[
+          { label: "LOGO", render: (s: any) => s.logo ? <img src={s.logo} className="w-12 h-12 object-contain bg-white p-1 rounded" /> : <Shield className="w-8 h-8 text-gray-500" /> },
+          { label: "NOME", key: "name", render: (s: any) => <span className="font-display text-white">{s.name}</span> }
+        ]}
+        onAdd={() => { setCurrentData({ type: 'official' }); setModalType('sponsor'); }}
+        onEdit={(sponsor: any) => { setCurrentData({ ...sponsor, type: 'official' }); setModalType('sponsor'); }}
+        onDelete={(id: number) => setSponsorsOfficial(sponsorsOfficial.filter(s => s.id !== id))}
+      />
+    </>
+  );
 
   const renderSettings = () => (
     <div className="bg-dark-card border border-dark-border rounded-xl p-6 max-w-2xl">
-      <h3 className="font-display text-xl text-white mb-6">CONFIGURAÇÕES GERAIS</h3>
-      <form onSubmit={(e) => { e.preventDefault(); alert("Configurações salvas com sucesso!"); }}>
+      <h3 className="font-display text-xl text-white mb-6 flex items-center gap-2">
+        <Settings className="w-6 h-6 text-primary" /> CONFIGURAÇÕES GERAIS
+      </h3>
+      <form onSubmit={(e) => { 
+        e.preventDefault(); 
+        setStoredData('settings', settings); 
+        alert("Configurações salvas com sucesso!"); 
+      }}>
         <div className="mb-6 flex flex-col items-start gap-4">
           <label className={labelClass}>Logo do Campeonato</label>
           <div className="flex items-center gap-6">
             <div className="w-24 h-24 rounded-full border border-dark-border bg-dark flex items-center justify-center overflow-hidden">
-              {leagueLogo ? <img src={leagueLogo} alt="Logo" className="w-full h-full object-cover" /> : <Trophy className="w-8 h-8 text-gray-500" />}
+              {settings.leagueLogo ? <img src={settings.leagueLogo} alt="Logo" className="w-full h-full object-cover" /> : <Trophy className="w-8 h-8 text-gray-500" />}
             </div>
             <label className="flex items-center gap-2 px-4 py-2 bg-dark border border-dark-border text-gray-300 rounded hover:text-white hover:border-primary transition-all cursor-pointer">
               <Upload className="w-4 h-4" />
               <span>Escolher Imagem</span>
-              <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+              <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  resizeImage(file, 400, 400).then(base64 => setSettings({...settings, leagueLogo: base64}));
+                }
+              }} />
             </label>
-            {leagueLogo && (
-               <button type="button" onClick={() => { setLeagueLogo(null); localStorage.removeItem('league_logo'); }} className="text-danger hover:underline text-sm ml-2">Remover</button>
+            {settings.leagueLogo && (
+               <button type="button" onClick={() => setSettings({...settings, leagueLogo: ""})} className="text-danger hover:underline text-sm ml-2">Remover</button>
             )}
           </div>
         </div>
 
         <label className={labelClass}>Nome do Evento</label>
-        <input type="text" className={inputClass} defaultValue="Liga de Futsal Escolar" />
+        <input type="text" className={inputClass} value={settings.eventName || ''} onChange={e => setSettings({...settings, eventName: e.target.value})} />
         
         <label className={labelClass}>Ano / Edição</label>
-        <input type="text" className={inputClass} defaultValue="2026" />
+        <input type="text" className={inputClass} value={settings.yearEdition || ''} onChange={e => setSettings({...settings, yearEdition: e.target.value})} />
         
         <label className={labelClass}>Período de Inscrições</label>
-        <select className={inputClass}>
+        <select className={inputClass} value={settings.registrationPeriod || 'aberto'} onChange={e => setSettings({...settings, registrationPeriod: e.target.value})}>
           <option value="aberto">Aberto</option>
           <option value="fechado">Fechado</option>
         </select>
+
+        <h3 className="font-display text-xl text-white mt-10 mb-6 flex flex-row items-center gap-2 border-t border-dark-border pt-6">
+          <Video className="w-6 h-6 text-primary" /> VÍDEO INSTITUCIONAL DA HOME
+        </h3>
+        
+        <label className={labelClass}>URL de Embed do Youtube (SRC do iframe)</label>
+        <input type="text" className={inputClass} placeholder="https://www.youtube.com/embed/dQw4w9WgXcQ" value={settings.institutionalVideoUrl || ''} onChange={e => setSettings({...settings, institutionalVideoUrl: e.target.value})} />
+        <p className="text-xs text-gray-500 mb-6 -mt-2">Exemplo: https://www.youtube.com/embed/SuaIdeVideoAQUI</p>
+
+        {settings.institutionalVideoUrl && (
+          <div className="w-full aspect-video rounded-xl overflow-hidden mb-6 border border-dark-border">
+            <iframe 
+              className="w-full h-full"
+              src={settings.institutionalVideoUrl}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen>
+            </iframe>
+          </div>
+        )}
         
         <button type="submit" className="mt-4 px-6 py-2 bg-primary text-dark font-display rounded hover:bg-primary-dark transition-all">Salvar Configurações</button>
       </form>
     </div>
   );
 
+  // Authentication Mock
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-dark py-20 flex items-center justify-center">
@@ -380,8 +384,8 @@ export default function Admin() {
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-dark-card border-r border-dark-border flex-shrink-0">
         <div className="p-6 border-b border-dark-border flex items-center gap-3">
-          {leagueLogo ? (
-            <img src={leagueLogo} alt="Liga" className="w-10 h-10 rounded-full border border-dark-border object-cover" />
+          {settings.leagueLogo ? (
+            <img src={settings.leagueLogo} alt="Liga" className="w-10 h-10 rounded-full border border-dark-border object-cover" />
           ) : (
             <div className="w-10 h-10 rounded-full bg-dark border border-dark-border flex items-center justify-center"><Trophy className="w-5 h-5 text-primary" /></div>
           )}
@@ -390,10 +394,12 @@ export default function Admin() {
         <nav className="p-4 space-y-2">
           {[
             { id: "Dashboard", icon: Activity },
+            { id: "Inscrições", icon: Database },
+            { id: "Banners", icon: Image },
             { id: "Equipes", icon: Shield },
             { id: "Atletas", icon: Users },
             { id: "Jogos", icon: Calendar },
-            { id: "Inscrições", icon: Database },
+            { id: "Patrocinadores", icon: Star },
             { id: "Configurações", icon: Settings },
           ].map((item) => (
             <button
@@ -417,120 +423,237 @@ export default function Admin() {
       <main className="flex-1 p-6 md:p-10">
         <div className="flex justify-between items-center mb-10">
           <h1 className="text-4xl font-display text-white uppercase">{activeTab}</h1>
-          <button 
-            onClick={() => setIsAuthenticated(false)}
-            className="px-4 py-2 border border-dark-border text-gray-400 rounded hover:text-white hover:border-gray-500 transition-colors font-display text-sm"
-          >
-            SAIR
-          </button>
+          <button onClick={() => setIsAuthenticated(false)} className="px-4 py-2 border border-dark-border text-gray-400 rounded hover:text-white hover:border-gray-500 transition-colors font-display text-sm">SAIR</button>
         </div>
 
         {activeTab === "Dashboard" && renderDashboard()}
+        {activeTab === "Inscrições" && (
+          <DataTable 
+            title="GERENCIAR INSCRIÇÕES" data={registrations}
+            columns={[
+              { label: "DATA", key: "date" },
+              { label: "ESCOLA", key: "school" },
+              { label: "RESPONSÁVEL", key: "resp" },
+              { label: "ELENCO", render: (r: any) => r.athleteSubmissionType === 'later' ? 'Pendente de envio' : `${r.athletes?.length || 0} inscritos` },
+              { label: "STATUS", render: (r: any) => <span className={cn("px-2 py-1 rounded text-xs", r.status === 'Pendente' ? "bg-yellow-500/20 text-yellow-500" : "bg-green-500/20 text-green-500")}>{r.status}</span>}
+            ]}
+            onAdd={() => alert("As inscrições são feitas pelo portal público.")}
+            onEdit={(r: any) => handleApproveRegistration(r)}
+            onDelete={(id: number) => setRegistrations(registrations.filter(r => r.id !== id))}
+          />
+        )}
+        {activeTab === "Banners" && renderBanners()}
         {activeTab === "Equipes" && renderTeams()}
         {activeTab === "Atletas" && renderAthletes()}
-        {activeTab === "Jogos" && renderGames()}
-        {activeTab === "Inscrições" && renderRegistrations()}
+        {activeTab === "Jogos" && (
+          <DataTable 
+            title="GERENCIAR JOGOS" data={games}
+            columns={[
+              { label: "CATEGORIA", key: "category" },
+              { label: "DATA/HORA", render: (g: any) => `${g.date} às ${g.time}` },
+              { label: "CONFRONTO", render: (g: any) => `${teams.find(t=>t.id===Number(g.homeTeamId))?.name || "A"} vs ${teams.find(t=>t.id===Number(g.awayTeamId))?.name || "B"}` },
+              { label: "STATUS", key: "status" }
+            ]}
+            onAdd={() => { setCurrentData({ events: [] }); setModalType('game'); }}
+            onEdit={(g: any) => { setCurrentData(g); setModalType('game'); }}
+            onDelete={(id: number) => setGames(games.filter(g => g.id !== id))}
+          />
+        )}
+        {activeTab === "Patrocinadores" && renderSponsors()}
         {activeTab === "Configurações" && renderSettings()}
       </main>
 
-      {/* Team Modal */}
-      <Modal isOpen={isTeamModalOpen} onClose={() => setTeamModalOpen(false)} title={currentTeam?.id ? "Editar Equipe" : "Nova Equipe"}>
-        <form onSubmit={handleSaveTeam}>
+      {/* MODALS */}
+      <Modal isOpen={modalType === 'team'} onClose={closeModal} title={currentData?.id ? "Editar Equipe" : "Nova Equipe"}>
+        <form onSubmit={(e) => handleSave(e, 'team', teams, setTeams)}>
+          <div className="mb-4">
+            <label className={labelClass}>Upload de Logo</label>
+            <div className="flex items-center gap-4">
+              {currentData.logo ? <img src={currentData.logo} className="w-16 h-16 bg-white p-1 rounded-full object-contain" /> : <div className="w-16 h-16 bg-dark border border-dark-border rounded-full flex items-center justify-center"><Shield className="text-gray-500" /></div>}
+              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'logo')} className="text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-dark hover:file:bg-primary-dark" />
+            </div>
+            <p className="text-xs text-gray-500 mt-2">Ou digite uma URL da imagem abaixo:</p>
+            <input type="text" className={inputClass} placeholder="https://..." value={currentData.logo || ''} onChange={e => setCurrentData({...currentData, logo: e.target.value})} />
+          </div>
+
           <label className={labelClass}>Nome da Equipe</label>
-          <input required type="text" className={inputClass} value={currentTeam?.name || ''} onChange={e => setCurrentTeam({...currentTeam, name: e.target.value})} />
+          <input required type="text" className={inputClass} value={currentData.name || ''} onChange={e => setCurrentData({...currentData, name: e.target.value})} />
           
           <label className={labelClass}>Cidade</label>
-          <input required type="text" className={inputClass} value={currentTeam?.city || ''} onChange={e => setCurrentTeam({...currentTeam, city: e.target.value})} />
+          <input required type="text" className={inputClass} value={currentData.city || ''} onChange={e => setCurrentData({...currentData, city: e.target.value})} />
           
           <label className={labelClass}>Categorias (Ex: SUB-15, SUB-17)</label>
-          <input required type="text" className={inputClass} value={currentTeam?.categories || ''} onChange={e => setCurrentTeam({...currentTeam, categories: e.target.value})} />
+          <input required type="text" className={inputClass} value={currentData.categories || ''} onChange={e => setCurrentData({...currentData, categories: e.target.value})} />
           
-          <button type="submit" className="w-full py-2 bg-primary text-dark font-display rounded hover:bg-primary-dark">Salvar</button>
+          <button type="submit" className="w-full py-2 mt-4 bg-primary text-dark font-display rounded hover:bg-primary-dark">Salvar</button>
         </form>
       </Modal>
 
-      {/* Athlete Modal */}
-      <Modal isOpen={isAthleteModalOpen} onClose={() => setAthleteModalOpen(false)} title={currentAthlete?.id ? "Editar Atleta" : "Novo Atleta"}>
-        <form onSubmit={handleSaveAthlete}>
+      <Modal isOpen={modalType === 'athlete'} onClose={closeModal} title={currentData?.id ? "Editar Atleta" : "Novo Atleta"}>
+        <form onSubmit={(e) => handleSave(e, 'athlete', athletes, setAthletes)}>
+          <div className="mb-4">
+            <label className={labelClass}>Foto do Jogador</label>
+            <div className="flex items-center gap-4">
+              {currentData.photo ? <img src={currentData.photo} className="w-16 h-16 object-cover rounded-full" /> : <div className="w-16 h-16 bg-dark border border-dark-border rounded-full flex items-center justify-center"><Users className="text-gray-500" /></div>}
+              <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'photo')} className="text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:bg-primary file:text-dark" />
+            </div>
+          </div>
+
           <label className={labelClass}>Nome</label>
-          <input required type="text" className={inputClass} value={currentAthlete?.name || ''} onChange={e => setCurrentAthlete({...currentAthlete, name: e.target.value})} />
-          
+          <input required type="text" className={inputClass} value={currentData.name || ''} onChange={e => setCurrentData({...currentData, name: e.target.value})} />
           <label className={labelClass}>Equipe</label>
-          <select required className={inputClass} value={currentAthlete?.teamId || ''} onChange={e => setCurrentAthlete({...currentAthlete, teamId: e.target.value})}>
-            <option value="">Selecione uma equipe</option>
+          <select required className={inputClass} value={currentData.teamId || ''} onChange={e => setCurrentData({...currentData, teamId: Number(e.target.value)})}>
+            <option value="">Selecione a equipe</option>
             {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
-
-          <label className={labelClass}>Número da Camisa</label>
-          <input required type="number" className={inputClass} value={currentAthlete?.number || ''} onChange={e => setCurrentAthlete({...currentAthlete, number: e.target.value})} />
-          
+          <label className={labelClass}>Número</label>
+          <input required type="number" className={inputClass} value={currentData.number || ''} onChange={e => setCurrentData({...currentData, number: e.target.value})} />
           <label className={labelClass}>Categoria</label>
-          <select required className={inputClass} value={currentAthlete?.category || ''} onChange={e => setCurrentAthlete({...currentAthlete, category: e.target.value})}>
-             <option value="">Selecione a categoria</option>
+          <select required className={inputClass} value={currentData.category || ''} onChange={e => setCurrentData({...currentData, category: e.target.value})}>
+             <option value="">Selecione</option>
+             <option value="SUB-11">SUB-11</option>
+             <option value="SUB-15">SUB-15</option>
+             <option value="SUB-17">SUB-17</option>
+          </select>
+          <button type="submit" className="w-full py-2 mt-4 bg-primary text-dark font-display rounded hover:bg-primary-dark">Salvar</button>
+        </form>
+      </Modal>
+
+      <Modal isOpen={modalType === 'game'} onClose={closeModal} title={currentData?.id ? "Editar Jogo" : "Agendar Jogo"}>
+        <form onSubmit={(e) => handleSave(e, 'game', games, setGames)}>
+          <label className={labelClass}>Data / Hora</label>
+          <div className="flex gap-4 mb-4">
+            <input required type="date" className={inputClass} value={currentData.date || ''} onChange={e => setCurrentData({...currentData, date: e.target.value})} />
+            <input required type="time" className={inputClass} value={currentData.time || ''} onChange={e => setCurrentData({...currentData, time: e.target.value})} />
+          </div>
+          <label className={labelClass}>Categoria do Jogo</label>
+          <select required className={inputClass} value={currentData.category || ''} onChange={e => setCurrentData({...currentData, category: e.target.value})}>
+             <option value="">Selecione</option>
              <option value="SUB-11">SUB-11</option>
              <option value="SUB-13">SUB-13</option>
              <option value="SUB-15">SUB-15</option>
              <option value="SUB-17">SUB-17</option>
           </select>
-
-          <button type="submit" className="w-full py-2 bg-primary text-dark font-display rounded hover:bg-primary-dark">Salvar</button>
+          <label className={labelClass}>Equipes</label>
+          <div className="flex gap-4">
+            <select required className={inputClass} value={currentData.homeTeamId || ''} onChange={e => setCurrentData({...currentData, homeTeamId: e.target.value})}>
+              <option value="">CASA</option>{teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
+            <select required className={inputClass} value={currentData.awayTeamId || ''} onChange={e => setCurrentData({...currentData, awayTeamId: e.target.value})}>
+              <option value="">FORA</option>{teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
+          </div>
+          <label className={labelClass}>Local</label>
+          <input required type="text" className={inputClass} value={currentData.location || ''} onChange={e => setCurrentData({...currentData, location: e.target.value})} />
+          <label className={labelClass}>Status</label>
+          <select required className={inputClass} value={currentData.status || ''} onChange={e => setCurrentData({...currentData, status: e.target.value})}>
+             <option value="Agendado">Agendado</option>
+             <option value="Finalizado">Finalizado</option>
+          </select>
+          {currentData.status === 'Finalizado' && (
+            <div className="border border-dark-border p-4 rounded-lg bg-dark mb-4">
+               <h4 className="text-white font-display text-sm mb-4 border-b border-dark-border pb-2">PLACAR E SÚMULA</h4>
+               <div className="flex gap-4 mb-4">
+                 <div className="flex-1">
+                   <label className={labelClass}>Gols Casa</label>
+                   <input type="number" className={inputClass} value={currentData.homeScore || 0} onChange={e => setCurrentData({...currentData, homeScore: e.target.value})} />
+                 </div>
+                 <div className="flex-1">
+                   <label className={labelClass}>Gols Fora</label>
+                   <input type="number" className={inputClass} value={currentData.awayScore || 0} onChange={e => setCurrentData({...currentData, awayScore: e.target.value})} />
+                 </div>
+               </div>
+               
+               <label className={labelClass}>Adicionar Evento (Gol, Cartão) - Afeta as estatísticas automaticamente</label>
+               <div className="flex gap-2 mb-2">
+                 <select className="px-2 py-2 bg-dark-card border border-dark-border text-white text-xs rounded flex-1" id="eventPlayer">
+                   <option value="">Selecione Jogador</option>
+                   {athletes.filter(a => a.teamId === Number(currentData.homeTeamId) || a.teamId === Number(currentData.awayTeamId)).map(a => (
+                     <option key={a.id} value={a.id}>{a.name} ({a.teamId === Number(currentData.homeTeamId) ? 'Casa' : 'Fora'})</option>
+                   ))}
+                 </select>
+                 <select className="px-2 py-2 bg-dark-card border border-dark-border text-white text-xs rounded w-[100px]" id="eventType">
+                   <option value="goal">Gol ⚽</option>
+                   <option value="yellow">Amarelo 🟨</option>
+                   <option value="red">Vermelho 🟥</option>
+                 </select>
+                 <button type="button" onClick={() => {
+                   const pid = (document.getElementById('eventPlayer') as HTMLSelectElement).value;
+                   const type = (document.getElementById('eventType') as HTMLSelectElement).value;
+                   if(!pid) return;
+                   const athlete = athletes.find(a => a.id === Number(pid));
+                   const events = currentData.events || [];
+                   setCurrentData({...currentData, events: [...events, { id: Date.now(), playerId: Number(pid), type, teamId: athlete.teamId }]});
+                 }} className="px-3 py-1 bg-primary text-dark font-bold text-xs rounded">Add</button>
+               </div>
+               
+               <div className="space-y-1 mt-4 max-h-32 overflow-y-auto pr-2">
+                 {(currentData.events || []).map((ev: any) => (
+                   <div key={ev.id} className="flex justify-between items-center text-xs text-gray-300 bg-dark-card p-2 rounded border border-dark-border">
+                     <span>{athletes.find((a: any) => a.id === ev.playerId)?.name || "Desconhecido"} - {ev.type === 'goal' ? 'GOL ⚽' : ev.type === 'yellow' ? 'AMARELO 🟨' : 'VERMELHO 🟥'}</span>
+                     <button type="button" onClick={() => setCurrentData({...currentData, events: currentData.events.filter((e:any)=>e.id !== ev.id)})} className="text-danger hover:text-red-400 font-bold">X</button>
+                   </div>
+                 ))}
+                 {(currentData.events || []).length === 0 && <div className="text-xs text-gray-500 italic">Nenhum evento registrado.</div>}
+               </div>
+            </div>
+          )}
+          <button type="submit" className="w-full py-2 mt-4 bg-primary text-dark font-display rounded hover:bg-primary-dark">Salvar</button>
         </form>
       </Modal>
 
-      {/* Game Modal */}
-      <Modal isOpen={isGameModalOpen} onClose={() => setGameModalOpen(false)} title={currentGame?.id ? "Editar Jogo" : "Agendar Jogo"}>
-        <form onSubmit={handleSaveGame}>
-          <label className={labelClass}>Equipe Casa</label>
-          <select required className={inputClass} value={currentGame?.homeTeamId || ''} onChange={e => setCurrentGame({...currentGame, homeTeamId: e.target.value})}>
-            <option value="">Selecione</option>
-            {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-          </select>
-
-          <label className={labelClass}>Equipe Fora</label>
-          <select required className={inputClass} value={currentGame?.awayTeamId || ''} onChange={e => setCurrentGame({...currentGame, awayTeamId: e.target.value})}>
-            <option value="">Selecione</option>
-            {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-          </select>
-
+      <Modal isOpen={modalType === 'banner'} onClose={closeModal} title={currentData?.id ? "Editar Banner" : "Novo Banner"}>
+        <form onSubmit={(e) => handleSave(e, 'banner', banners, setBanners)}>
+          <label className={labelClass}>URL da Imagem (Fundo)</label>
+          <input required type="text" className={inputClass} value={currentData.image || ''} onChange={e => setCurrentData({...currentData, image: e.target.value})} placeholder="https://images.unsplash..." />
+          <label className={labelClass}>Título</label>
+          <input required type="text" className={inputClass} value={currentData.title || ''} onChange={e => setCurrentData({...currentData, title: e.target.value})} />
+          <label className={labelClass}>Subtítulo</label>
+          <input type="text" className={inputClass} value={currentData.subtitle || ''} onChange={e => setCurrentData({...currentData, subtitle: e.target.value})} />
+          <label className={labelClass}>Descrição</label>
+          <textarea rows={3} className={inputClass} value={currentData.description || ''} onChange={e => setCurrentData({...currentData, description: e.target.value})} />
+          
           <div className="flex gap-4">
-            <div className="flex-1">
-              <label className={labelClass}>Data</label>
-              <input required type="date" className={inputClass} value={currentGame?.date || ''} onChange={e => setCurrentGame({...currentGame, date: e.target.value})} />
-            </div>
-            <div className="flex-1">
-               <label className={labelClass}>Hora</label>
-               <input required type="time" className={inputClass} value={currentGame?.time || ''} onChange={e => setCurrentGame({...currentGame, time: e.target.value})} />
-            </div>
+             <div className="flex-1">
+               <label className={labelClass}>Botão (Texto)</label>
+               <input type="text" className={inputClass} value={currentData.ctaText || ''} onChange={e => setCurrentData({...currentData, ctaText: e.target.value})} />
+             </div>
+             <div className="flex-1">
+               <label className={labelClass}>Link</label>
+               <input type="text" className={inputClass} value={currentData.ctaLink || ''} onChange={e => setCurrentData({...currentData, ctaLink: e.target.value})} />
+             </div>
           </div>
-
-          <label className={labelClass}>Local</label>
-          <input required type="text" className={inputClass} value={currentGame?.location || ''} onChange={e => setCurrentGame({...currentGame, location: e.target.value})} />
-
-          <label className={labelClass}>Status</label>
-          <select required className={inputClass} value={currentGame?.status || ''} onChange={e => setCurrentGame({...currentGame, status: e.target.value})}>
-             <option value="Agendado">Agendado</option>
-             <option value="Em Andamento">Em Andamento</option>
-             <option value="Finalizado">Finalizado</option>
+          
+          <label className={labelClass}>Cor Tema (Accent)</label>
+          <select className={inputClass} value={currentData.accent || 'primary'} onChange={e => setCurrentData({...currentData, accent: e.target.value})}>
+             <option value="primary">Primária (Verde/Amarelo)</option>
+             <option value="secondary">Secundária (Laranja/Amarelo)</option>
+             <option value="accent">Destaque (Ciano)</option>
           </select>
+          
+          <button type="submit" className="w-full py-2 mt-4 bg-primary text-dark font-display rounded hover:bg-primary-dark">Salvar</button>
+        </form>
+      </Modal>
 
-          {currentGame?.status === 'Finalizado' && (
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className={labelClass}>Gols (Casa)</label>
-                <input type="number" className={inputClass} value={currentGame?.homeScore || 0} onChange={e => setCurrentGame({...currentGame, homeScore: e.target.value})} />
-              </div>
-              <div className="flex-1">
-                 <label className={labelClass}>Gols (Fora)</label>
-                 <input type="number" className={inputClass} value={currentGame?.awayScore || 0} onChange={e => setCurrentGame({...currentGame, awayScore: e.target.value})} />
-              </div>
-            </div>
-          )}
-
-          <button type="submit" className="w-full py-2 bg-primary text-dark font-display rounded hover:bg-primary-dark">Salvar</button>
+      <Modal isOpen={modalType === 'sponsor'} onClose={closeModal} title={currentData?.id ? "Editar Patrocinador" : "Novo Patrocinador"}>
+        <form onSubmit={(e) => {
+          if (currentData.type === 'premium') handleSave(e, 'sponsor', sponsorsPremium, setSponsorsPremium);
+          else handleSave(e, 'sponsor', sponsorsOfficial, setSponsorsOfficial);
+        }}>
+          <label className={labelClass}>Nome</label>
+          <input required type="text" className={inputClass} value={currentData.name || ''} onChange={e => setCurrentData({...currentData, name: e.target.value})} />
+          
+          <label className={labelClass}>Logo (Opcional - base64 upload ou URL)</label>
+          <div className="flex items-center gap-4 mb-4">
+            {currentData.logo ? <img src={currentData.logo} className="w-16 h-16 bg-white p-1 rounded object-contain" /> : <div className="w-16 h-16 bg-white rounded border border-gray-300 flex items-center justify-center flex-shrink-0"><Star className="text-gray-400" /></div>}
+            <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'logo')} className="text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-dark hover:file:bg-primary-dark" />
+          </div>
+          <input type="text" className={inputClass} placeholder="Ou URL direto..." value={currentData.logo || ''} onChange={e => setCurrentData({...currentData, logo: e.target.value})} />
+          
+          <button type="submit" className="w-full py-2 mt-4 bg-primary text-dark font-display rounded hover:bg-primary-dark">Salvar</button>
         </form>
       </Modal>
 
     </div>
   );
 }
-

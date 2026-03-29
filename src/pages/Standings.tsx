@@ -1,23 +1,17 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
-import { Trophy, Shield, Goal, Star, Calendar } from "lucide-react";
+import { Trophy, Shield, Goal, Star, Calendar, AlertTriangle } from "lucide-react";
 import { cn } from "@/src/lib/utils";
+import { getStoredData } from "@/src/lib/store";
 
-const TeamLogoSmall = ({ teamId, teamName, className }: { teamId: number, teamName: string, className?: string }) => {
-  const [logo, setLogo] = useState<string | null>(null);
-
-  useEffect(() => {
-    const savedLogo = localStorage.getItem(`team_logo_${teamId}`);
-    if (savedLogo) setLogo(savedLogo);
-  }, [teamId]);
-
+const TeamLogoSmall = ({ teamId, teamName, logo, className }: { teamId: number, teamName: string, logo?: string, className?: string }) => {
   return (
     <div className={cn("bg-dark rounded-full border border-dark-border flex items-center justify-center overflow-hidden shrink-0", className)}>
       {logo ? (
-        <img src={logo} alt={teamName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+        <img src={logo} alt={teamName} className="w-full h-full object-contain p-0.5 bg-white" referrerPolicy="no-referrer" />
       ) : (
         <span className="text-[10px] text-gray-500 font-display">
-          {teamName.substring(0, 2).toUpperCase()}
+          {teamName?.substring(0, 2).toUpperCase()}
         </span>
       )}
     </div>
@@ -26,35 +20,103 @@ const TeamLogoSmall = ({ teamId, teamName, className }: { teamId: number, teamNa
 
 const categories = ["SUB-11", "SUB-13", "SUB-15", "SUB-17"];
 
-const mockGames = [
-  { id: 1, category: "SUB-17", date: "SÁB, 14 MAI", time: "09:00", homeTeam: "Colégio Diocesano", homeAbbr: "DIO", homeTeamId: 1, awayTeam: "Colégio Santa Sofia", awayAbbr: "SSO", awayTeamId: 2, homeScore: 3, awayScore: 1, location: "Ginásio Principal", status: "FINALIZADO" },
-  { id: 2, category: "SUB-17", date: "SÁB, 14 MAI", time: "10:00", homeTeam: "Colégio XV de Novembro", homeAbbr: "XVN", homeTeamId: 3, awayTeam: "CMA Garanhuns", awayAbbr: "CMA", awayTeamId: 4, homeScore: null, awayScore: null, location: "Quadra 2", status: "EM BREVE" },
-  { id: 3, category: "SUB-15", date: "DOM, 15 MAI", time: "08:00", homeTeam: "EREM Garanhuns", homeAbbr: "ERE", homeTeamId: 5, awayTeam: "Escola Padre Agobar Valença", awayAbbr: "PAV", awayTeamId: 6, homeScore: 2, awayScore: 2, location: "Ginásio Principal", status: "FINALIZADO" },
-  { id: 4, category: "SUB-13", date: "DOM, 15 MAI", time: "09:30", homeTeam: "Escola Simoa Gomes", homeAbbr: "SGO", homeTeamId: 7, awayTeam: "Colégio Santa Joana D'Arc", awayAbbr: "SJD", awayTeamId: 8, homeScore: null, awayScore: null, location: "Quadra 1", status: "EM BREVE" },
-  { id: 5, category: "SUB-11", date: "SÁB, 21 MAI", time: "08:00", homeTeam: "Colégio Diocesano", homeAbbr: "DIO", homeTeamId: 1, awayTeam: "Colégio XV de Novembro", awayAbbr: "XVN", awayTeamId: 3, homeScore: null, awayScore: null, location: "Ginásio Principal", status: "EM BREVE" },
-  { id: 6, category: "SUB-17", date: "SÁB, 21 MAI", time: "11:00", homeTeam: "EREM Garanhuns", homeAbbr: "ERE", homeTeamId: 5, awayTeam: "Escola Simoa Gomes", awayAbbr: "SGO", awayTeamId: 7, homeScore: null, awayScore: null, location: "Quadra 2", status: "EM BREVE" },
-  { id: 7, category: "SUB-15", date: "SÁB, 21 MAI", time: "13:00", homeTeam: "CMA Garanhuns", homeAbbr: "CMA", homeTeamId: 4, awayTeam: "Colégio XV de Novembro", awayAbbr: "XVN", awayTeamId: 3, homeScore: null, awayScore: null, location: "Ginásio Principal", status: "EM BREVE" },
-];
-
 export default function Standings() {
   const [activeCategory, setActiveCategory] = useState("SUB-17");
   const [activeTab, setActiveTab] = useState("CLASSIFICACAO");
 
+  const teams = getStoredData('teams') || [];
+  const games = getStoredData('games') || [];
+  const athletes = getStoredData('athletes') || [];
+
+  // Filter games by active category
+  const categoryGames = games.filter((g: any) => g.category === activeCategory);
+  
+  // Filter teams that have this category
+  const categoryTeams = teams.filter((t: any) => t.categories?.includes(activeCategory));
+
+  // 1. Standings calculation
+  const standings = categoryTeams.map((t: any) => {
+    let pts = 0, j = 0, v = 0, e = 0, d = 0, gp = 0, gc = 0;
+    categoryGames.forEach((g: any) => {
+      if (g.status === 'Finalizado') {
+        const homeScore = Number(g.homeScore || 0);
+        const awayScore = Number(g.awayScore || 0);
+        if (g.homeTeamId === t.id.toString() || g.homeTeamId === t.id) {
+          j++; gp += homeScore; gc += awayScore;
+          if (homeScore > awayScore) v++;
+          else if (homeScore === awayScore) e++;
+          else d++;
+        } else if (g.awayTeamId === t.id.toString() || g.awayTeamId === t.id) {
+          j++; gp += awayScore; gc += homeScore;
+          if (awayScore > homeScore) v++;
+          else if (awayScore === homeScore) e++;
+          else d++;
+        }
+      }
+    });
+    pts = (v * 3) + (e * 1);
+    const sg = gp - gc;
+    return { ...t, pts, j, v, e, d, gp, gc, sg };
+  }).sort((a: any, b: any) => b.pts - a.pts || b.v - a.v || b.sg - a.sg || b.gp - a.gp)
+    .map((t: any, idx: number) => ({ ...t, pos: idx + 1 }));
+
+  // 2. Artilharia calculation
+  // Computes goals strictly from Game Events for this category
+  const playerStats = athletes.map((a: any) => {
+    let goals = 0;
+    let yellows = 0;
+    let reds = 0;
+    
+    // Add baseline goals if defined manually in Athlete modal
+    if (a.goals && !isNaN(a.goals)) goals += Number(a.goals);
+
+    categoryGames.forEach((g: any) => {
+      if(g.status === 'Finalizado' && g.events) {
+        g.events.forEach((ev: any) => {
+          if(ev.playerId === a.id) {
+             if(ev.type === 'goal') goals++;
+             if(ev.type === 'yellow') yellows++;
+             if(ev.type === 'red') reds++;
+          }
+        });
+      }
+    });
+    return { ...a, computedGoals: goals, yellows, reds };
+  });
+
+  const topScorers = playerStats
+     .filter((p: any) => p.computedGoals > 0 && p.category === activeCategory)
+     .sort((a: any, b: any) => b.computedGoals - a.computedGoals)
+     .slice(0, 10);
+
+  // 3. Team Statistics (Cards / Disciplina)
+  const teamStats = categoryTeams.map((t: any) => {
+    let teamYellows = 0, teamReds = 0;
+    categoryGames.forEach((g: any) => {
+      if(g.status === 'Finalizado' && g.events) {
+        g.events.forEach((ev: any) => {
+          if(Number(ev.teamId) === t.id) {
+             if(ev.type === 'yellow') teamYellows++;
+             if(ev.type === 'red') teamReds++;
+          }
+        });
+      }
+    });
+    return { ...t, teamYellows, teamReds };
+  }).sort((a: any, b: any) => a.teamReds - b.teamReds || a.teamYellows - b.teamYellows);
+
   return (
     <div className="min-h-screen bg-dark py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header */}
         <div className="mb-12">
           <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-4">
             TABELA E <span className="text-primary">ESTATÍSTICAS</span>
           </h1>
           <p className="text-gray-400 text-lg max-w-2xl">
-            Acompanhe o desempenho das equipes, artilharia e resultados atualizados em tempo real.
+            Acompanhe o desempenho das equipes, artilharia, resultados e cartões de forma automatizada.
           </p>
         </div>
 
-        {/* Category Selector */}
         <div className="flex flex-wrap gap-2 mb-8">
           {categories.map((cat) => (
             <button
@@ -62,38 +124,23 @@ export default function Standings() {
               onClick={() => setActiveCategory(cat)}
               className={cn(
                 "px-6 py-3 font-display text-lg rounded transition-all",
-                activeCategory === cat
-                  ? "bg-primary text-dark"
-                  : "bg-dark-card text-gray-400 border border-dark-border hover:border-primary/50 hover:text-white"
-              )}
-            >
+                activeCategory === cat ? "bg-primary text-dark" : "bg-dark-card text-gray-400 border border-dark-border hover:border-primary/50 hover:text-white"
+              )}>
               {cat}
             </button>
           ))}
         </div>
 
-        {/* Tabs */}
         <div className="flex border-b border-dark-border mb-8 overflow-x-auto hide-scrollbar">
-          {["CLASSIFICACAO", "JOGOS", "ARTILHARIA", "MVP"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={cn(
-                "px-6 py-4 font-display text-lg whitespace-nowrap transition-colors relative",
-                activeTab === tab ? "text-primary" : "text-gray-500 hover:text-gray-300"
-              )}
-            >
+          {["CLASSIFICACAO", "JOGOS", "ARTILHARIA", "ESTATISTICAS"].map((tab) => (
+            <button key={tab} onClick={() => setActiveTab(tab)} className={cn("px-6 py-4 font-display text-lg whitespace-nowrap transition-colors relative", activeTab === tab ? "text-primary" : "text-gray-500 hover:text-gray-300")}>
               {tab}
-              {activeTab === tab && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-              )}
+              {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
             </button>
           ))}
         </div>
 
-        {/* Content Area */}
         <div className="bg-dark-card border border-dark-border rounded-xl p-1 md:p-6">
-          
           {activeTab === "CLASSIFICACAO" && (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[800px]">
@@ -112,28 +159,17 @@ export default function Standings() {
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    { id: 1, pos: 1, name: "Colégio Diocesano", pts: 15, j: 5, v: 5, e: 0, d: 0, gp: 25, gc: 5, sg: 20 },
-                    { id: 2, pos: 2, name: "Colégio Santa Sofia", pts: 12, j: 5, v: 4, e: 0, d: 1, gp: 18, gc: 8, sg: 10 },
-                    { id: 3, pos: 3, name: "Colégio XV de Novembro", pts: 10, j: 5, v: 3, e: 1, d: 1, gp: 15, gc: 10, sg: 5 },
-                    { id: 4, pos: 4, name: "CMA Garanhuns", pts: 9, j: 5, v: 3, e: 0, d: 2, gp: 12, gc: 12, sg: 0 },
-                    { id: 5, pos: 5, name: "EREM Garanhuns", pts: 7, j: 5, v: 2, e: 1, d: 2, gp: 10, gc: 15, sg: -5 },
-                    { id: 6, pos: 6, name: "Escola Padre Agobar Valença", pts: 4, j: 5, v: 1, e: 1, d: 3, gp: 8, gc: 20, sg: -12 },
-                    { id: 7, pos: 7, name: "Escola Simoa Gomes", pts: 1, j: 5, v: 0, e: 1, d: 4, gp: 5, gc: 25, sg: -20 },
-                  ].map((team, idx) => (
-                    <tr key={idx} className="border-b border-dark-border/50 hover:bg-dark transition-colors">
+                  {standings.map((team: any, idx: number) => (
+                    <tr key={team.id} className="border-b border-dark-border/50 hover:bg-dark transition-colors">
                       <td className="p-4 font-display text-center">
-                        <span className={cn(
-                          "w-8 h-8 rounded flex items-center justify-center text-sm mx-auto",
-                          team.pos <= 4 ? "bg-primary/20 text-primary border border-primary/30" : "text-gray-400"
-                        )}>
+                        <span className={cn("w-8 h-8 rounded flex items-center justify-center text-sm mx-auto", team.pos <= 4 ? "bg-primary/20 text-primary border border-primary/30" : "text-gray-400")}>
                           {team.pos}
                         </span>
                       </td>
                       <td className="p-4 font-display text-lg">
                         <Link to={`/equipes/${team.id}`} className="flex items-center gap-3 hover:text-primary transition-colors group">
-                          <TeamLogoSmall teamId={team.id} teamName={team.name} className="w-8 h-8 group-hover:border-primary transition-colors" />
-                          {team.name}
+                          <TeamLogoSmall teamId={team.id} teamName={team.name} logo={team.logo} className="w-8 h-8 group-hover:border-primary transition-colors" />
+                          <span className="truncate max-w-[200px]">{team.name}</span>
                         </Link>
                       </td>
                       <td className="p-4 font-display text-xl text-primary text-center font-bold">{team.pts}</td>
@@ -146,12 +182,13 @@ export default function Standings() {
                       <td className="p-4 font-display text-gray-400 text-center">{team.sg}</td>
                     </tr>
                   ))}
+                  {standings.length === 0 && <tr><td colSpan={10} className="p-8 text-center text-gray-500 font-display">NENHUMA EQUIPE NESTA CATEGORIA</td></tr>}
                 </tbody>
               </table>
               <div className="p-4 flex gap-4 text-xs font-sans text-gray-500 border-t border-dark-border mt-4">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-primary/20 border border-primary/30 rounded" />
-                  <span>Classificados para as Quartas de Final</span>
+                  <span>Classificados para a próxima fase</span>
                 </div>
               </div>
             </div>
@@ -159,93 +196,145 @@ export default function Standings() {
 
           {activeTab === "ARTILHARIA" && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-              {[
-                { pos: 1, name: "João Pedro", team: "Colégio Diocesano", teamId: 1, goals: 12, img: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?q=80&w=200&auto=format&fit=crop" },
-                { pos: 2, name: "Lucas Silva", team: "Colégio Santa Sofia", teamId: 2, goals: 9, img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop" },
-                { pos: 3, name: "Mateus Santos", team: "Colégio XV de Novembro", teamId: 3, goals: 8, img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop" },
-                { pos: 4, name: "Gabriel Costa", team: "CMA Garanhuns", teamId: 4, goals: 7, img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop" },
-                { pos: 5, name: "Pedro Henrique", team: "EREM Garanhuns", teamId: 5, goals: 6, img: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?q=80&w=200&auto=format&fit=crop" },
-              ].map((player) => (
-                <div key={player.pos} className="flex items-center gap-4 bg-dark p-4 rounded-lg border border-dark-border relative overflow-hidden group">
-                  <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <Goal className="w-32 h-32" />
+              {topScorers.map((player: any, idx: number) => {
+                const team = teams.find((t: any) => t.id === Number(player.teamId));
+                return (
+                  <div key={player.id} className="flex items-center gap-4 bg-dark p-4 rounded-lg border border-dark-border relative overflow-hidden group">
+                    <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity"><Goal className="w-32 h-32" /></div>
+                    <div className="font-display text-3xl text-gray-600 w-8 text-center">{idx + 1}</div>
+                    {player.photo ? (
+                      <img src={player.photo} alt={player.name} className="w-16 h-16 rounded-full object-cover border-2 border-dark-border group-hover:border-primary transition-colors" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full border-2 border-dark-border bg-dark flex items-center justify-center text-gray-600"><Goal /></div>
+                    )}
+                    <div className="flex-grow z-10">
+                      <h4 className="font-display text-lg text-white">{player.name}</h4>
+                      <Link to={`/equipes/${team?.id}`} className="text-xs text-gray-400 font-sans hover:text-primary transition-colors flex items-center gap-1.5">
+                        <TeamLogoSmall teamId={team?.id} teamName={team?.name || ""} logo={team?.logo} className="w-4 h-4" />{team?.name || "Sem equipe"}
+                      </Link>
+                    </div>
+                    <div className="text-right z-10 w-16">
+                      <span className="block font-display text-3xl text-primary leading-none">{player.computedGoals || 0}</span>
+                      <span className="text-[10px] text-gray-500 uppercase tracking-wider">Gols</span>
+                    </div>
                   </div>
-                  <div className="font-display text-3xl text-gray-600 w-8 text-center">
-                    {player.pos}
-                  </div>
-                  <img src={player.img} alt={player.name} className="w-16 h-16 rounded-full object-cover border-2 border-dark-border group-hover:border-primary transition-colors" referrerPolicy="no-referrer" />
-                  <div className="flex-grow z-10">
-                    <h4 className="font-display text-lg text-white">{player.name}</h4>
-                    <Link to={`/equipes/${player.teamId}`} className="text-xs text-gray-400 font-sans hover:text-primary transition-colors flex items-center gap-1.5">
-                      <TeamLogoSmall teamId={player.teamId} teamName={player.team} className="w-4 h-4" />
-                      {player.team}
-                    </Link>
-                  </div>
-                  <div className="text-right z-10">
-                    <span className="block font-display text-3xl text-primary leading-none">{player.goals}</span>
-                    <span className="text-[10px] text-gray-500 uppercase tracking-wider">Gols</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
+              {topScorers.length === 0 && <div className="col-span-3 p-12 text-center flex flex-col items-center justify-center text-gray-500 font-display"><Goal className="w-16 h-16 opacity-20 mb-4" /> NENHUM GOL REGISTRADO NESTA CATEGORIA</div>}
             </div>
           )}
 
           {activeTab === "JOGOS" && (
             <div className="p-4 space-y-4">
-              {mockGames.filter(g => g.category === activeCategory).length > 0 ? (
+              {categoryGames.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {mockGames.filter(g => g.category === activeCategory).map(game => (
-                    <div key={game.id} className="bg-dark border border-dark-border rounded-lg p-4 hover:border-primary/50 transition-colors group">
-                      <div className="flex justify-between items-center mb-4 text-xs font-display text-gray-400">
-                        <span>{game.date} - {game.time}</span>
-                        <span className={cn(
-                          "px-2 py-1 rounded",
-                          game.status === "FINALIZADO" ? "bg-dark-card text-gray-500 border border-dark-border" : "bg-primary/10 text-primary border border-primary/20"
-                        )}>
-                          {game.status}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <Link to={`/equipes/${game.homeTeamId}`} className="flex flex-col items-center gap-2 w-1/3 group/team">
-                          <TeamLogoSmall teamId={game.homeTeamId} teamName={game.homeTeam} className="w-12 h-12 border border-dark-border group-hover/team:border-primary transition-colors" />
-                          <span className="font-display text-sm text-center group-hover/team:text-primary transition-colors">{game.homeTeam}</span>
-                        </Link>
-                        
-                        <div className="w-1/3 flex flex-col items-center justify-center">
-                          {game.status === "FINALIZADO" ? (
-                            <div className="flex items-center gap-3 font-display text-3xl text-white">
-                              <span>{game.homeScore}</span>
-                              <span className="text-gray-600 text-xl">X</span>
-                              <span>{game.awayScore}</span>
-                            </div>
-                          ) : (
-                            <span className="text-2xl font-display text-gray-600">VS</span>
-                          )}
-                          <span className="text-xs text-gray-500 mt-2 text-center">{game.location}</span>
+                  {categoryGames.map((game: any) => {
+                    const home = teams.find((t: any) => t.id === Number(game.homeTeamId));
+                    const away = teams.find((t: any) => t.id === Number(game.awayTeamId));
+                    return (
+                      <div key={game.id} className="bg-dark border border-dark-border rounded-lg p-4 hover:border-primary/50 transition-colors group">
+                        <div className="flex justify-between items-center mb-4 text-xs font-display text-gray-400">
+                          <span>{game.date} - {game.time} • Categoria {game.category}</span>
+                          <span className={cn("px-2 py-1 rounded", game.status === "Finalizado" ? "bg-dark-card text-gray-500 border border-dark-border" : "bg-primary/10 text-primary border border-primary/20")}>
+                            {game.status?.toUpperCase()}
+                          </span>
                         </div>
+                        <div className="flex justify-between items-center">
+                          <Link to={`/equipes/${home?.id}`} className="flex flex-col items-center gap-2 w-1/3 group/team">
+                            <TeamLogoSmall teamId={home?.id} teamName={home?.name || "-"} logo={home?.logo} className="w-12 h-12 border border-dark-border group-hover/team:border-primary transition-colors" />
+                            <span className="font-display text-sm text-center group-hover/team:text-primary transition-colors truncate max-w-full">{home?.name || "-"}</span>
+                          </Link>
+                          
+                          <div className="w-1/3 flex flex-col items-center justify-center">
+                            {game.status === "Finalizado" ? (
+                              <div className="flex items-center gap-3 font-display text-3xl text-white">
+                                <span>{game.homeScore}</span><span className="text-gray-600 text-xl">X</span><span>{game.awayScore}</span>
+                              </div>
+                            ) : (<span className="text-2xl font-display text-gray-600">VS</span>)}
+                            <span className="text-xs text-gray-500 mt-2 text-center truncate w-full px-2">{game.location}</span>
+                          </div>
 
-                        <Link to={`/equipes/${game.awayTeamId}`} className="flex flex-col items-center gap-2 w-1/3 group/team">
-                          <TeamLogoSmall teamId={game.awayTeamId} teamName={game.awayTeam} className="w-12 h-12 border border-dark-border group-hover/team:border-primary transition-colors" />
-                          <span className="font-display text-sm text-center group-hover/team:text-primary transition-colors">{game.awayTeam}</span>
-                        </Link>
+                          <Link to={`/equipes/${away?.id}`} className="flex flex-col items-center gap-2 w-1/3 group/team">
+                            <TeamLogoSmall teamId={away?.id} teamName={away?.name || "-"} logo={away?.logo} className="w-12 h-12 border border-dark-border group-hover/team:border-primary transition-colors" />
+                            <span className="font-display text-sm text-center group-hover/team:text-primary transition-colors truncate max-w-full">{away?.name || "-"}</span>
+                          </Link>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="p-12 text-center flex flex-col items-center justify-center text-gray-500">
                   <Calendar className="w-16 h-16 mb-4 opacity-20" />
-                  <p className="font-display text-xl">NENHUM JOGO ENCONTRADO PARA ESTA CATEGORIA</p>
+                  <p className="font-display text-xl">NENHUM JOGO AGENDADO PARA A CATEGORIA {activeCategory}</p>
                 </div>
               )}
             </div>
           )}
 
-          {/* Placeholder for MVP tab */}
-          {activeTab === "MVP" && (
-            <div className="p-12 text-center flex flex-col items-center justify-center text-gray-500">
-              <Trophy className="w-16 h-16 mb-4 opacity-20" />
-              <p className="font-display text-xl">CONTEÚDO EM ATUALIZAÇÃO</p>
+          {activeTab === "ESTATISTICAS" && (
+            <div className="p-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="bg-dark border border-dark-border rounded-xl p-6">
+                  <h3 className="font-display text-xl text-white mb-6 border-b border-dark-border pb-4 flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5 text-yellow-500" /> DISCIPLINA DAS EQUIPES
+                  </h3>
+                  <div className="space-y-4">
+                    {teamStats.map((t: any, idx: number) => (
+                      <div key={t.id} className="flex items-center justify-between p-3 bg-dark-card border border-dark-border rounded hover:border-gray-500 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-600 font-display text-lg w-6 text-center">{idx + 1}</span>
+                          <TeamLogoSmall teamId={t.id} teamName={t.name} logo={t.logo} className="w-8 h-8" />
+                          <span className="font-display text-white text-sm lg:text-base">{t.name}</span>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm font-display pr-2">
+                          <div className="flex items-center gap-1.5" title="Cartões Amarelos">
+                            <div className="w-3 h-4 bg-yellow-500 rounded-sm"></div>
+                            <span className="text-white w-4 text-center">{t.teamYellows}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5" title="Cartões Vermelhos">
+                            <div className="w-3 h-4 bg-red-600 rounded-sm"></div>
+                            <span className="text-white w-4 text-center">{t.teamReds}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {teamStats.length === 0 && <p className="text-gray-500 text-sm text-center h-full flex items-center justify-center py-10">Nenhuma equipe para avaliar.</p>}
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                   <div className="bg-dark border border-dark-border rounded-xl p-6">
+                    <h3 className="font-display text-xl text-white mb-6 border-b border-dark-border pb-4 flex items-center gap-2">
+                      <Trophy className="w-5 h-5 text-primary" /> RESUMO {activeCategory}
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-dark-card p-4 rounded border border-dark-border text-center">
+                        <div className="text-4xl font-display text-primary mb-1">{categoryGames.filter((g:any)=>g.status==='Finalizado').length}</div>
+                        <div className="text-[10px] text-gray-500 uppercase tracking-widest">Jogos Realizados</div>
+                      </div>
+                      <div className="bg-dark-card p-4 rounded border border-dark-border text-center">
+                        <div className="text-4xl font-display text-primary mb-1">
+                          {categoryGames.filter((g:any)=>g.status==='Finalizado').reduce((acc: number, g: any) => acc + (Number(g.homeScore||0) + Number(g.awayScore||0)), 0)}
+                        </div>
+                        <div className="text-[10px] text-gray-500 uppercase tracking-widest">Gols Marcados</div>
+                      </div>
+                      <div className="bg-dark-card p-4 rounded border border-dark-border text-center">
+                        <div className="text-4xl font-display text-yellow-500 mb-1">
+                          {teamStats.reduce((acc: number, t: any) => acc + t.teamYellows, 0)}
+                        </div>
+                        <div className="text-[10px] text-gray-500 uppercase tracking-widest">Cartões Amarelos</div>
+                      </div>
+                      <div className="bg-dark-card p-4 rounded border border-dark-border text-center">
+                        <div className="text-4xl font-display text-red-500 mb-1">
+                          {teamStats.reduce((acc: number, t: any) => acc + t.teamReds, 0)}
+                        </div>
+                        <div className="text-[10px] text-gray-500 uppercase tracking-widest">Cartões Vermelhos</div>
+                      </div>
+                    </div>
+                   </div>
+                </div>
+              </div>
             </div>
           )}
 
