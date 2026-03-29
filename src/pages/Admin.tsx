@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Lock, Settings, Users, Trophy, Calendar, Database, Search, Filter, Check, X, Eye, Plus, Edit, Trash, Activity, Shield, Upload, Image, Video, Star } from "lucide-react";
+import { Lock, Settings, Users, Trophy, Calendar, Database, Search, Filter, Check, X, Eye, Plus, Edit, Trash, Activity, Shield, Upload, Image, Video, Star, Camera } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { getStoredData, setStoredData, resizeImage, defaultData } from "@/src/lib/store";
 
@@ -33,6 +33,7 @@ export default function Admin() {
   const [banners, setBanners] = useState<any[]>([]);
   const [sponsorsPremium, setSponsorsPremium] = useState<any[]>([]);
   const [sponsorsOfficial, setSponsorsOfficial] = useState<any[]>([]);
+  const [gallery, setGallery] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(defaultData.settings);
 
   // Load Initial Data
@@ -44,6 +45,7 @@ export default function Admin() {
     setBanners(getStoredData('banners') || []);
     setSponsorsPremium(getStoredData('sponsorsPremium') || []);
     setSponsorsOfficial(getStoredData('sponsorsOfficial') || []);
+    setGallery(getStoredData('gallery') || []);
     
     // Check old localstorage for backward compat on league_logo
     let savedSettings = getStoredData('settings');
@@ -62,6 +64,7 @@ export default function Admin() {
   useEffect(() => { setStoredData('banners', banners); }, [banners]);
   useEffect(() => { setStoredData('sponsorsPremium', sponsorsPremium); }, [sponsorsPremium]);
   useEffect(() => { setStoredData('sponsorsOfficial', sponsorsOfficial); }, [sponsorsOfficial]);
+  useEffect(() => { setStoredData('gallery', gallery); }, [gallery]);
   useEffect(() => { 
     setStoredData('settings', settings); 
     // Synchronize to the old key "league_logo" just in case other parts of the app use it directly
@@ -136,6 +139,9 @@ export default function Admin() {
           </button>
           <button onClick={() => { setCurrentData({}); setModalType('banner'); }} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded hover:bg-primary hover:text-dark transition-all">
             <Plus className="w-4 h-4" /> Novo Banner (Home)
+          </button>
+          <button onClick={() => { setCurrentData({}); setModalType('gallery'); }} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded hover:bg-primary hover:text-dark transition-all">
+            <Plus className="w-4 h-4" /> Nova Foto (Galeria)
           </button>
         </div>
       </div>
@@ -259,6 +265,25 @@ export default function Admin() {
     </>
   );
 
+  const renderGallery = () => (
+    <>
+      <div className="bg-primary/10 border border-primary/20 text-primary p-4 rounded mb-6 flex gap-3 text-sm">
+        <Camera className="w-5 h-5 flex-shrink-0" />
+        <p>Adicione fotos marcantes do evento para aparecerem na aba de Galeria pública. Preencha o título e faça o upload ou insira a URL da imagem (Unsplash recomendado).</p>
+      </div>
+      <DataTable 
+        title="GERENCIAR GALERIA DE FOTOS" data={gallery}
+        columns={[
+          { label: "IMAGEM", render: (g: any) => <img src={g.url} className="w-24 h-16 object-cover rounded border border-dark-border" /> },
+          { label: "TÍTULO", key: "title", render: (g: any) => <span className="font-display text-white">{g.title}</span> }
+        ]}
+        onAdd={() => { setCurrentData({}); setModalType('gallery'); }}
+        onEdit={(g: any) => { setCurrentData(g); setModalType('gallery'); }}
+        onDelete={(id: number) => setGallery(gallery.filter(g => g.id !== id))}
+      />
+    </>
+  );
+
   const renderSponsors = () => (
     <>
       <DataTable 
@@ -337,6 +362,42 @@ export default function Admin() {
         <input type="text" className={inputClass} placeholder="https://www.youtube.com/embed/dQw4w9WgXcQ" value={settings.institutionalVideoUrl || ''} onChange={e => setSettings({...settings, institutionalVideoUrl: e.target.value})} />
         <p className="text-xs text-gray-500 mb-6 -mt-2">Exemplo: https://www.youtube.com/embed/SuaIdeVideoAQUI</p>
 
+        <h3 className="font-display text-xl text-white mt-10 mb-6 flex flex-row items-center gap-2 border-t border-dark-border pt-6">
+          <Database className="w-6 h-6 text-primary" /> REGULAMENTO OFICIAL
+        </h3>
+        
+        <label className={labelClass}>Upload do Regulamento (Formato PDF)</label>
+        <div className="flex items-center gap-6 mb-4">
+          <label className="flex items-center gap-2 px-4 py-2 bg-dark border border-dark-border text-gray-300 rounded hover:text-white hover:border-primary transition-all cursor-pointer">
+            <Upload className="w-4 h-4" />
+            <span>{settings.rulesUrl ? "Substituir Regulamento" : "Anexar PDF"}</span>
+            <input type="file" accept=".pdf" className="hidden" onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                if (file.size > 2.5 * 1024 * 1024) {
+                  alert("Atenção: Para garantir a performance do site, o PDF deve ter no máximo 2.5 MB.");
+                  return;
+                }
+                const reader = new FileReader();
+                reader.onload = () => {
+                   setSettings((prev: any) => ({...prev, rulesUrl: reader.result as string, rulesName: file.name}));
+                };
+                reader.readAsDataURL(file);
+              }
+            }} />
+          </label>
+          
+          {settings.rulesUrl && (
+            <div className="flex items-center gap-4">
+              <span className="text-primary text-sm font-bold flex items-center gap-2">
+                <Check className="w-4 h-4" /> {settings.rulesName || "Regulamento Anexado"}
+              </span>
+              <button type="button" onClick={() => setSettings((prev:any) => ({...prev, rulesUrl: "", rulesName: ""}))} className="text-danger hover:text-red-400 font-bold text-xs uppercase underline">Remover Arquivo</button>
+            </div>
+          )}
+        </div>
+        <p className="text-xs text-gray-500 mb-6 -mt-2">Nota: Uma vez anexado, o público geral poderá acessar e baixar esse regulamento ao visitar a área de inscrições.</p>
+
         {settings.institutionalVideoUrl && (
           <div className="w-full aspect-video rounded-xl overflow-hidden mb-6 border border-dark-border">
             <iframe 
@@ -396,6 +457,7 @@ export default function Admin() {
             { id: "Dashboard", icon: Activity },
             { id: "Inscrições", icon: Database },
             { id: "Banners", icon: Image },
+            { id: "Galeria", icon: Camera },
             { id: "Equipes", icon: Shield },
             { id: "Atletas", icon: Users },
             { id: "Jogos", icon: Calendar },
@@ -443,6 +505,7 @@ export default function Admin() {
           />
         )}
         {activeTab === "Banners" && renderBanners()}
+        {activeTab === "Galeria" && renderGallery()}
         {activeTab === "Equipes" && renderTeams()}
         {activeTab === "Atletas" && renderAthletes()}
         {activeTab === "Jogos" && (
@@ -632,6 +695,22 @@ export default function Admin() {
           </select>
           
           <button type="submit" className="w-full py-2 mt-4 bg-primary text-dark font-display rounded hover:bg-primary-dark">Salvar</button>
+        </form>
+      </Modal>
+
+      <Modal isOpen={modalType === 'gallery'} onClose={closeModal} title={currentData?.id ? "Editar Foto" : "Nova Foto da Galeria"}>
+        <form onSubmit={(e) => handleSave(e, 'gallery', gallery, setGallery)}>
+          <label className={labelClass}>Título da Foto / Momento</label>
+          <input required type="text" className={inputClass} value={currentData.title || ''} onChange={e => setCurrentData({...currentData, title: e.target.value})} placeholder="Ex: Comemoração de título" />
+          
+          <label className={labelClass}>Imagem (Opcional - base64 upload ou URL)</label>
+          <div className="flex items-center gap-4 mb-4">
+            {currentData.url ? <img src={currentData.url} className="w-24 h-16 object-cover rounded shadow" /> : <div className="w-24 h-16 bg-white rounded border border-gray-300 flex items-center justify-center flex-shrink-0"><Camera className="text-gray-400" /></div>}
+            <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'url')} className="text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-dark hover:file:bg-primary-dark" />
+          </div>
+          <input type="text" className={inputClass} placeholder="Ou inserir URL do Unsplash/Imagens..." value={currentData.url || ''} onChange={e => setCurrentData({...currentData, url: e.target.value})} />
+          
+          <button type="submit" className="w-full py-2 mt-4 bg-primary text-dark font-display rounded hover:bg-primary-dark">Salvar Foto</button>
         </form>
       </Modal>
 

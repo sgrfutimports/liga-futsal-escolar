@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Upload, Send, CheckCircle2, AlertCircle, Plus, Trash2, Camera, Shield } from "lucide-react";
+import { Upload, Send, CheckCircle2, AlertCircle, Plus, Trash2, Camera, Shield, Download } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { getStoredData, setStoredData, resizeImage } from "@/src/lib/store";
 
@@ -34,6 +34,10 @@ interface FormErrors {
 export default function Registration() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const settings = getStoredData('settings') || {};
+  const rulesUrl = settings.rulesUrl;
+  const rulesName = settings.rulesName || "Baixar Regulamento PDF";
   
   const [formData, setFormData] = useState<FormData>({
     schoolName: "",
@@ -210,9 +214,16 @@ export default function Registration() {
           <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-4 uppercase">
             INSCREVA SUA <span className="text-primary">EQUIPE</span>
           </h1>
-          <p className="text-gray-400 text-lg">
+          <p className="text-gray-400 text-lg mb-6">
             Plataforma oficial de registros. Preencha os dados institucionais e relacione os seus atletas.
           </p>
+          
+          {rulesUrl && (
+            <a href={rulesUrl} download={rulesName} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-6 py-3 bg-dark-card border border-dark-border hover:border-primary text-gray-300 hover:text-primary font-display uppercase tracking-widest text-sm rounded-lg transition-all shadow-[0_0_15px_rgba(255,255,15,0.02)] hover:shadow-[0_0_15px_rgba(118,169,17,0.1)]">
+              <Download className="w-5 h-5" />
+              {rulesName}
+            </a>
+          )}
         </div>
 
         {/* Form Container */}

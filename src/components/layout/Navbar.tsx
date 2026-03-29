@@ -9,6 +9,7 @@ const navLinks = [
   { name: "Classificação", path: "/classificacao" },
   { name: "Equipes", path: "/equipes" },
   { name: "Atletas", path: "/atletas" },
+  { name: "Galeria", path: "/galeria" },
   { name: "Inscrição", path: "/inscricao" },
 ];
 
