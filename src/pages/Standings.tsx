@@ -30,7 +30,7 @@ export default function Standings() {
 
   // Filter games by active category
   const categoryGames = games.filter((g: any) => g.category === activeCategory);
-  
+
   // Filter teams that have this category
   const categoryTeams = teams.filter((t: any) => t.categories?.includes(activeCategory));
 
@@ -66,17 +66,17 @@ export default function Standings() {
     let goals = 0;
     let yellows = 0;
     let reds = 0;
-    
+
     // Add baseline goals if defined manually in Athlete modal
     if (a.goals && !isNaN(a.goals)) goals += Number(a.goals);
 
     categoryGames.forEach((g: any) => {
-      if(g.status === 'Finalizado' && g.events) {
+      if (g.status === 'Finalizado' && g.events) {
         g.events.forEach((ev: any) => {
-          if(ev.playerId === a.id) {
-             if(ev.type === 'goal') goals++;
-             if(ev.type === 'yellow') yellows++;
-             if(ev.type === 'red') reds++;
+          if (ev.playerId === a.id) {
+            if (ev.type === 'goal') goals++;
+            if (ev.type === 'yellow') yellows++;
+            if (ev.type === 'red') reds++;
           }
         });
       }
@@ -85,19 +85,19 @@ export default function Standings() {
   });
 
   const topScorers = playerStats
-     .filter((p: any) => p.computedGoals > 0 && p.category === activeCategory)
-     .sort((a: any, b: any) => b.computedGoals - a.computedGoals)
-     .slice(0, 10);
+    .filter((p: any) => p.computedGoals > 0 && p.category === activeCategory)
+    .sort((a: any, b: any) => b.computedGoals - a.computedGoals)
+    .slice(0, 10);
 
   // 3. Team Statistics (Cards / Disciplina)
   const teamStats = categoryTeams.map((t: any) => {
     let teamYellows = 0, teamReds = 0;
     categoryGames.forEach((g: any) => {
-      if(g.status === 'Finalizado' && g.events) {
+      if (g.status === 'Finalizado' && g.events) {
         g.events.forEach((ev: any) => {
-          if(Number(ev.teamId) === t.id) {
-             if(ev.type === 'yellow') teamYellows++;
-             if(ev.type === 'red') teamReds++;
+          if (Number(ev.teamId) === t.id) {
+            if (ev.type === 'yellow') teamYellows++;
+            if (ev.type === 'red') teamReds++;
           }
         });
       }
@@ -244,7 +244,7 @@ export default function Standings() {
                             <TeamLogoSmall teamId={home?.id} teamName={home?.name || "-"} logo={home?.logo} className="w-12 h-12 border border-dark-border group-hover/team:border-primary transition-colors" />
                             <span className="font-display text-sm text-center group-hover/team:text-primary transition-colors truncate max-w-full">{home?.name || "-"}</span>
                           </Link>
-                          
+
                           <div className="w-1/3 flex flex-col items-center justify-center">
                             {game.status === "Finalizado" ? (
                               <div className="flex items-center gap-3 font-display text-3xl text-white">
@@ -304,18 +304,18 @@ export default function Standings() {
                 </div>
 
                 <div className="space-y-6">
-                   <div className="bg-dark border border-dark-border rounded-xl p-6">
+                  <div className="bg-dark border border-dark-border rounded-xl p-6">
                     <h3 className="font-display text-xl text-white mb-6 border-b border-dark-border pb-4 flex items-center gap-2">
                       <Trophy className="w-5 h-5 text-primary" /> RESUMO {activeCategory}
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-dark-card p-4 rounded border border-dark-border text-center">
-                        <div className="text-4xl font-display text-primary mb-1">{categoryGames.filter((g:any)=>g.status==='Finalizado').length}</div>
+                        <div className="text-4xl font-display text-primary mb-1">{categoryGames.filter((g: any) => g.status === 'Finalizado').length}</div>
                         <div className="text-[10px] text-gray-500 uppercase tracking-widest">Jogos Realizados</div>
                       </div>
                       <div className="bg-dark-card p-4 rounded border border-dark-border text-center">
                         <div className="text-4xl font-display text-primary mb-1">
-                          {categoryGames.filter((g:any)=>g.status==='Finalizado').reduce((acc: number, g: any) => acc + (Number(g.homeScore||0) + Number(g.awayScore||0)), 0)}
+                          {categoryGames.filter((g: any) => g.status === 'Finalizado').reduce((acc: number, g: any) => acc + (Number(g.homeScore || 0) + Number(g.awayScore || 0)), 0)}
                         </div>
                         <div className="text-[10px] text-gray-500 uppercase tracking-widest">Gols Marcados</div>
                       </div>
@@ -332,7 +332,7 @@ export default function Standings() {
                         <div className="text-[10px] text-gray-500 uppercase tracking-widest">Cartões Vermelhos</div>
                       </div>
                     </div>
-                   </div>
+                  </div>
                 </div>
               </div>
             </div>

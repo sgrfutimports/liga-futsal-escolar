@@ -22,11 +22,11 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="relative w-16 h-16 bg-white rounded-full flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.15)]">
               <img 
                 src={localStorage.getItem('league_logo') || "https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/liga-futsal-logo.png"} 
                 alt="Liga de Futsal Escolar" 
-                className="w-full h-full object-contain overflow-hidden rounded-full"
+                className="w-full h-full object-contain scale-[1.2]"
                 onError={(e) => {
                   // Fallback if image not found
                   e.currentTarget.style.display = 'none';

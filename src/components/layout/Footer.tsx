@@ -9,11 +9,11 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-1 md:col-span-2 pr-0 md:pr-12">
             <Link to="/" className="flex items-center gap-3 mb-4 group">
-              <div className="relative w-10 h-10 flex items-center justify-center">
+              <div className="relative w-16 h-16 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.05)]">
                 <img 
                   src={localStorage.getItem('league_logo') || "https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/liga-futsal-logo.png"} 
                   alt="Liga de Futsal Escolar" 
-                  className="w-full h-full object-contain overflow-hidden rounded-full"
+                  className="w-full h-full object-contain scale-[1.2]"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     e.currentTarget.parentElement?.classList.add('bg-primary', 'rounded');
