@@ -11,7 +11,7 @@ export default function Footer() {
             <Link to="/" className="flex items-center gap-3 mb-4 group">
               <div className="relative w-16 h-16 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.05)]">
                 <img 
-                  src={localStorage.getItem('league_logo') || "https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/liga-futsal-logo.png"} 
+                  src="/logos/logo.jpg" 
                   alt="Liga de Futsal Escolar" 
                   className="w-full h-full object-contain scale-[1.2]"
                   onError={(e) => {
@@ -34,8 +34,16 @@ export default function Footer() {
               A maior liga de futsal escolar do agreste meridional. Formando atletas e cidadãos através do esporte.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-dark flex items-center justify-center text-gray-400 hover:text-primary hover:bg-dark-border transition-all">
-                <Instagram className="w-5 h-5" />
+              <a 
+                href="https://www.instagram.com/ligadefutsalescolar/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-white transition-all hover:scale-110 shadow-lg active:scale-95 group-hover:shadow-primary/20"
+                style={{ 
+                  background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)' 
+                }}
+              >
+                <Instagram className="w-6 h-6" strokeWidth={2.5} />
               </a>
             </div>
           </div>

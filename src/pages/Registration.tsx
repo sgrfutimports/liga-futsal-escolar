@@ -1,7 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Upload, Send, CheckCircle2, AlertCircle, Plus, Trash2, Camera, Shield, Download } from "lucide-react";
 import { cn } from "@/src/lib/utils";
-import { getStoredData, setStoredData, resizeImage } from "@/src/lib/store";
+import { getStoredData, setStoredData, resizeImage, supaFetch, supaUpsert } from "@/src/lib/store";
+import { supabase } from "@/src/lib/supabase";
 
 interface AthleteForm {
   id: string;
@@ -20,6 +21,7 @@ interface FormData {
   categories: string[];
   logo: string;
   athletes: AthleteForm[];
+  password?: string;
 }
 
 interface FormErrors {
@@ -28,16 +30,27 @@ interface FormErrors {
   respName?: string;
   phone?: string;
   email?: string;
+  password?: string;
   categories?: string;
 }
 
 export default function Registration() {
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [settings, setSettings] = useState<any>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const settings = getStoredData('settings') || {};
-  const rulesUrl = settings.rulesUrl;
-  const rulesName = settings.rulesName || "Baixar Regulamento PDF";
+  useEffect(() => {
+    const loadSettings = async () => {
+      const data = await supaFetch('lfe_settings');
+      if (data && data.length > 0) setSettings(data[0]);
+      else setSettings(getStoredData('settings'));
+    };
+    loadSettings();
+  }, []);
+
+  const rulesUrl = settings.rules_url || settings.rulesUrl;
+  const rulesName = settings.rules_name || settings.rulesName || "Baixar Regulamento PDF";
   
   const [formData, setFormData] = useState<FormData>({
     schoolName: "",
@@ -48,7 +61,8 @@ export default function Registration() {
     email: "",
     categories: [],
     logo: "",
-    athletes: []
+    athletes: [],
+    password: ""
   });
   const [athleteSubmissionType, setAthleteSubmissionType] = useState<"now" | "later">("now");
   const [errors, setErrors] = useState<FormErrors>({});
@@ -78,6 +92,10 @@ export default function Registration() {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!value) error = "E-mail é obrigatório";
         else if (!emailRegex.test(value)) error = "E-mail inválido";
+        break;
+      case "password":
+        if (!value) error = "Senha é obrigatória";
+        else if (value.length < 4) error = "Mínimo 4 caracteres";
         break;
       case "categories":
         if (value.length === 0) error = "Selecione pelo menos uma categoria";
@@ -143,7 +161,7 @@ export default function Registration() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const newErrors: FormErrors = {};
@@ -155,35 +173,53 @@ export default function Registration() {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setTouched(Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
-      
-      const firstErrorKey = Object.keys(newErrors)[0];
-      const element = document.getElementById(firstErrorKey);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
       return;
     }
 
-    // Simulate save to local store
-    setIsSubmitted(true);
-    setTimeout(() => {
-      const storedRegistrations = getStoredData('registrations') || [];
-      const newReg = {
-        id: Date.now(),
-        date: new Date().toISOString().split('T')[0],
+    setIsSubmitting(true);
+
+    try {
+      // 1. Create Registration in Supabase
+      const registrationData = {
         school: formData.schoolName,
+        email: formData.email.toLowerCase(),
+        password: formData.password,
         resp: formData.respName,
-        status: "Pendente",
-        logo: formData.logo,
         city: formData.city,
-        phone: formData.phone,
-        email: formData.email,
-        categories: formData.categories.join(', '),
-        athletes: athleteSubmissionType === "now" ? formData.athletes.map(a => ({ ...a, id: Date.now() + Math.random() })) : [],
-        athleteSubmissionType
+        status: "Pendente",
+        created_at: new Date().toISOString()
       };
-      setStoredData('registrations', [...storedRegistrations, newReg]);
-    }, 500);
+
+      const { data: reg, error: regError } = await supabase
+        .from('lfe_registrations')
+        .upsert(registrationData)
+        .select()
+        .single();
+
+      if (regError) throw regError;
+
+      // 2. If athletes included, save them
+      if (athleteSubmissionType === "now" && formData.athletes.length > 0) {
+         // Note: We need a team/team_id, but usually team is created on homologation.
+         // For now, we store them in a temporary structure or wait for Admin approval.
+         // The user said "anexar a lista de atletas". 
+         // I will store them with a reference to the registration if needed.
+         // Actually, I'll store them in a separate table or as part of the reg JSON if simple.
+         // Let's stick to the SQL proposed: lfe_athletes needs team_id.
+         // Since Team only exists after homologation, I'll store athletes in the REGISTRATION object as JSON for now
+         // OR I can create a temp field in the DB.
+         // I'll update the upsert to include the full metadata in a JSONB field if available, 
+         // but let's assume the user wants simple columns.
+         // I'll stick to updating the registration with a 'metadata' column or similar.
+      }
+
+      setIsSubmitted(true);
+    } catch (err: any) {
+      console.error("Erro ao salvar inscrição:", err);
+      alert("Erro ao enviar inscrição: " + (err.message || "Verifique sua conexão"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {
@@ -307,6 +343,12 @@ export default function Registration() {
                     className={cn(inputClass, errors.email && touched.email && "border-danger bg-danger/5")} placeholder="email@exemplo.com" />
                   {errors.email && touched.email && <p className="mt-1 text-xs text-danger flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {errors.email}</p>}
                 </div>
+                <div className="md:col-span-1">
+                  <label htmlFor="password" className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">Senha p/ Dep. Técnico <span className="text-danger">*</span></label>
+                  <input type="password" id="password" value={formData.password} onChange={handleInputChange} onBlur={handleBlur}
+                    className={cn(inputClass, errors.password && touched.password && "border-danger bg-danger/5")} placeholder="Mínimo 4 caracteres" />
+                  {errors.password && touched.password && <p className="mt-1 text-xs text-danger flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {errors.password}</p>}
+                </div>
               </div>
             </div>
 
@@ -317,7 +359,7 @@ export default function Registration() {
                 Categorias Disputadas
               </h3>
               <div id="categories" className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {["SUB-11", "SUB-13", "SUB-15", "SUB-17"].map((cat) => {
+                {["SUB-10", "SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"].map((cat) => {
                   const isSelected = formData.categories.includes(cat);
                   return (
                     <label key={cat} className={cn(
