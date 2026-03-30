@@ -70,7 +70,10 @@ export const defaultData = {
     { id: 7, name: "DIEGO ESPORTES", logo: "/logos/DIEGO_ESPORTES_LOGO.jpg" },
     { id: 8, name: "ORTOBOM", logo: "/logos/ORTOBOM_LOGO.jpg" },
     { id: 9, name: "WS", logo: "/logos/WS_LOGO.jpg" },
-    { id: 10, name: "CASA DAS BALAS", logo: "/logos/casa_das_balas_logo.jpg" }
+    { id: 10, name: "CASA DAS BALAS", logo: "/logos/casa_das_balas_logo.jpg" },
+    { id: 11, name: "IAUPE", logo: "/logos/IAUPE LOGO.jfif" },
+    { id: 12, name: "CMA", logo: "/logos/CMA LOGO.jpg" },
+    { id: 13, name: "GRE", logo: "/logos/GRE  LOGO.png" }
   ],
   settings: {
     eventName: "Liga de Futsal Escolar",

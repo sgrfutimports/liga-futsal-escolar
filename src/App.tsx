@@ -21,7 +21,23 @@ export default function App() {
           !s.name?.toUpperCase().includes("BOTICARIO") && 
           !s.name?.toUpperCase().includes("PREFEITURA")
         );
-        if (filtered.length !== parsed.length) {
+
+        // Add missing local partners if they don't exist
+        const newPartners = [
+          { id: 11, name: "IAUPE", logo: "/logos/IAUPE LOGO.jfif" },
+          { id: 12, name: "CMA", logo: "/logos/CMA LOGO.jpg" },
+          { id: 13, name: "GRE", logo: "/logos/GRE  LOGO.png" }
+        ];
+        
+        let needsUpdate = filtered.length !== parsed.length;
+        newPartners.forEach(p => {
+          if (!filtered.find((s: any) => s.id === p.id || s.name === p.name)) {
+            filtered.push(p);
+            needsUpdate = true;
+          }
+        });
+
+        if (needsUpdate) {
           localStorage.setItem('lfe_sponsorsOfficial', JSON.stringify(filtered));
         }
       } catch (e) { console.error(e); }
