@@ -26,6 +26,19 @@ export default function App() {
         }
       } catch (e) { console.error(e); }
     }
+
+    const premium = localStorage.getItem('lfe_sponsorsPremium');
+    if (premium) {
+      try {
+        const parsed = JSON.parse(premium);
+        const updated = parsed.map((s: any) => {
+          if (s.name?.toUpperCase().includes("FERREIRA")) return { ...s, logo: "/logos/FERREIRA_COSTA_LOGO.png" };
+          if (s.name?.toUpperCase().includes("UNICOMPRA")) return { ...s, logo: "/logos/UNICOMPRA_LOGO.png" };
+          return s;
+        });
+        localStorage.setItem('lfe_sponsorsPremium', JSON.stringify(updated));
+      } catch (e) { console.error(e); }
+    }
   }, []);
 
   return (

@@ -58,8 +58,8 @@ export const defaultData = {
     }
   ],
   sponsorsPremium: [
-    { id: 1, name: "FERREIRA COSTA", logo: "https://logodownload.org/wp-content/uploads/2019/11/ferreira-costa-logo-0.png" },
-    { id: 2, name: "UNICOMPRA", logo: "https://logodownload.org/wp-content/uploads/2021/08/unicompra-logo.png" },
+    { id: 1, name: "FERREIRA COSTA", logo: "/logos/FERREIRA_COSTA_LOGO.png" },
+    { id: 2, name: "UNICOMPRA", logo: "/logos/UNICOMPRA_LOGO.png" },
     { id: 3, name: "BC ENERGIA", logo: "/logos/BC_ENERGIA_LOGO.jpg" }
   ],
   sponsorsOfficial: [

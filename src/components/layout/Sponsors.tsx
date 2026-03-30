@@ -35,14 +35,20 @@ export default function Sponsors() {
                 <div key={sponsor.id} className="group relative bg-[#0a0a0a] rounded-3xl p-px flex items-center justify-center overflow-hidden transition-all duration-700 cursor-pointer shadow-2xl hover:shadow-[0_0_60px_rgba(232,95,1,0.2)] hover:-translate-y-3">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-3xl" />
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-b from-secondary/60 via-secondary/10 to-transparent rounded-3xl transition-opacity duration-700" />
-                  <div className="relative z-10 w-full h-full bg-gradient-to-b from-[#141414] to-[#0a0a0a] rounded-[23px] p-12 md:p-8 flex flex-col items-center justify-center m-[1px]">
+                  <div className="relative z-10 w-full h-full bg-gradient-to-b from-[#141414] to-[#0a0a0a] rounded-[23px] p-6 md:p-4 flex flex-col items-center justify-center m-[1px]">
                     <div className="absolute inset-0 bg-secondary/5 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-[23px]"></div>
                     {getLogo(sponsor) ? (
-                      <img src={getLogo(sponsor)} alt={sponsor.name} className="h-24 md:h-28 max-w-[240px] object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.05)] group-hover:scale-110 transition-all duration-700" />
+                      <div className="w-full h-48 md:h-56 flex items-center justify-center p-4">
+                        <img 
+                          src={getLogo(sponsor)} 
+                          alt={sponsor.name} 
+                          className="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.05)] group-hover:scale-110 transition-all duration-700" 
+                        />
+                      </div>
                     ) : (
                       <Shield className="w-20 h-20 text-gray-700 group-hover:text-secondary transition-colors duration-700" />
                     )}
-                    <span className="font-display text-sm text-gray-600 group-hover:text-white tracking-[0.3em] text-center mt-6 uppercase transition-colors duration-700">{sponsor.name}</span>
+                    <span className="font-display text-sm text-gray-500 group-hover:text-white tracking-[0.3em] text-center mt-4 uppercase transition-colors duration-700">{sponsor.name}</span>
                   </div>
                 </div>
               ))}
