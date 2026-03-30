@@ -4,7 +4,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { cn } from "@/src/lib/utils";
-import { getStoredData, setStoredData, resizeImage, defaultData } from "@/src/lib/store";
+import { getStoredData, setStoredData, resizeImage, defaultData, supaFetch, supaUpsert, supaDelete } from "@/src/lib/store";
 
 // --- Sub-components ---
 function Modal({ isOpen, onClose, title, children }: any) {
@@ -27,6 +27,7 @@ function Modal({ isOpen, onClose, title, children }: any) {
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('lfe_admin_authenticated') === 'true');
   const [activeTab, setActiveTab] = useState("Dashboard");
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleAdminLogout = () => {
     localStorage.removeItem('lfe_admin_authenticated');
@@ -45,46 +46,47 @@ export default function Admin() {
   const [technicalDocs, setTechnicalDocs] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(defaultData.settings);
 
-  // Load Initial Data
+  // Load Initial Data from Supabase
   useEffect(() => {
-    setRegistrations(getStoredData('registrations') || []);
-    setTeams(getStoredData('teams') || []);
-    setAthletes(getStoredData('athletes') || []);
-    setGames(getStoredData('games') || []);
-    setBanners(getStoredData('banners') || []);
-    setSponsorsPremium(getStoredData('sponsorsPremium') || []);
-    setSponsorsOfficial(getStoredData('sponsorsOfficial') || []);
-    setGallery(getStoredData('gallery') || []);
-    setTechnicalDocs(getStoredData('technical_documents') || []);
-    
-    // Check old localstorage for backward compat on league_logo
-    let savedSettings = getStoredData('settings');
-    if (!savedSettings) savedSettings = defaultData.settings;
-    if (!savedSettings.leagueLogo && localStorage.getItem('league_logo')) {
-      savedSettings.leagueLogo = localStorage.getItem('league_logo');
-    }
-    setSettings(savedSettings);
-  }, []);
+    const loadAllData = async () => {
+      setIsLoading(true);
+      try {
+        const [reg, t, a, g, b, sp, sf, gl, td, st] = await Promise.all([
+          supaFetch('lfe_registrations'),
+          supaFetch('lfe_teams'),
+          supaFetch('lfe_athletes'),
+          supaFetch('lfe_games'),
+          supaFetch('lfe_banners'),
+          supaFetch('lfe_sponsors'), // Handle premium vs official locally or in query
+          supaFetch('lfe_sponsors'),
+          supaFetch('lfe_gallery'),
+          supaFetch('lfe_technical_documents'),
+          supaFetch('lfe_settings')
+        ]);
+        
+        if (reg) setRegistrations(reg);
+        if (t) setTeams(t);
+        if (a) setAthletes(a);
+        if (g) setGames(g);
+        if (b) setBanners(b);
+        if (gl) setGallery(gl);
+        if (td) setTechnicalDocs(td);
+        if (st && st.length > 0) setSettings(st[0]);
 
-  // Update localStorage when state changes
-  useEffect(() => { setStoredData('registrations', registrations); }, [registrations]);
-  useEffect(() => { setStoredData('teams', teams); }, [teams]);
-  useEffect(() => { setStoredData('athletes', athletes); }, [athletes]);
-  useEffect(() => { setStoredData('games', games); }, [games]);
-  useEffect(() => { setStoredData('banners', banners); }, [banners]);
-  useEffect(() => { setStoredData('sponsorsPremium', sponsorsPremium); }, [sponsorsPremium]);
-  useEffect(() => { setStoredData('sponsorsOfficial', sponsorsOfficial); }, [sponsorsOfficial]);
-  useEffect(() => { setStoredData('gallery', gallery); }, [gallery]);
-  useEffect(() => { setStoredData('technical_documents', technicalDocs); }, [technicalDocs]);
-  useEffect(() => { 
-    setStoredData('settings', settings); 
-    // Synchronize to the old key "league_logo" just in case other parts of the app use it directly
-    if (settings.leagueLogo) {
-      localStorage.setItem('league_logo', settings.leagueLogo);
-    } else {
-      localStorage.removeItem('league_logo');
-    }
-  }, [settings]);
+        // Separate sponsors if unified table
+        if (sp) {
+          setSponsorsPremium(sp.filter((s:any) => s.type === 'premium'));
+          setSponsorsOfficial(sp.filter((s:any) => s.type === 'official'));
+        }
+      } catch (err) {
+        console.error("Erro ao carregar dados do Supabase:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    if (isAuthenticated) loadAllData();
+  }, [isAuthenticated]);
 
   // Modals Data Setup
   const [modalType, setModalType] = useState<string | null>(null);
@@ -95,14 +97,47 @@ export default function Admin() {
     setCurrentData({});
   };
 
-  const handleSave = (e: React.FormEvent, type: string, collection: any[], setCollection: any) => {
+  const typeToTable: any = {
+    'team': 'lfe_teams',
+    'athlete': 'lfe_athletes',
+    'game': 'lfe_games',
+    'banner': 'lfe_banners',
+    'sponsor': 'lfe_sponsors',
+    'gallery': 'lfe_gallery',
+    'tech_doc': 'lfe_technical_documents'
+  };
+
+  const handleSave = async (e: React.FormEvent, type: string, collection: any[], setCollection: any) => {
     e.preventDefault();
-    if (currentData.id) {
-      setCollection(collection.map((item: any) => item.id === currentData.id ? currentData : item));
-    } else {
-      setCollection([...collection, { ...currentData, id: Date.now() }]);
+    const table = typeToTable[type];
+    if (!table) return;
+
+    try {
+      // Sync to Supabase
+      await supaUpsert(table, currentData);
+      
+      // Update local state
+      if (currentData.id) {
+        setCollection(collection.map((item: any) => item.id === currentData.id ? currentData : item));
+      } else {
+        // Refresh after insert to get proper UUID/ID from DB
+        const refreshed = await supaFetch(table);
+        if (refreshed) setCollection(refreshed);
+      }
+      closeModal();
+    } catch (err) {
+      alert("Erro ao salvar no banco de dados.");
     }
-    closeModal();
+  };
+
+  const handleDelete = async (table: any, id: any, collection: any[], setCollection: any) => {
+    if (!window.confirm("Deseja realmente excluir este registro?")) return;
+    try {
+      await supaDelete(table, id);
+      setCollection(collection.filter(item => item.id !== id));
+    } catch (err) {
+      alert("Erro ao excluir do banco de dados.");
+    }
   };
 
   // Image Upload Handler setup for Forms
