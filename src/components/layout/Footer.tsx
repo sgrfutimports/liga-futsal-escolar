@@ -34,8 +34,16 @@ export default function Footer() {
               A maior liga de futsal escolar do agreste meridional. Formando atletas e cidadãos através do esporte.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-dark flex items-center justify-center text-gray-400 hover:text-primary hover:bg-dark-border transition-all">
-                <Instagram className="w-5 h-5" />
+              <a 
+                href="https://www.instagram.com/ligadefutsalescolar/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-white transition-all hover:scale-110 shadow-lg active:scale-95 group-hover:shadow-primary/20"
+                style={{ 
+                  background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)' 
+                }}
+              >
+                <Instagram className="w-6 h-6" strokeWidth={2.5} />
               </a>
             </div>
           </div>
