@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Lock, Settings, Users, Trophy, Calendar, Database, Search, Filter, Check, X, Eye, Plus, Edit, Trash, Activity, Shield, Upload, Image, Video, Star, Camera } from "lucide-react";
+import { Lock, Settings, Users, Trophy, Calendar, Database, Search, Filter, Check, X, Eye, Plus, Edit, Trash, Activity, Shield, Upload, Image, Video, Star, Camera, FileText, Download, Folder } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 import { cn } from "@/src/lib/utils";
 import { getStoredData, setStoredData, resizeImage, defaultData } from "@/src/lib/store";
 
@@ -34,6 +37,7 @@ export default function Admin() {
   const [sponsorsPremium, setSponsorsPremium] = useState<any[]>([]);
   const [sponsorsOfficial, setSponsorsOfficial] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
+  const [technicalDocs, setTechnicalDocs] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(defaultData.settings);
 
   // Load Initial Data
@@ -46,6 +50,7 @@ export default function Admin() {
     setSponsorsPremium(getStoredData('sponsorsPremium') || []);
     setSponsorsOfficial(getStoredData('sponsorsOfficial') || []);
     setGallery(getStoredData('gallery') || []);
+    setTechnicalDocs(getStoredData('technical_documents') || []);
     
     // Check old localstorage for backward compat on league_logo
     let savedSettings = getStoredData('settings');
@@ -65,6 +70,7 @@ export default function Admin() {
   useEffect(() => { setStoredData('sponsorsPremium', sponsorsPremium); }, [sponsorsPremium]);
   useEffect(() => { setStoredData('sponsorsOfficial', sponsorsOfficial); }, [sponsorsOfficial]);
   useEffect(() => { setStoredData('gallery', gallery); }, [gallery]);
+  useEffect(() => { setStoredData('technical_documents', technicalDocs); }, [technicalDocs]);
   useEffect(() => { 
     setStoredData('settings', settings); 
     // Synchronize to the old key "league_logo" just in case other parts of the app use it directly
@@ -177,13 +183,110 @@ export default function Admin() {
     alert(`Inscrição da escola ${reg.school} homologada com sucesso!\nEquipe e atletas criados!`);
   };
 
-  const DataTable = ({ title, data, columns, onAdd, onEdit, onDelete, onMoveUp, onMoveDown }: any) => (
+  const exportToExcel = (data: any[], title: string) => {
+    const ws = XLSX.utils.json_to_sheet(data.map(item => {
+      // Basic cleaning for excel export
+      const cleaned: any = {};
+      Object.keys(item).forEach(key => {
+        if (typeof item[key] !== 'object' && !key.toLowerCase().includes('logo') && !key.toLowerCase().includes('photo') && !key.toLowerCase().includes('image')) {
+          cleaned[key.toUpperCase()] = item[key];
+        }
+      });
+      return cleaned;
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Dados");
+    XLSX.writeFile(wb, `${title.replace(/\s+/g, '_').toLowerCase()}.xlsx`);
+  };
+
+  const exportToPDF = (data: any[], title: string, columns: any[]) => {
+    const doc = new jsPDF();
+    doc.text(title, 14, 15);
+    
+    const tableRows = data.map(item => columns.map(col => {
+      if (col.key === 'logo' || col.key === 'photo' || col.key === 'image') return "[IMAGEM]";
+      if (col.renderText) return col.renderText(item);
+      return String(item[col.key] || "");
+    }));
+    const tableHeaders = columns.map(col => col.label);
+
+    autoTable(doc, {
+      head: [tableHeaders],
+      body: tableRows,
+      startY: 20,
+      theme: 'grid',
+      headStyles: { fillColor: [204, 255, 0], textColor: [0, 0, 0] }
+    });
+
+    doc.save(`${title.replace(/\s+/g, '_').toLowerCase()}.pdf`);
+  };
+
+  const generateMatchSheet = (game: any) => {
+    const doc = new jsPDF();
+    const homeTeam = teams.find(t => t.id === Number(game.homeTeamId)) || { name: "Time Casa" };
+    const awayTeam = teams.find(t => t.id === Number(game.awayTeamId)) || { name: "Time Fora" };
+    
+    // Header
+    doc.setFontSize(22);
+    doc.text("LIGA DE FUTSAL ESCOLAR", 105, 20, { align: 'center' });
+    doc.setFontSize(14);
+    doc.text(`SÚMULA DE JOGO - ${game.category}`, 105, 30, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.text(`DATA: ${game.date} | HORA: ${game.time} | LOCAL: ${game.location}`, 105, 40, { align: 'center' });
+    
+    // Teams Header
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`${homeTeam.name}`, 40, 55, { align: 'center' });
+    doc.text("VS", 105, 55, { align: 'center' });
+    doc.text(`${awayTeam.name}`, 170, 55, { align: 'center' });
+    
+    // Athletes Home
+    const homeAthletes = athletes.filter(a => a.teamId === Number(game.homeTeamId)).map(a => [a.number || "", a.name || "", "", "", "", ""]);
+    autoTable(doc, {
+      head: [['#', 'ATLETA (CASA)', 'ASSINATURA', 'GOLS', 'A', 'V']],
+      body: homeAthletes.length > 0 ? homeAthletes : [['-', 'Sem atletas inscritos', '', '', '', '']],
+      startY: 65,
+      tableWidth: 90,
+      margin: { left: 10 },
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0] }
+    });
+    
+    // Athletes Away
+    const awayAthletes = athletes.filter(a => a.teamId === Number(game.awayTeamId)).map(a => [a.number || "", a.name || "", "", "", "", ""]);
+    autoTable(doc, {
+      head: [['#', 'ATLETA (FORA)', 'ASSINATURA', 'GOLS', 'A', 'V']],
+      body: awayAthletes.length > 0 ? awayAthletes : [['-', 'Sem atletas inscritos', '', '', '', '']],
+      startY: 65,
+      tableWidth: 90,
+      margin: { left: 110 },
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0] }
+    });
+
+    doc.save(`sumula_${game.category}_${homeTeam.name}_vs_${awayTeam.name}.pdf`);
+  };
+
+  const DataTable = ({ title, data, columns, onAdd, onEdit, onDelete, onMoveUp, onMoveDown, extraActions }: any) => (
     <div className="bg-dark-card border border-dark-border rounded-xl p-6 mb-8">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="font-display text-xl text-white">{title}</h3>
-        <button onClick={onAdd} className="flex items-center gap-2 px-4 py-2 bg-primary text-dark rounded hover:bg-primary-dark transition-all text-sm font-semibold">
-          <Plus className="w-4 h-4" /> Adicionar
-        </button>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div>
+          <h3 className="font-display text-xl text-white">{title}</h3>
+          <p className="text-xs text-gray-500 mt-1">{data.length} registros encontrados</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => exportToPDF(data, title, columns)} className="flex items-center gap-2 px-3 py-1.5 bg-dark border border-dark-border text-gray-400 rounded hover:text-white hover:border-gray-500 transition-all text-xs">
+            <Download className="w-3 h-3" /> PDF
+          </button>
+          <button onClick={() => exportToExcel(data, title)} className="flex items-center gap-2 px-3 py-1.5 bg-dark border border-dark-border text-gray-400 rounded hover:text-white hover:border-gray-500 transition-all text-xs">
+            <Download className="w-3 h-3" /> EXCEL
+          </button>
+          <button onClick={onAdd} className="flex items-center gap-2 px-4 py-2 bg-primary text-dark rounded hover:bg-primary-dark transition-all text-sm font-semibold ml-2">
+            <Plus className="w-4 h-4" /> Adicionar
+          </button>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left">
@@ -210,6 +313,7 @@ export default function Admin() {
                   )}
                   <button onClick={() => onEdit(item)} className="p-2 text-primary hover:bg-primary/10 rounded mr-2"><Edit className="w-4 h-4" /></button>
                   <button onClick={() => onDelete(item.id)} className="p-2 text-danger hover:bg-danger/10 rounded"><Trash className="w-4 h-4" /></button>
+                  {extraActions && extraActions(item)}
                 </td>
               </tr>
             ))}
@@ -225,9 +329,9 @@ export default function Admin() {
       title="GERENCIAR EQUIPES" data={teams}
       columns={[
         { label: "LOGO", render: (t: any) => t.logo ? <img src={t.logo} className="w-10 h-10 object-contain bg-white rounded-full p-1" /> : <Shield className="w-8 h-8 text-gray-500" /> },
-        { label: "NOME", key: "name", render: (t: any) => <span className="font-display text-white">{t.name}</span> },
-        { label: "CIDADE", key: "city" },
-        { label: "CATEGORIAS", key: "categories" }
+        { label: "NOME", key: "name", render: (t: any) => <span className="font-display text-white">{t.name}</span>, renderText: (t: any) => t.name },
+        { label: "CIDADE", key: "city", renderText: (t: any) => t.city },
+        { label: "CATEGORIAS", key: "categories", renderText: (t: any) => t.categories }
       ]}
       onAdd={() => { setCurrentData({}); setModalType('team'); }}
       onEdit={(team: any) => { setCurrentData(team); setModalType('team'); }}
@@ -240,10 +344,10 @@ export default function Admin() {
       title="GERENCIAR ATLETAS" data={athletes}
       columns={[
         { label: "FOTO", render: (a: any) => a.photo ? <img src={a.photo} className="w-10 h-10 object-cover rounded-full" /> : <Users className="w-8 h-8 text-gray-500" /> },
-        { label: "NOME", key: "name", render: (a: any) => <span className="font-display text-white">{a.name}</span> },
-        { label: "EQUIPE", render: (a: any) => teams.find(t => t.id === Number(a.teamId))?.name || "Desconhecida" },
-        { label: "NÚMERO", key: "number" },
-        { label: "CATEGORIA", key: "category" }
+        { label: "NOME", key: "name", render: (a: any) => <span className="font-display text-white">{a.name}</span>, renderText: (a: any) => a.name },
+        { label: "EQUIPE", render: (a: any) => teams.find(t => t.id === Number(a.teamId))?.name || "Desconhecida", renderText: (a: any) => teams.find(t => t.id === Number(a.teamId))?.name || "Desconhecida" },
+        { label: "NÚMERO", key: "number", renderText: (a: any) => a.number },
+        { label: "CATEGORIA", key: "category", renderText: (a: any) => a.category }
       ]}
       onAdd={() => { setCurrentData({}); setModalType('athlete'); }}
       onEdit={(athlete: any) => { setCurrentData(athlete); setModalType('athlete'); }}
@@ -341,6 +445,26 @@ export default function Admin() {
       </>
     );
   };
+
+  const renderTechnicalDocs = () => (
+    <>
+      <div className="bg-primary/10 border border-primary/20 text-primary p-4 rounded mb-6 flex gap-3 text-sm">
+        <Folder className="w-5 h-5 flex-shrink-0" />
+        <p>Gerencie os comunicados e documentos do Dep. Técnico. Estes arquivos aparecerão na página pública de Dep. Técnico para os chefes de equipe. Formatos recomendados: PDF.</p>
+      </div>
+      <DataTable 
+        title="DOCUMENTOS TÉCNICOS E ATOS OFICIAIS" data={technicalDocs}
+        columns={[
+          { label: "CATEGORIA", key: "category", renderText: (d: any) => d.category },
+          { label: "TÍTULO", key: "title", render: (d: any) => <span className="font-display text-white">{d.title}</span>, renderText: (d: any) => d.title },
+          { label: "DATA", key: "date", renderText: (d: any) => d.date }
+        ]}
+        onAdd={() => { setCurrentData({ category: 'NOTAS OFICIAIS', date: new Date().toLocaleDateString('pt-BR') }); setModalType('tech_doc'); }}
+        onEdit={(d: any) => { setCurrentData(d); setModalType('tech_doc'); }}
+        onDelete={(id: number) => setTechnicalDocs(technicalDocs.filter(d => d.id !== id))}
+      />
+    </>
+  );
 
   const renderSettings = () => (
     <div className="bg-dark-card border border-dark-border rounded-xl p-6 max-w-2xl">
@@ -490,6 +614,7 @@ export default function Admin() {
             { id: "Inscrições", icon: Database },
             { id: "Banners", icon: Image },
             { id: "Galeria", icon: Camera },
+            { id: "Dep. Técnico", icon: Folder },
             { id: "Equipes", icon: Shield },
             { id: "Atletas", icon: Users },
             { id: "Jogos", icon: Calendar },
@@ -538,20 +663,26 @@ export default function Admin() {
         )}
         {activeTab === "Banners" && renderBanners()}
         {activeTab === "Galeria" && renderGallery()}
+        {activeTab === "Dep. Técnico" && renderTechnicalDocs()}
         {activeTab === "Equipes" && renderTeams()}
         {activeTab === "Atletas" && renderAthletes()}
         {activeTab === "Jogos" && (
           <DataTable 
             title="GERENCIAR JOGOS" data={games}
             columns={[
-              { label: "CATEGORIA", key: "category" },
-              { label: "DATA/HORA", render: (g: any) => `${g.date} às ${g.time}` },
-              { label: "CONFRONTO", render: (g: any) => `${teams.find(t=>t.id===Number(g.homeTeamId))?.name || "A"} vs ${teams.find(t=>t.id===Number(g.awayTeamId))?.name || "B"}` },
-              { label: "STATUS", key: "status" }
+              { label: "CATEGORIA", key: "category", renderText: (g: any) => g.category },
+              { label: "DATA/HORA", render: (g: any) => `${g.date} às ${g.time}`, renderText: (g: any) => `${g.date} às ${g.time}` },
+              { label: "CONFRONTO", render: (g: any) => `${teams.find(t=>t.id===Number(g.homeTeamId))?.name || "A"} vs ${teams.find(t=>t.id===Number(g.awayTeamId))?.name || "B"}`, renderText: (g: any) => `${teams.find(t=>t.id===Number(g.homeTeamId))?.name || "A"} vs ${teams.find(t=>t.id===Number(g.awayTeamId))?.name || "B"}` },
+              { label: "STATUS", key: "status", renderText: (g: any) => g.status }
             ]}
             onAdd={() => { setCurrentData({ events: [] }); setModalType('game'); }}
             onEdit={(g: any) => { setCurrentData(g); setModalType('game'); }}
             onDelete={(id: number) => setGames(games.filter(g => g.id !== id))}
+            extraActions={(g: any) => (
+              <button onClick={() => generateMatchSheet(g)} className="p-2 text-primary hover:bg-primary/10 rounded" title="Gerar Súmula">
+                <FileText className="w-4 h-4" />
+              </button>
+            )}
           />
         )}
         {activeTab === "Patrocinadores" && renderSponsors()}
@@ -606,9 +737,9 @@ export default function Admin() {
           <label className={labelClass}>Categoria</label>
           <select required className={inputClass} value={currentData.category || ''} onChange={e => setCurrentData({...currentData, category: e.target.value})}>
              <option value="">Selecione</option>
-             <option value="SUB-11">SUB-11</option>
-             <option value="SUB-15">SUB-15</option>
-             <option value="SUB-17">SUB-17</option>
+             {["SUB-10", "SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"].map(cat => (
+               <option key={cat} value={cat}>{cat}</option>
+             ))}
           </select>
           <button type="submit" className="w-full py-2 mt-4 bg-primary text-dark font-display rounded hover:bg-primary-dark">Salvar</button>
         </form>
@@ -624,10 +755,9 @@ export default function Admin() {
           <label className={labelClass}>Categoria do Jogo</label>
           <select required className={inputClass} value={currentData.category || ''} onChange={e => setCurrentData({...currentData, category: e.target.value})}>
              <option value="">Selecione</option>
-             <option value="SUB-11">SUB-11</option>
-             <option value="SUB-13">SUB-13</option>
-             <option value="SUB-15">SUB-15</option>
-             <option value="SUB-17">SUB-17</option>
+             {["SUB-10", "SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"].map(cat => (
+               <option key={cat} value={cat}>{cat}</option>
+             ))}
           </select>
           <label className={labelClass}>Equipes</label>
           <div className="flex gap-4">
@@ -762,6 +892,53 @@ export default function Admin() {
           <input type="text" className={inputClass} placeholder="Ou URL direto..." value={currentData.logo || ''} onChange={e => setCurrentData({...currentData, logo: e.target.value})} />
           
           <button type="submit" className="w-full py-2 mt-4 bg-primary text-dark font-display rounded hover:bg-primary-dark">Salvar</button>
+        </form>
+      </Modal>
+
+      <Modal isOpen={modalType === 'tech_doc'} onClose={closeModal} title={currentData?.id ? "Editar Documento" : "Novo Documento Técnico"}>
+        <form onSubmit={(e) => handleSave(e, 'tech_doc', technicalDocs, setTechnicalDocs)}>
+          <label className={labelClass}>Título do Documento</label>
+          <input required type="text" className={inputClass} value={currentData.title || ''} onChange={e => setCurrentData({...currentData, title: e.target.value})} placeholder="Ex: NOTA OFICIAL 001/2026 - ABERTURA" />
+          
+          <label className={labelClass}>Categoria</label>
+          <select required className={inputClass} value={currentData.category || ''} onChange={e => setCurrentData({...currentData, category: e.target.value})}>
+             <option value="NOTAS OFICIAIS">NOTAS OFICIAIS</option>
+             <option value="REGULAMENTOS">REGULAMENTOS</option>
+             <option value="NORMAS">NORMAS</option>
+             <option value="SÚMULAS">SÚMULAS</option>
+             <option value="COMUNICADOS">COMUNICADOS</option>
+             <option value="BOLETIM">BOLETIM</option>
+             <option value="FORMULÁRIOS">FORMULÁRIOS</option>
+          </select>
+
+          <label className={labelClass}>Data (Exibição)</label>
+          <input required type="text" className={inputClass} value={currentData.date || ''} onChange={e => setCurrentData({...currentData, date: e.target.value})} />
+          
+          <label className={labelClass}>Upload do PDF ou URL</label>
+          <div className="flex items-center gap-4 mb-4">
+            <label className="flex items-center gap-2 px-4 py-2 bg-dark border border-dark-border text-gray-300 rounded hover:text-white hover:border-primary transition-all cursor-pointer">
+              <Upload className="w-4 h-4" />
+              <span>{currentData.url ? "Substituir PDF" : "Anexar PDF"}</span>
+              <input type="file" accept=".pdf" className="hidden" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                     setCurrentData((prev: any) => ({...prev, url: reader.result as string, size: (file.size / 1024).toFixed(0) + " KB"}));
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }} />
+            </label>
+            {currentData.url && (
+               <div className="flex items-center gap-2 text-primary text-xs">
+                 <Check className="w-4 h-4" /> Arquivo anexado ({currentData.size})
+               </div>
+            )}
+          </div>
+          <input type="text" className={inputClass} placeholder="Ou inserir URL do PDF..." value={currentData.url || ''} onChange={e => setCurrentData({...currentData, url: e.target.value})} />
+          
+          <button type="submit" className="w-full py-2 mt-4 bg-primary text-dark font-display rounded hover:bg-primary-dark uppercase">Salvar Documento</button>
         </form>
       </Modal>
 

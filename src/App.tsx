@@ -9,6 +9,7 @@ import Athletes from "./pages/Athletes";
 import Registration from "./pages/Registration";
 import Admin from "./pages/Admin";
 import Gallery from "./pages/Gallery";
+import TechnicalDepartment from "./pages/TechnicalDepartment";
 
 export default function App() {
   useEffect(() => {
@@ -67,6 +68,7 @@ export default function App() {
           <Route path="equipes/:id" element={<TeamDetails />} />
           <Route path="atletas" element={<Athletes />} />
           <Route path="galeria" element={<Gallery />} />
+          <Route path="dep-tecnico" element={<TechnicalDepartment />} />
           <Route path="inscricao" element={<Registration />} />
           <Route path="admin" element={<Admin />} />
         </Route>

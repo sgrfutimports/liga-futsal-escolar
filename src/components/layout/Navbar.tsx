@@ -11,6 +11,7 @@ const navLinks = [
   { name: "Atletas", path: "/atletas" },
   { name: "Galeria", path: "/galeria" },
   { name: "Inscrição", path: "/inscricao" },
+  { name: "Dep. Técnico", path: "/dep-tecnico" },
 ];
 
 export default function Navbar() {
