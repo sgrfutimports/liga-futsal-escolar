@@ -12,6 +12,13 @@ export default function Home() {
   const banners = getStoredData('banners');
   const teams = getStoredData('teams');
   const games = getStoredData('games');
+  const settings = getStoredData('settings');
+
+  // Safety fallbacks
+  const carouselItems = banners?.length > 0 ? banners : defaultData.banners;
+  const loadedTeams = teams || [];
+  const nextGames = (games || []).filter((g: any) => g.status !== 'Finalizado').slice(0, 4);
+
   // Calculate simple standings from games
   const standings = loadedTeams.map((t: any) => {
     let pts = 0;
