@@ -50,7 +50,7 @@ export default function Athletes() {
                 
                 <div className="relative aspect-[3/4] overflow-hidden bg-dark flex flex-col items-center justify-center">
                   {athlete.photo ? (
-                    <img src={athlete.photo} alt={athlete.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 grayscale group-hover:grayscale-0" referrerPolicy="no-referrer" />
+                    <img src={athlete.photo} alt={athlete.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
                   ) : (
                     <Users className="w-24 h-24 text-gray-700 opacity-20" />
                   )}

@@ -177,7 +177,7 @@ export default function Admin() {
     alert(`Inscrição da escola ${reg.school} homologada com sucesso!\nEquipe e atletas criados!`);
   };
 
-  const DataTable = ({ title, data, columns, onAdd, onEdit, onDelete }: any) => (
+  const DataTable = ({ title, data, columns, onAdd, onEdit, onDelete, onMoveUp, onMoveDown }: any) => (
     <div className="bg-dark-card border border-dark-border rounded-xl p-6 mb-8">
       <div className="flex justify-between items-center mb-6">
         <h3 className="font-display text-xl text-white">{title}</h3>
@@ -202,6 +202,12 @@ export default function Admin() {
                   </td>
                 ))}
                 <td className="py-4 text-right">
+                  {onMoveUp && (
+                    <button onClick={() => onMoveUp(item.id)} className="p-2 text-gray-400 hover:text-white rounded mr-1"><Plus className="w-4 h-4 rotate-180" style={{ transform: 'rotate(180deg)' }} /> 🔼</button>
+                  )}
+                  {onMoveDown && (
+                    <button onClick={() => onMoveDown(item.id)} className="p-2 text-gray-400 hover:text-white rounded mr-2">🔽</button>
+                  )}
                   <button onClick={() => onEdit(item)} className="p-2 text-primary hover:bg-primary/10 rounded mr-2"><Edit className="w-4 h-4" /></button>
                   <button onClick={() => onDelete(item.id)} className="p-2 text-danger hover:bg-danger/10 rounded"><Trash className="w-4 h-4" /></button>
                 </td>
@@ -284,31 +290,57 @@ export default function Admin() {
     </>
   );
 
-  const renderSponsors = () => (
-    <>
-      <DataTable 
-        title="PATROCINADORES MASTER (Premium)" data={sponsorsPremium}
-        columns={[
-          { label: "LOGO", render: (s: any) => s.logo ? <img src={s.logo} className="w-12 h-12 object-contain bg-white p-1 rounded" /> : <Star className="w-8 h-8 text-gray-500" /> },
-          { label: "NOME", key: "name", render: (s: any) => <span className="font-display text-white">{s.name}</span> }
-        ]}
-        onAdd={() => { setCurrentData({ type: 'premium' }); setModalType('sponsor'); }}
-        onEdit={(sponsor: any) => { setCurrentData({ ...sponsor, type: 'premium' }); setModalType('sponsor'); }}
-        onDelete={(id: number) => setSponsorsPremium(sponsorsPremium.filter(s => s.id !== id))}
-      />
+  const renderSponsors = () => {
+    const moveSponsor = (id: number, direction: 'up' | 'down', type: 'premium' | 'official') => {
+      const collection = type === 'premium' ? [...sponsorsPremium] : [...sponsorsOfficial];
+      const setCollection = type === 'premium' ? setSponsorsPremium : setSponsorsOfficial;
+      const index = collection.findIndex(s => s.id === id);
+      if (index === -1) return;
+      if (direction === 'up' && index === 0) return;
+      if (direction === 'down' && index === collection.length - 1) return;
 
-      <DataTable 
-        title="PATROCINADORES OFICIAIS (Marquee)" data={sponsorsOfficial}
-        columns={[
-          { label: "LOGO", render: (s: any) => s.logo ? <img src={s.logo} className="w-12 h-12 object-contain bg-white p-1 rounded" /> : <Shield className="w-8 h-8 text-gray-500" /> },
-          { label: "NOME", key: "name", render: (s: any) => <span className="font-display text-white">{s.name}</span> }
-        ]}
-        onAdd={() => { setCurrentData({ type: 'official' }); setModalType('sponsor'); }}
-        onEdit={(sponsor: any) => { setCurrentData({ ...sponsor, type: 'official' }); setModalType('sponsor'); }}
-        onDelete={(id: number) => setSponsorsOfficial(sponsorsOfficial.filter(s => s.id !== id))}
-      />
-    </>
-  );
+      const newIndex = direction === 'up' ? index - 1 : index + 1;
+      const temp = collection[index];
+      collection[index] = collection[newIndex];
+      collection[newIndex] = temp;
+      setCollection(collection);
+    };
+
+    return (
+      <>
+        <div className="bg-primary/10 border border-primary/20 text-primary p-4 rounded mb-6 flex gap-3 text-sm">
+          <Star className="w-5 h-5 flex-shrink-0" />
+          <p>Use as setas 🔼 e 🔽 para reordenar os patrocinadores. A ordem definida aqui será exatamente a exibida na página inicial.</p>
+        </div>
+        
+        <DataTable 
+          title="PATROCINADORES MASTER (Premium) - Exibidos em cards grandes" data={sponsorsPremium}
+          columns={[
+            { label: "LOGO", render: (s: any) => s.logo ? <img src={s.logo} className="w-12 h-12 object-contain bg-white p-1 rounded" /> : <Star className="w-8 h-8 text-gray-500" /> },
+            { label: "NOME", key: "name", render: (s: any) => <span className="font-display text-white">{s.name}</span> }
+          ]}
+          onAdd={() => { setCurrentData({ type: 'premium' }); setModalType('sponsor'); }}
+          onEdit={(sponsor: any) => { setCurrentData({ ...sponsor, type: 'premium' }); setModalType('sponsor'); }}
+          onDelete={(id: number) => setSponsorsPremium(sponsorsPremium.filter(s => s.id !== id))}
+          onMoveUp={(id: number) => moveSponsor(id, 'up', 'premium')}
+          onMoveDown={(id: number) => moveSponsor(id, 'down', 'premium')}
+        />
+
+        <DataTable 
+          title="PATROCINADORES OFICIAIS - Exibidos no letreiro rotativo (Marquee)" data={sponsorsOfficial}
+          columns={[
+            { label: "LOGO", render: (s: any) => s.logo ? <img src={s.logo} className="w-12 h-12 object-contain bg-white p-1 rounded" /> : <Shield className="w-8 h-8 text-gray-500" /> },
+            { label: "NOME", key: "name", render: (s: any) => <span className="font-display text-white">{s.name}</span> }
+          ]}
+          onAdd={() => { setCurrentData({ type: 'official' }); setModalType('sponsor'); }}
+          onEdit={(sponsor: any) => { setCurrentData({ ...sponsor, type: 'official' }); setModalType('sponsor'); }}
+          onDelete={(id: number) => setSponsorsOfficial(sponsorsOfficial.filter(s => s.id !== id))}
+          onMoveUp={(id: number) => moveSponsor(id, 'up', 'official')}
+          onMoveDown={(id: number) => moveSponsor(id, 'down', 'official')}
+        />
+      </>
+    );
+  };
 
   const renderSettings = () => (
     <div className="bg-dark-card border border-dark-border rounded-xl p-6 max-w-2xl">

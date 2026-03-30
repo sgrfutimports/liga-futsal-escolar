@@ -25,7 +25,7 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-3 group">
             <div className="relative w-16 h-16 bg-white rounded-full flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.15)]">
               <img 
-                src={localStorage.getItem('league_logo') || "https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/liga-futsal-logo.png"} 
+                src="/logos/logo.jpg" 
                 alt="Liga de Futsal Escolar" 
                 className="w-full h-full object-contain scale-[1.2]"
                 onError={(e) => {

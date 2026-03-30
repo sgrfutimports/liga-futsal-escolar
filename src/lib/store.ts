@@ -1,3 +1,12 @@
+export function getLogo(sponsor: any) {
+  if (sponsor.logo) return sponsor.logo;
+  const name = (sponsor.name || "").toUpperCase().trim();
+  if (name.includes("FERREIRA")) return "https://upload.wikimedia.org/wikipedia/commons/7/7b/Ferreira_Costa_logo.svg";
+  if (name.includes("UNICOMPRA")) return "https://logo.clearbit.com/unicompra.com.br";
+  if (name.includes("SESC")) return "/logos/logo-sesc.png";
+  return null;
+}
+
 export const defaultData = {
   teams: [
     { id: 1, name: "Colégio Diocesano", city: "Garanhuns", founded: 1915, categories: "SUB-15, SUB-17", logo: "" },
@@ -50,13 +59,18 @@ export const defaultData = {
   ],
   sponsorsPremium: [
     { id: 1, name: "FERREIRA COSTA", logo: "https://logodownload.org/wp-content/uploads/2019/11/ferreira-costa-logo-0.png" },
-    { id: 2, name: "UNICOMPRA", logo: "https://logodownload.org/wp-content/uploads/2021/08/unicompra-logo.png" }
+    { id: 2, name: "UNICOMPRA", logo: "https://logodownload.org/wp-content/uploads/2021/08/unicompra-logo.png" },
+    { id: 3, name: "BC ENERGIA", logo: "/logos/BC_ENERGIA_LOGO.jpg" }
   ],
   sponsorsOfficial: [
-    { id: 1, name: "BÔNUS", logo: "" },
-    { id: 2, name: "SESC PE", logo: "https://logodownload.org/wp-content/uploads/2018/10/sesc-logo.png" },
-    { id: 3, name: "O BOTICÁRIO", logo: "https://logodownload.org/wp-content/uploads/2014/11/o-boticario-logo-0.png" },
-    { id: 4, name: "PREFEITURA DE GARANHUNS", logo: "https://garanhuns.pe.gov.br/wp-content/uploads/2021/01/brasao.png" }
+    { id: 1, name: "SESC PE", logo: "/logos/logo-sesc.png" },
+    { id: 4, name: "AZEVEDO", logo: "/logos/AZEVEDO_LOGO.jpg" },
+    { id: 5, name: "BREJÃO", logo: "/logos/BREJÃO_LOGO.jpg" },
+    { id: 6, name: "COLINAS MOTOR", logo: "/logos/COLINAS_MOTOR_LOGO.jpg" },
+    { id: 7, name: "DIEGO ESPORTES", logo: "/logos/DIEGO_ESPORTES_LOGO.jpg" },
+    { id: 8, name: "ORTOBOM", logo: "/logos/ORTOBOM_LOGO.jpg" },
+    { id: 9, name: "WS", logo: "/logos/WS_LOGO.jpg" },
+    { id: 10, name: "CASA DAS BALAS", logo: "/logos/casa_das_balas_logo.jpg" }
   ],
   settings: {
     eventName: "Liga de Futsal Escolar",
