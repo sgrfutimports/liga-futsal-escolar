@@ -59,7 +59,7 @@ export const defaultData = {
   ],
   sponsorsPremium: [
     { id: 1, name: "FERREIRA COSTA", logo: "/logos/FERREIRA_COSTA_LOGO.png" },
-    { id: 2, name: "UNICOMPRA", logo: "/logos/UNICOMPRA_LOGO.png" },
+    { id: 2, name: "UNICOMPRA", logo: "/logos/UNICOMPRA_LOGO.jpg" },
     { id: 3, name: "BC ENERGIA", logo: "/logos/BC_ENERGIA_LOGO.jpg" }
   ],
   sponsorsOfficial: [

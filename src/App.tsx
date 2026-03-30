@@ -33,7 +33,7 @@ export default function App() {
         const parsed = JSON.parse(premium);
         const updated = parsed.map((s: any) => {
           if (s.name?.toUpperCase().includes("FERREIRA")) return { ...s, logo: "/logos/FERREIRA_COSTA_LOGO.png" };
-          if (s.name?.toUpperCase().includes("UNICOMPRA")) return { ...s, logo: "/logos/UNICOMPRA_LOGO.png" };
+          if (s.name?.toUpperCase().includes("UNICOMPRA")) return { ...s, logo: "/logos/UNICOMPRA_LOGO.jpg" };
           return s;
         });
         localStorage.setItem('lfe_sponsorsPremium', JSON.stringify(updated));
