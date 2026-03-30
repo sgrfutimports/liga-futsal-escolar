@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Lock, Settings, Users, Trophy, Calendar, Database, Search, Filter, Check, X, Eye, Plus, Edit, Trash, Activity, Shield, Upload, Image, Video, Star, Camera, FileText, Download, Folder } from "lucide-react";
+import { Lock, Settings, Users, Trophy, Calendar, Database, Search, Filter, Check, X, Eye, Plus, Edit, Trash, Activity, Shield, Upload, Image, Video, Star, Camera, FileText, Download, Folder, LogOut } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
@@ -25,8 +25,13 @@ function Modal({ isOpen, onClose, title, children }: any) {
 }
 
 export default function Admin() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('lfe_admin_authenticated') === 'true');
   const [activeTab, setActiveTab] = useState("Dashboard");
+
+  const handleAdminLogout = () => {
+    localStorage.removeItem('lfe_admin_authenticated');
+    setIsAuthenticated(false);
+  };
 
   // Global State
   const [registrations, setRegistrations] = useState<any[]>([]);
@@ -580,7 +585,7 @@ export default function Admin() {
             <Lock className="w-8 h-8 text-primary" />
           </div>
           <h2 className="text-3xl font-display text-white mb-8 text-center">ÁREA RESTRITA</h2>
-          <form onSubmit={(e) => { e.preventDefault(); setIsAuthenticated(true); }} className="space-y-6">
+          <form onSubmit={(e) => { e.preventDefault(); setIsAuthenticated(true); localStorage.setItem('lfe_admin_authenticated', 'true'); }} className="space-y-6">
             <div>
               <label className={labelClass}>E-mail</label>
               <input type="email" required className={inputClass} placeholder="admin@lfe.com" defaultValue="admin@lfe.com" />
@@ -642,7 +647,9 @@ export default function Admin() {
       <main className="flex-1 p-6 md:p-10">
         <div className="flex justify-between items-center mb-10">
           <h1 className="text-4xl font-display text-white uppercase">{activeTab}</h1>
-          <button onClick={() => setIsAuthenticated(false)} className="px-4 py-2 border border-dark-border text-gray-400 rounded hover:text-white hover:border-gray-500 transition-colors font-display text-sm">SAIR</button>
+          <button onClick={handleAdminLogout} className="flex items-center gap-2 px-4 py-2 border border-dark-border text-gray-400 rounded hover:text-white hover:border-gray-500 transition-colors font-display text-sm uppercase">
+            <LogOut className="w-4 h-4" /> SAIR
+          </button>
         </div>
 
         {activeTab === "Dashboard" && renderDashboard()}
@@ -654,11 +661,20 @@ export default function Admin() {
               { label: "ESCOLA", key: "school" },
               { label: "RESPONSÁVEL", key: "resp" },
               { label: "ELENCO", render: (r: any) => r.athleteSubmissionType === 'later' ? 'Pendente de envio' : `${r.athletes?.length || 0} inscritos` },
-              { label: "STATUS", render: (r: any) => <span className={cn("px-2 py-1 rounded text-xs", r.status === 'Pendente' ? "bg-yellow-500/20 text-yellow-500" : "bg-green-500/20 text-green-500")}>{r.status}</span>}
+              { label: "STATUS", render: (r: any) => <span className={cn("px-2 py-1 rounded text-xs uppercase font-bold", r.status === 'Pendente' ? "bg-yellow-500/20 text-yellow-500" : "bg-green-500/20 text-green-500")}>{r.status}</span>}
             ]}
             onAdd={() => alert("As inscrições são feitas pelo portal público.")}
             onEdit={(r: any) => handleApproveRegistration(r)}
             onDelete={(id: number) => setRegistrations(registrations.filter(r => r.id !== id))}
+            extraActions={(r: any) => r.status === 'Pendente' && (
+              <button 
+                onClick={() => handleApproveRegistration(r)} 
+                className="ml-2 px-3 py-1 bg-green-600 text-white border border-green-700/30 rounded text-[10px] font-bold uppercase hover:bg-green-700 transition-all shadow-sm"
+                title="Ativar Acesso do Chefe de Equipe"
+              >
+                Homologar
+              </button>
+            )}
           />
         )}
         {activeTab === "Banners" && renderBanners()}

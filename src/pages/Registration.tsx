@@ -20,6 +20,7 @@ interface FormData {
   categories: string[];
   logo: string;
   athletes: AthleteForm[];
+  password?: string;
 }
 
 interface FormErrors {
@@ -28,6 +29,7 @@ interface FormErrors {
   respName?: string;
   phone?: string;
   email?: string;
+  password?: string;
   categories?: string;
 }
 
@@ -48,7 +50,8 @@ export default function Registration() {
     email: "",
     categories: [],
     logo: "",
-    athletes: []
+    athletes: [],
+    password: ""
   });
   const [athleteSubmissionType, setAthleteSubmissionType] = useState<"now" | "later">("now");
   const [errors, setErrors] = useState<FormErrors>({});
@@ -78,6 +81,10 @@ export default function Registration() {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!value) error = "E-mail é obrigatório";
         else if (!emailRegex.test(value)) error = "E-mail inválido";
+        break;
+      case "password":
+        if (!value) error = "Senha é obrigatória";
+        else if (value.length < 4) error = "Mínimo 4 caracteres";
         break;
       case "categories":
         if (value.length === 0) error = "Selecione pelo menos uma categoria";
@@ -306,6 +313,12 @@ export default function Registration() {
                   <input type="email" id="email" value={formData.email} onChange={handleInputChange} onBlur={handleBlur}
                     className={cn(inputClass, errors.email && touched.email && "border-danger bg-danger/5")} placeholder="email@exemplo.com" />
                   {errors.email && touched.email && <p className="mt-1 text-xs text-danger flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {errors.email}</p>}
+                </div>
+                <div className="md:col-span-1">
+                  <label htmlFor="password" className="block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wide">Senha p/ Dep. Técnico <span className="text-danger">*</span></label>
+                  <input type="password" id="password" value={formData.password} onChange={handleInputChange} onBlur={handleBlur}
+                    className={cn(inputClass, errors.password && touched.password && "border-danger bg-danger/5")} placeholder="Mínimo 4 caracteres" />
+                  {errors.password && touched.password && <p className="mt-1 text-xs text-danger flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {errors.password}</p>}
                 </div>
               </div>
             </div>

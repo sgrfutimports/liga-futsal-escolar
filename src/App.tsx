@@ -6,10 +6,11 @@ import Standings from "./pages/Standings";
 import Teams from "./pages/Teams";
 import TeamDetails from "./pages/TeamDetails";
 import Athletes from "./pages/Athletes";
-import Registration from "./pages/Registration";
-import Admin from "./pages/Admin";
 import Gallery from "./pages/Gallery";
 import TechnicalDepartment from "./pages/TechnicalDepartment";
+import ChefesLogin from "./pages/ChefesLogin";
+import Registration from "./pages/Registration";
+import Admin from "./pages/Admin";
 
 export default function App() {
   useEffect(() => {
@@ -69,6 +70,7 @@ export default function App() {
           <Route path="atletas" element={<Athletes />} />
           <Route path="galeria" element={<Gallery />} />
           <Route path="dep-tecnico" element={<TechnicalDepartment />} />
+          <Route path="chefes-login" element={<ChefesLogin />} />
           <Route path="inscricao" element={<Registration />} />
           <Route path="admin" element={<Admin />} />
         </Route>

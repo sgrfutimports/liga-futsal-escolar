@@ -75,6 +75,13 @@ export const defaultData = {
     { id: 12, name: "CMA", logo: "/logos/CMA LOGO.jpg" },
     { id: 13, name: "GRE", logo: "/logos/GRE  LOGO.png" }
   ],
+  technical_documents: [
+    { id: 1, title: "NOTA OFICIAL 001/2026 - ABERTURA DE INSCRIÇÕES", category: "NOTAS OFICIAIS", date: "27/03/2026", url: "#", size: "124 KB" },
+    { id: 2, title: "REGULAMENTO GERAL DA COMPETIÇÃO - EDIÇÃO 2026", category: "REGULAMENTOS", date: "25/03/2026", url: "#", size: "450 KB" },
+    { id: 3, title: "CRONOGRAMA DE JOGOS - FASE DE GRUPOS - ABRIL", category: "BOLETIM", date: "30/03/2026", url: "#", size: "88 KB" },
+    { id: 4, title: "FORMULÁRIO DE AUTORIZAÇÃO DE ATLETA (MENOR DE IDADE)", category: "FORMULÁRIOS", date: "20/03/2026", url: "#", size: "65 KB" },
+    { id: 5, title: "COMUNICADO 002/2026 - ALTERAÇÃO DE ENDEREÇO DO CONGRESSO TÉCNICO", category: "COMUNICADOS", date: "29/03/2026", url: "#", size: "110 KB" }
+  ],
   settings: {
     eventName: "Liga de Futsal Escolar",
     yearEdition: "2026",

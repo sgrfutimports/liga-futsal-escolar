@@ -11,12 +11,19 @@ const navLinks = [
   { name: "Atletas", path: "/atletas" },
   { name: "Galeria", path: "/galeria" },
   { name: "Inscrição", path: "/inscricao" },
-  { name: "Dep. Técnico", path: "/dep-tecnico" },
 ];
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+
+  const isAdmin = localStorage.getItem('lfe_admin_authenticated') === 'true';
+  const isChefe = localStorage.getItem('lfe_is_chefe') === 'true';
+
+  const mergedLinks = [...navLinks];
+  if (isAdmin || isChefe) {
+    mergedLinks.push({ name: "Dep. Técnico", path: "/dep-tecnico" });
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-dark/90 backdrop-blur-md border-b border-dark-border">
@@ -50,7 +57,7 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => (
+            {mergedLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
@@ -71,10 +78,10 @@ export default function Navbar() {
               </Link>
             ))}
             <Link
-              to="/admin"
-              className="px-4 py-2 bg-dark-card border border-dark-border rounded-md font-display text-sm hover:border-primary hover:text-primary transition-colors"
+              to="/chefes-login"
+              className="px-4 py-2 bg-primary/10 border border-primary/20 rounded-md font-display text-sm text-primary hover:bg-primary hover:text-dark transition-all uppercase tracking-widest font-bold"
             >
-              Admin
+              Área do Chefe
             </Link>
           </div>
 
@@ -100,7 +107,7 @@ export default function Navbar() {
             className="md:hidden border-t border-dark-border bg-dark"
           >
             <div className="px-4 pt-2 pb-6 space-y-2">
-              {navLinks.map((link) => (
+              {mergedLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
@@ -116,11 +123,11 @@ export default function Navbar() {
                 </Link>
               ))}
               <Link
-                to="/admin"
+                to="/chefes-login"
                 onClick={() => setIsOpen(false)}
-                className="block px-3 py-3 rounded-md font-display text-xl text-gray-400 hover:bg-dark-card hover:text-white mt-4 border border-dark-border"
+                className="block px-3 py-3 rounded-md font-display text-xl text-primary bg-primary/10 mt-4 border border-primary/20 text-center"
               >
-                Área Admin
+                Área do Chefe
               </Link>
             </div>
           </motion.div>
