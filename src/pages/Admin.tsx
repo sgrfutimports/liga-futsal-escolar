@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Lock, Settings, Users, Trophy, Calendar, Database, Search, Filter, Check, X, Eye, Plus, Edit, Trash, Activity, Shield, Upload, Image, Video, Star, Camera, FileText, Download, Folder, LogOut, ClipboardList, ChevronDown, CheckCircle2, AlertTriangle } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -315,7 +315,7 @@ export default function Admin() {
     setSumulaState((prev: any) => ({ ...prev, [key]: prev[key].filter((_: any, i: number) => i !== idx) }));
   };
 
-  const generateSumulaPDF = (sumulaData?: any) => {
+  const generateSumulaPDF = async (sumulaData?: any) => {
     const data = sumulaData || sumuiaState;
     const game = sumulaData ? games.find((g: any) => g.id === sumulaData.selectedGameId) : selectedGame;
     if (!game) return;
@@ -332,6 +332,21 @@ export default function Admin() {
     const doc = new jsPDF({ orientation: 'landscape', format: 'a4', unit: 'mm' });
     const PW = 297, PH = 210, ML = 3, MR = 3, MT = 2;
     const half = PW / 2; // 148.5 – divides the two teams
+
+    // Image helper
+    const loadImg = (url: string): Promise<HTMLImageElement | null> => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = url;
+      });
+    };
+
+    const leagueLogo = await loadImg('/logos/logo.jpg');
+    const kagivaLogo = await loadImg('/logos/BC_ENERGIA_LOGO.jpg'); // Using available as placeholder for Kagiva
+    const homeLogoImg = homeTeam.logo ? await loadImg(homeTeam.logo) : null;
+    const awayLogoImg = awayTeam.logo ? await loadImg(awayTeam.logo) : null;
 
     // Column widths per team half
     const cReg = 6, cName = 37, cNum = 5, cAm = 4, cVm = 4;
@@ -369,16 +384,23 @@ export default function Admin() {
 
     // ── HEADER ────────────────────────────────────────────────────────────
     let Y = MT;
-    const hH = 8;
+    const hH = 10;
     FB(ML, Y, PW-ML-MR, hH, 15, 15, 15);
-    T('LIGA DE FUTSAL ESCOLAR — GARANHUNS/PE', ML+4, Y+5.5, 12, true, 'left', [204,255,0]);
-    T('Súmula de Futsal', half+35, Y+5.5, 12, true, 'left', [255,255,255]);
-    FB(PW-MR-17, Y+0.5, 16, hH-1, 180,0,0);
-    T('LOGO', PW-MR-9, Y+5, 5, true, 'center', [255,255,255]);
+    T('LIGA DE FUTSAL ESCOLAR — GARANHUNS/PE', ML+25, Y+6.5, 14, true, 'left', [204,255,0]);
+    T('Súmula de Futsal', half+45, Y+6.5, 14, true, 'left', [255,255,255]);
+    
+    // Liga Logo
+    if (leagueLogo) {
+      doc.addImage(leagueLogo, 'JPEG', ML+2, Y+1, 18, hH-2);
+      doc.addImage(leagueLogo, 'JPEG', PW-MR-17, Y+1, 15, hH-2);
+    } else {
+      FB(PW-MR-17, Y+1, 15, hH-2, 180, 0, 0);
+      T('LOGO', PW-MR-9.5, Y+6, 5, true, 'center', [255,255,255]);
+    }
     Y += hH;
 
     // ── INFO ROWS (3 × 4mm) ────────────────────────────────────────────────
-    const iH = 4;
+    const iH = 4.2;
     // Row 1
     B(ML, Y, PW-ML-MR, iH); VL(half, Y, iH); VL(PW-MR-55, Y, iH);
     T('CAMPEONATO: Liga de Futsal Escolar 2026', ML+1, Y+3, 5.5);
@@ -405,22 +427,37 @@ export default function Admin() {
     Y += iH;
 
     // ── TEAM BLOCKS ────────────────────────────────────────────────────────
-    const tbH = 14;
+    const tbH = 16;
     FB(ML, Y, teamW, tbH, 245,245,245);
     FB(half, Y, teamW, tbH, 245,245,245);
+    
+    // VS oval - Fixed position and size to avoid overlap
+    doc.setFillColor(255,255,255); 
+    doc.ellipse(half, Y+8, 8, 5, 'FD');
+    T('X', half, Y+10, 14, true, 'center', [0,0,0]);
+
     // Home
-    T('Equipe [A]', ML+1, Y+4.5, 6, true);
-    T(homeTeam.name, ML+1, Y+10.5, 8, true, 'left', [0,0,120]);
-    T('Saída', ML+1, Y+13.5, 4.5);
-    doc.setDrawColor(80,80,80); doc.circle(ML+14, Y+12.7, 1.5, 'S'); doc.setDrawColor(0,0,0);
-    // VS oval
-    doc.setFillColor(255,255,255); doc.ellipse(half, Y+7, 12, 5.5, 'FD');
-    T('X', half, Y+9.2, 17, true, 'center', [0,0,0]);
+    T('Equipe [A]', ML+1, Y+4, 6, true);
+    if (homeLogoImg) {
+      doc.addImage(homeLogoImg, 'PNG', ML+2, Y+5, 10, 10);
+      T(homeTeam.name, ML+13, Y+10, 9, true, 'left', [0,0,120]);
+    } else {
+      T(homeTeam.name, ML+2, Y+10, 9, true, 'left', [0,0,120]);
+    }
+    T('Saída', ML+1, Y+15, 4.5);
+    doc.setDrawColor(80,80,80); doc.circle(ML+12, Y+14.2, 1.3, 'S'); doc.setDrawColor(0,0,0);
+
     // Away
-    T('Equipe [B]', half+1, Y+4.5, 6, true);
-    T(awayTeam.name, half+1, Y+10.5, 8, true, 'left', [120,0,0]);
-    T('Saída', half+1, Y+13.5, 4.5);
-    doc.setDrawColor(80,80,80); doc.circle(half+14, Y+12.7, 1.5, 'S'); doc.setDrawColor(0,0,0);
+    T('Equipe [B]', PW-MR-1, Y+4, 6, true, 'right');
+    if (awayLogoImg) {
+      doc.addImage(awayLogoImg, 'PNG', PW-MR-12, Y+5, 10, 10);
+      T(awayTeam.name, PW-MR-14, Y+10, 9, true, 'right', [120,0,0]);
+    } else {
+      T(awayTeam.name, PW-MR-2, Y+10, 9, true, 'right', [120,0,0]);
+    }
+    T('Saída', PW-MR-14, Y+15, 4.5, false, 'right');
+    doc.setDrawColor(80,80,80); doc.circle(PW-MR-16, Y+14.2, 1.3, 'S'); doc.setDrawColor(0,0,0);
+
     Y += tbH;
 
     // ── TIMEOUTS + FOULS ───────────────────────────────────────────────────
@@ -430,8 +467,15 @@ export default function Admin() {
       T('Pedidos de Tempo '+lbl, sx+1, Y+2.5, 4.5, true);
       B(sx, Y+3, 22, 5); T('1º Período', sx+1, Y+6.5, 4);
       B(sx+22, Y+3, 22, 5); T('2º Período', sx+23, Y+6.5, 4);
-      FB(sx+47, Y+0.5, 22, toH-1, 228,228,228);
-      B(sx+47, Y+0.5, 22, toH-1); T('⚽ LOGO', sx+58, Y+5, 4.5, true, 'center', [100,100,100]);
+      
+      // Kagiva / Sponsor Logo area
+      if (kagivaLogo) {
+        doc.addImage(kagivaLogo, 'JPEG', sx+47, Y+0.5, 22, toH-1);
+      } else {
+        FB(sx+47, Y+0.5, 22, toH-1, 228,228,228);
+        T('KAGIVA', sx+58, Y+5, 4.5, true, 'center', [100,100,100]);
+      }
+
       T('Faltas Acumulativas', sx+73, Y+2, 4.5, true);
       T('1º Per.:', sx+73, Y+5, 4); for(let i=0;i<5;i++) B(sx+90+i*5, Y+3, 4.5, 2.5);
       T('2º Per.:', sx+73, Y+7.3, 4); for(let i=0;i<5;i++) B(sx+90+i*5, Y+5.8, 4.5, 2);
@@ -487,7 +531,7 @@ export default function Admin() {
     Y += chH;
 
     // ── PLAYER ROWS ───────────────────────────────────────────────────────
-    const rH = 4.5;
+    const rH = 4.3;
     const maxR = 18;
 
     const drawRow = (sx: number, ath: any, evts: any[], idx: number) => {
@@ -498,19 +542,19 @@ export default function Admin() {
       FB(x, Y, cReg, rH, ...rb); x += cReg;
       // name
       FB(x, Y, cName, rH, ...rb);
-      if(ath) T(ath.name, x+0.5, Y+rH/2+1.5, 4.5, false, 'left', [0,0,0]);
+      if(ath) T(ath.name, x+0.5, Y+rH/2+1.2, 4.3, false, 'left', [0,0,0]);
       x += cName;
       // nº
       FB(x, Y, cNum, rH, ...rb);
-      if(ath) T(String(ath.number||''), x+cNum/2, Y+rH/2+1.5, 5, true, 'center');
+      if(ath) T(String(ath.number||''), x+cNum/2, Y+rH/2+1.2, 4.8, true, 'center');
       x += cNum;
       // Amarelo
       FB(x, Y, cAm, rH, ...rb);
-      if(ath){ const n=evts.filter(e=>e.type==='amarelo'&&String(e.playerId)===String(ath.id)).length; if(n>0){FB(x+0.3,Y+0.3,cAm-0.6,rH-0.6,255,200,0);T(String(n),x+cAm/2,Y+rH/2+1.5,5,true,'center');} }
+      if(ath){ const n=evts.filter(e=>e.type==='amarelo'&&String(e.playerId)===String(ath.id)).length; if(n>0){FB(x+0.3,Y+0.3,cAm-0.6,rH-0.6,255,200,0);T(String(n),x+cAm/2,Y+rH/2+1.2,4.8,true,'center');} }
       x += cAm;
       // Vermelho
       FB(x, Y, cVm, rH, ...rb);
-      if(ath){ const n=evts.filter(e=>e.type==='vermelho'&&String(e.playerId)===String(ath.id)).length; if(n>0){FB(x+0.3,Y+0.3,cVm-0.6,rH-0.6,210,20,20);T('V',x+cVm/2,Y+rH/2+1.5,5,true,'center',[255,255,255]);} }
+      if(ath){ const n=evts.filter(e=>e.type==='vermelho'&&String(e.playerId)===String(ath.id)).length; if(n>0){FB(x+0.3,Y+0.3,cVm-0.6,rH-0.6,210,20,20);T('V',x+cVm/2,Y+rH/2+1.2,4.8,true,'center',[255,255,255]);} }
       x += cVm;
       // Goal cells
       const tg = ath ? evts.filter(e=>e.type==='gol'&&String(e.playerId)===String(ath.id)).length : 0;
@@ -521,7 +565,7 @@ export default function Admin() {
           gi++;
           const mk = tg >= gi;
           FB(x, Y, cGol, rH, ...(mk?[20,160,20] as [number,number,number]:rb));
-          if(mk) T('●', x+cGol/2, Y+rH/2+1.5, 3, false, 'center', [255,255,255]);
+          if(mk) T('●', x+cGol/2, Y+rH/2+1.2, 2.8, false, 'center', [255,255,255]);
           else B(x, Y, cGol, rH);
           x += cGol;
         }
@@ -537,13 +581,13 @@ export default function Admin() {
     }
 
     // ── STAFF WITH GOAL COLUMNS (Técnico + Aux) ───────────────────────────
-    const stH = 3.8;
+    const stH = 3.6;
     const drawStaffGoalRow = (label: string, ri: number) => {
       const rb: [number,number,number] = ri%2===0?[250,250,250]:[244,244,244];
       [ML, half].forEach(sx => {
         let x = sx;
         FB(x,Y,cReg,stH,...rb); x+=cReg;
-        FB(x,Y,cName,stH,...rb); T(label,x+0.5,Y+stH/2+1.2,4.5); x+=cName;
+        FB(x,Y,cName,stH,...rb); T(label,x+0.5,Y+stH/2+1.0,4.2); x+=cName;
         FB(x,Y,cNum,stH,...rb); x+=cNum;
         FB(x,Y,cAm,stH,...rb); x+=cAm;
         FB(x,Y,cVm,stH,...rb); x+=cVm;
@@ -560,8 +604,8 @@ export default function Admin() {
 
     // Remaining staff (no goal columns)
     ['Prep. Físico:','Atendente:','Fisioterapeuta:','Supervisor:'].forEach((label, i) => {
-      B(ML,Y,teamW,stH); T(label,ML+1,Y+stH/2+1.2,4.5);
-      B(half,Y,teamW,stH); T(label,half+1,Y+stH/2+1.2,4.5);
+      B(ML,Y,teamW,stH); T(label,ML+1,Y+stH/2+1.0,4.0);
+      B(half,Y,teamW,stH); T(label,half+1,Y+stH/2+1.0,4.0);
       Y += stH;
     });
 
@@ -578,7 +622,7 @@ export default function Admin() {
     ];
     let aY = fY+5;
     arb.forEach(([l, v]) => {
-      B(ML,aY,arbW,4.5); T(l,ML+1,aY+3,5,true); T(v||'________________________________',ML+34,aY+3,5); aY+=4.5;
+      B(ML,aY,arbW,4.2); T(l,ML+1,aY+3,5,true); T(v||'________________________________',ML+34,aY+3,5); aY+=4.2;
     });
 
     // Horário block
@@ -596,7 +640,7 @@ export default function Admin() {
     const wn = (data.homeScore!==''&&data.awayScore!=='')
       ? (Number(data.homeScore)>Number(data.awayScore)?homeTeam.name:Number(data.awayScore)>Number(data.homeScore)?awayTeam.name:'EMPATE')
       : '';
-    FB(hX,hY,hW,5,20,20,20); T('VENCEDOR: '+wn,hX+1,hY+3.5,5,true,'left',[204,255,0]);
+    FB(hX,hY,hW,5,20,20,20); T('VENCEDOR: '+wn,hX+1,hY+3.5,5,true,'left', [204, 255, 0]);
 
     // Contagens block
     const cX = hX+hW+1, cW = PW-MR-cX, cc = cW*2/3;
@@ -619,6 +663,7 @@ export default function Admin() {
     doc.text('Liga de Futsal Escolar — Garanhuns/PE — Documento Oficial — '+new Date().toLocaleDateString('pt-BR'), PW/2, PH-1, {align:'center'});
     doc.save('sumula_'+(game.category||'jogo').replace(/\s+/g,'_')+'_'+homeTeam.name?.split(' ')[0]+'_vs_'+awayTeam.name?.split(' ')[0]+'.pdf');
   };
+
   const DataTable = ({ title, data, columns, onAdd, onEdit, onDelete, onMoveUp, onMoveDown, extraActions }: any) => (
     <div className="bg-dark-card border border-dark-border rounded-xl p-6 mb-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
