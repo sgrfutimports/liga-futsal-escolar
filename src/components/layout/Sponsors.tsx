@@ -7,8 +7,20 @@ export default function Sponsors() {
   const sponsorsPremium = sponsorsArr?.filter((s: any) => s.type === 'premium') || [];
   const sponsorsOfficial = sponsorsArr?.filter((s: any) => s.type === 'official') || [];
 
-  const premiumSponsorItems = sponsorsPremium?.length > 0 ? sponsorsPremium : defaultData.sponsorsPremium || [];
-  const officialSponsorItems = sponsorsOfficial?.length > 0 ? sponsorsOfficial : defaultData.sponsorsOfficial || [];
+  const fallbackPremium = [
+    { id: 'fp1', name: 'Ferreira Costa', type: 'premium', logo: '/logos/FERREIRA_COSTA_LOGO.png' },
+    { id: 'fp2', name: 'Unicompra', type: 'premium', logo: '/logos/UNICOMPRA_LOGO.jpg' }
+  ];
+
+  const fallbackOfficial = [
+    { id: 'fo1', name: 'Sesc', type: 'official', logo: '/logos/logo-sesc.png' },
+    { id: 'fo2', name: 'IAUPE', type: 'official', logo: '/logos/IAUPE LOGO.jfif' },
+    { id: 'fo3', name: 'CMA', type: 'official', logo: '/logos/CMA LOGO.jpg' },
+    { id: 'fo4', name: 'GRE', type: 'official', logo: '/logos/GRE  LOGO.png' }
+  ];
+
+  const premiumSponsorItems = sponsorsPremium?.length > 0 ? sponsorsPremium : fallbackPremium;
+  const officialSponsorItems = sponsorsOfficial?.length > 0 ? sponsorsOfficial : fallbackOfficial;
 
   if (premiumSponsorItems.length === 0 && officialSponsorItems.length === 0) return null;
 
