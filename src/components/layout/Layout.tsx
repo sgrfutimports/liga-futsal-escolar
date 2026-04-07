@@ -16,15 +16,21 @@ export default function Layout() {
     });
   }, [pathname]);
 
+  const isAdminPage = pathname.startsWith('/admin');
+
   return (
     <div className="min-h-screen flex flex-col relative">
-      <Navbar />
+      {!isAdminPage && <Navbar />}
       <main className="flex-grow">
         <Outlet />
       </main>
-      <Sponsors />
-      <Footer />
-      <WhatsAppButton />
+      {!isAdminPage && (
+        <>
+          <Sponsors />
+          <Footer />
+          <WhatsAppButton />
+        </>
+      )}
     </div>
   );
 }
