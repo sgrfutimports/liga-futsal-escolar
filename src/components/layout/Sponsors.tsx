@@ -1,13 +1,14 @@
-import { getStoredData, defaultData, getLogo } from "@/src/lib/store";
+import { defaultData, getLogo, useSupaData } from "@/src/lib/store";
 import { Star, Shield, Goal } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
 export default function Sponsors() {
-  const sponsorsPremium = getStoredData('sponsorsPremium');
-  const sponsorsOfficial = getStoredData('sponsorsOfficial');
+  const { data: sponsorsArr } = useSupaData('lfe_sponsors', []);
+  const sponsorsPremium = sponsorsArr?.filter((s: any) => s.type === 'premium') || [];
+  const sponsorsOfficial = sponsorsArr?.filter((s: any) => s.type === 'official') || [];
 
-  const premiumSponsorItems = sponsorsPremium?.length > 0 ? sponsorsPremium : defaultData.sponsorsPremium;
-  const officialSponsorItems = sponsorsOfficial?.length > 0 ? sponsorsOfficial : defaultData.sponsorsOfficial;
+  const premiumSponsorItems = sponsorsPremium?.length > 0 ? sponsorsPremium : defaultData.sponsorsPremium || [];
+  const officialSponsorItems = sponsorsOfficial?.length > 0 ? sponsorsOfficial : defaultData.sponsorsOfficial || [];
 
   if (premiumSponsorItems.length === 0 && officialSponsorItems.length === 0) return null;
 
