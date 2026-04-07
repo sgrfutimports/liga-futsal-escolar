@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase, TableName } from './supabase';
+import { mockTeams, mockAthletes, mockGames, mockGallery, mockRegistrations, mockTechnicalDocs } from './mockData';
 
 // ─── Utilidades de log / fallback ─────────────────────────────────────────────
 export function getLogo(sponsor: any) {
@@ -33,16 +34,33 @@ export const defaultData: Record<string, any> = {
 // ─── CRUD Supabase ────────────────────────────────────────────────────────────
 
 export async function supaFetch(table: TableName): Promise<any[] | null> {
+  const getMockData = () => {
+    if (table === 'lfe_teams') return mockTeams;
+    if (table === 'lfe_athletes') return mockAthletes;
+    if (table === 'lfe_games') return mockGames;
+    if (table === 'lfe_gallery') return mockGallery;
+    if (table === 'lfe_registrations') return mockRegistrations;
+    if (table === 'lfe_technical_documents') return mockTechnicalDocs;
+    return null;
+  };
+
   try {
     const { data, error } = await supabase.from(table).select('*');
     if (error) {
       console.error(`[Supabase] Fetch error [${table}]:`, error.message);
-      return null;
+      return getMockData();
     }
+    
+    // Fallback para mock data se a tabela estiver completamente vazia (Para fins de demonstração)
+    if (!data || data.length === 0) {
+      const mockResult = getMockData();
+      if (mockResult) return mockResult;
+    }
+    
     return data ?? [];
   } catch (e) {
     console.error(`[Supabase] Network error [${table}]:`, e);
-    return null;
+    return getMockData();
   }
 }
 
