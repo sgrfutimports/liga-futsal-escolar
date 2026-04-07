@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router";
-import { Menu, X, Trophy } from "lucide-react";
+import { Menu, X, Trophy, LogOut, User } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -20,10 +20,20 @@ export default function Navbar() {
   const isAdmin = localStorage.getItem('lfe_admin_authenticated') === 'true';
   const isChefe = localStorage.getItem('lfe_is_chefe') === 'true';
 
-  const mergedLinks = [...navLinks];
+  let mergedLinks = [...navLinks];
   if (isAdmin || isChefe) {
+    if (isChefe) {
+      mergedLinks = mergedLinks.filter(link => link.name !== "Inscrição");
+      mergedLinks.push({ name: "Enviar Elenco", path: "/enviar-elenco" });
+    }
     mergedLinks.push({ name: "Dep. Técnico", path: "/dep-tecnico" });
   }
+
+  const handleLogout = () => {
+    localStorage.removeItem('lfe_admin_authenticated');
+    localStorage.removeItem('lfe_is_chefe');
+    window.location.href = '/';
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-dark/90 backdrop-blur-md border-b border-dark-border">
@@ -77,12 +87,34 @@ export default function Navbar() {
                 )}
               </Link>
             ))}
-            <Link
-              to="/chefes-login"
-              className="px-4 py-2 bg-primary/10 border border-primary/20 rounded-md font-display text-sm text-primary hover:bg-primary hover:text-dark transition-all uppercase tracking-widest font-bold"
-            >
-              Área do Chefe
-            </Link>
+            
+            {(isAdmin || isChefe) ? (
+              <div className="flex items-center gap-4 bg-dark-card border border-dark-border px-4 py-2 rounded-full shadow-inner">
+                <div className="flex items-center gap-2 text-sm font-display text-gray-300">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <span className="max-w-[100px] truncate">
+                    {isAdmin ? "Administrador" : "Chefe Delegação"}
+                  </span>
+                </div>
+                <div className="w-px h-6 bg-dark-border"></div>
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                  title="Sair da Conta"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/chefes-login"
+                className="px-4 py-2 bg-primary/10 border border-primary/20 rounded-md font-display text-sm text-primary hover:bg-primary hover:text-dark transition-all uppercase tracking-widest font-bold"
+              >
+                Área do Chefe
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -122,13 +154,39 @@ export default function Navbar() {
                   {link.name}
                 </Link>
               ))}
-              <Link
-                to="/chefes-login"
-                onClick={() => setIsOpen(false)}
-                className="block px-3 py-3 rounded-md font-display text-xl text-primary bg-primary/10 mt-4 border border-primary/20 text-center"
-              >
-                Área do Chefe
-              </Link>
+              
+              {(isAdmin || isChefe) ? (
+                <div className="mt-4 pt-4 border-t border-dark-border">
+                  <div className="flex items-center gap-3 px-3 py-3 mb-2 rounded-md bg-dark-card border border-dark-border">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                      <User className="w-5 h-5" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-gray-500 font-display uppercase tracking-widest">Logado como</span>
+                      <span className="text-white font-display text-sm">
+                        {isAdmin ? "Administrador da Liga" : "Chefe de Delegação"}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-md font-display text-lg text-red-500 bg-red-500/10 hover:bg-red-500/20 transition-colors border border-red-500/20"
+                  >
+                    <LogOut className="w-5 h-5" /> Sair da Conta
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/chefes-login"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-3 py-3 rounded-md font-display text-xl text-primary bg-primary/10 mt-4 border border-primary/20 text-center"
+                >
+                  Área do Chefe
+                </Link>
+              )}
             </div>
           </motion.div>
         )}

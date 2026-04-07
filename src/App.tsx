@@ -11,6 +11,7 @@ import TechnicalDepartment from "./pages/TechnicalDepartment";
 import ChefesLogin from "./pages/ChefesLogin";
 import Registration from "./pages/Registration";
 import Admin from "./pages/Admin";
+import EnviarElenco from "./pages/EnviarElenco";
 
 export default function App() {
   useEffect(() => {
@@ -72,6 +73,7 @@ export default function App() {
           <Route path="dep-tecnico" element={<TechnicalDepartment />} />
           <Route path="chefes-login" element={<ChefesLogin />} />
           <Route path="inscricao" element={<Registration />} />
+          <Route path="enviar-elenco" element={<EnviarElenco />} />
           <Route path="admin" element={<Admin />} />
         </Route>
       </Routes>
