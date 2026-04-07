@@ -13,7 +13,11 @@ export default function Home() {
   const { data: teams } = useSupaData('lfe_teams', []);
   const { data: games } = useSupaData('lfe_games', []);
   const { data: settingsArr } = useSupaData('lfe_settings', []);
+  const { data: sponsorsArr } = useSupaData('lfe_sponsors', []);
   const settings = settingsArr[0] ?? {};
+
+  const sponsorsPremium = sponsorsArr?.filter((s: any) => s.type === 'premium') || [];
+  const sponsorsOfficial = sponsorsArr?.filter((s: any) => s.type === 'official') || [];
 
   // Safety fallbacks
   const carouselItems = banners?.length > 0 ? banners : [
@@ -348,6 +352,66 @@ export default function Home() {
           </div>
         </div>
       </section>
+      )}
+
+      {/* Sponsors Section */}
+      {(sponsorsPremium.length > 0 || sponsorsOfficial.length > 0) && (
+        <section className="py-16 bg-dark border-t border-dark-border">
+          <style>{`
+            @keyframes marquee {
+              0% { transform: translateX(0%); }
+              100% { transform: translateX(-50%); }
+            }
+            .animate-marquee {
+              animation: marquee 30s linear infinite;
+            }
+          `}</style>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-center font-display text-gray-500 text-sm tracking-[0.3em] uppercase mb-12">
+              Patrocinadores e Apoiadores Oficiais
+            </h2>
+            
+            {/* Premium Sponsors */}
+            {sponsorsPremium.length > 0 && (
+              <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 mb-16">
+                {sponsorsPremium.map((sponsor: any) => (
+                  <div key={sponsor.id} className="flex flex-col items-center">
+                    {sponsor.logo ? (
+                      <div className="w-40 h-24 md:w-56 md:h-32 bg-white/5 rounded-2xl border border-white/5 p-6 flex items-center justify-center hover:bg-white/10 hover:border-primary/30 transition-all duration-300 group shadow-lg">
+                        <img src={sponsor.logo} alt={sponsor.name} className="max-w-full max-h-full object-contain grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-105" />
+                      </div>
+                    ) : (
+                      <span className="font-display text-2xl md:text-3xl text-gray-500 font-bold uppercase tracking-widest">{sponsor.name}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Official Sponsors (Marquee style) */}
+            {sponsorsOfficial.length > 0 && (
+              <div className="w-full overflow-hidden relative pt-8 border-t border-dark-border/30">
+                <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-dark to-transparent z-10" />
+                <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-dark to-transparent z-10" />
+                
+                <div className="flex animate-marquee hover:[animation-play-state:paused] whitespace-nowrap min-w-max">
+                  {/* Duplicar lista para efeito infinito contínuo */}
+                  {[...sponsorsOfficial, ...sponsorsOfficial, ...sponsorsOfficial, ...sponsorsOfficial].map((sponsor: any, idx: number) => (
+                    <div key={`${sponsor.id}-${idx}`} className="flex items-center justify-center gap-4 mx-8 md:mx-12">
+                      {sponsor.logo ? (
+                        <div className="w-24 h-12 md:w-32 md:h-16 flex items-center justify-center filter grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                          <img src={sponsor.logo} alt={sponsor.name} className="max-w-full max-h-full object-contain" />
+                        </div>
+                      ) : (
+                        <span className="font-display text-xl text-gray-600 font-bold uppercase tracking-wider opacity-60 hover:opacity-100 transition-opacity">{sponsor.name}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
       )}
     </div>
   );
