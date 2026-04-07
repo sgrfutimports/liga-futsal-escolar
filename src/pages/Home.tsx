@@ -39,26 +39,46 @@ export default function Home() {
     }
   ];
   const loadedTeams = teams || [];
-  const nextGames = (games || []).filter((g: any) => g.status !== 'Finalizado').slice(0, 4);
+  const categoriesList = Array.from(new Set((games || []).map((g: any) => g.category || "Geral")));
+  
+  const groupedStandings = categoriesList.reduce((acc: any, category: any) => {
+     const categoryGames = (games || []).filter((g: any) => (g.category || "Geral") === category);
+     if (categoryGames.length === 0) return acc;
+     
+     const involvedTeamIds = new Set();
+     categoryGames.forEach((g: any) => {
+        involvedTeamIds.add(Number(g.homeTeamId || g.home_team_id));
+        involvedTeamIds.add(Number(g.awayTeamId || g.away_team_id));
+     });
+     
+     const catStandings = loadedTeams.filter((t: any) => involvedTeamIds.has(t.id)).map((t: any) => {
+        let pts = 0;
+        categoryGames.forEach((g: any) => {
+          if (g.status === 'Finalizado') {
+            const homeScore = Number(g.home_score ?? g.homeScore ?? 0);
+            const awayScore = Number(g.away_score ?? g.awayScore ?? 0);
+            if (Number(g.homeTeamId || g.home_team_id) === t.id) {
+              if (homeScore > awayScore) pts += 3;
+              else if (homeScore === awayScore) pts += 1;
+            } else if (Number(g.awayTeamId || g.away_team_id) === t.id) {
+              if (awayScore > homeScore) pts += 3;
+              else if (homeScore === awayScore) pts += 1;
+            }
+          }
+        });
+        return { ...t, pts };
+     }).sort((a: any, b: any) => b.pts - a.pts).slice(0, 5);
+     
+     acc[category] = catStandings;
+     return acc;
+  }, {});
 
-  // Calculate simple standings from games
-  const standings = loadedTeams.map((t: any) => {
-    let pts = 0;
-    (games || []).forEach((g: any) => {
-      if (g.status === 'Finalizado') {
-        const homeScore = Number(g.homeScore || 0);
-        const awayScore = Number(g.awayScore || 0);
-        if (g.homeTeamId === t.id) {
-          if (homeScore > awayScore) pts += 3;
-          else if (homeScore === awayScore) pts += 1;
-        } else if (g.awayTeamId === t.id) {
-          if (awayScore > homeScore) pts += 3;
-          else if (homeScore === awayScore) pts += 1;
-        }
-      }
-    });
-    return { ...t, pts };
-  }).sort((a: any, b: any) => b.pts - a.pts).slice(0, 5);
+  const groupedNextGames = (games || []).filter((g: any) => g.status !== 'Finalizado').reduce((acc: any, game: any) => {
+     const cat = game.category || "Geral";
+     if (!acc[cat]) acc[cat] = [];
+     acc[cat].push(game);
+     return acc;
+  }, {});
 
   useEffect(() => {
     if (carouselItems.length <= 1) return;
@@ -231,38 +251,45 @@ export default function Home() {
                 </Link>
               </div>
 
-              {nextGames.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {nextGames.map((game: any) => {
-                    const home = loadedTeams.find((t: any) => t.id === Number(game.homeTeamId));
-                    const away = loadedTeams.find((t: any) => t.id === Number(game.awayTeamId));
-                    return (
-                      <div key={game.id} className="bg-dark-card border border-dark-border rounded-lg p-4 hover:border-primary/50 transition-colors group cursor-pointer">
-                        <div className="flex justify-between items-center mb-4 text-xs font-display text-gray-400">
-                          <span>{game.date} - {game.time}</span>
-                          <span className="bg-dark px-2 py-1 rounded">AGENDADO</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <div className="flex flex-col items-center gap-2 w-1/3">
-                            <div className="w-12 h-12 bg-dark rounded-full flex items-center justify-center border border-dark-border group-hover:border-primary transition-colors overflow-hidden p-1">
-                               {home?.logo ? <img src={home.logo} className="w-full h-full object-contain rounded-full bg-white"/> : <span className="font-display text-lg tracking-tighter">{home?.name?.substring(0,3).toUpperCase()}</span>}
-                            </div>
-                            <span className="font-display text-sm text-center line-clamp-1">{home?.name || "-"}</span>
-                          </div>
-                          <div className="w-1/3 flex flex-col items-center justify-center">
-                            <span className="text-2xl font-display text-gray-600">VS</span>
-                            <span className="text-xs text-gray-500 mt-1 line-clamp-1 text-center">{game.location}</span>
-                          </div>
-                          <div className="flex flex-col items-center gap-2 w-1/3">
-                            <div className="w-12 h-12 bg-dark rounded-full flex items-center justify-center border border-dark-border group-hover:border-primary transition-colors overflow-hidden p-1">
-                               {away?.logo ? <img src={away.logo} className="w-full h-full object-contain rounded-full bg-white"/> : <span className="font-display text-lg tracking-tighter">{away?.name?.substring(0,3).toUpperCase()}</span>}
-                            </div>
-                            <span className="font-display text-sm text-center line-clamp-1">{away?.name || "-"}</span>
-                          </div>
-                        </div>
+              {Object.keys(groupedNextGames).length > 0 ? (
+                <div className="space-y-8">
+                  {Object.entries(groupedNextGames).sort().map(([category, catGames]: [string, any]) => (
+                    <div key={category} className="space-y-4">
+                      <h3 className="text-sm font-display text-primary/80 uppercase tracking-widest border-b border-dark-border pb-1">{category}</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {catGames.slice(0, 4).map((game: any) => {
+                          const home = loadedTeams.find((t: any) => t.id === Number(game.homeTeamId || game.home_team_id));
+                          const away = loadedTeams.find((t: any) => t.id === Number(game.awayTeamId || game.away_team_id));
+                          return (
+                            <Link to={`/equipes/${home?.id}`} key={game.id} className="bg-dark-card border border-dark-border rounded-lg p-4 hover:border-primary/50 transition-colors group cursor-pointer block">
+                              <div className="flex justify-between items-center mb-4 text-xs font-display text-gray-400">
+                                <span className="uppercase">{game.date} {game.time ? `- ${game.time}` : ''}</span>
+                                <span className="bg-dark px-2 py-1 rounded shadow-inner">AGENDADO</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <div className="flex flex-col items-center gap-2 w-[40%]">
+                                  <div className="w-12 h-12 bg-dark rounded-full flex items-center justify-center border border-dark-border group-hover:border-primary transition-colors overflow-hidden p-1 shadow-md">
+                                     {home?.logo && !home.logo.includes('undefined') ? <img src={home.logo} className="w-full h-full object-contain rounded-full bg-white"/> : <Shield className="w-6 h-6 text-gray-500" />}
+                                  </div>
+                                  <span className="font-display text-xs md:text-sm text-center line-clamp-1">{home?.name || "-"}</span>
+                                </div>
+                                <div className="w-[20%] flex flex-col items-center justify-center">
+                                  <span className="text-xl md:text-2xl font-display text-gray-600">VS</span>
+                                  <span className="text-[9px] md:text-[10px] text-gray-500 mt-1 line-clamp-1 text-center uppercase">{game.location}</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-2 w-[40%]">
+                                  <div className="w-12 h-12 bg-dark rounded-full flex items-center justify-center border border-dark-border group-hover:border-primary transition-colors overflow-hidden p-1 shadow-md">
+                                     {away?.logo && !away.logo.includes('undefined') ? <img src={away.logo} className="w-full h-full object-contain rounded-full bg-white"/> : <Shield className="w-6 h-6 text-gray-500" />}
+                                  </div>
+                                  <span className="font-display text-xs md:text-sm text-center line-clamp-1">{away?.name || "-"}</span>
+                                </div>
+                              </div>
+                            </Link>
+                          )
+                        })}
                       </div>
-                    )
-                  })}
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <div className="text-gray-500 font-display py-8 text-center border border-dark-border rounded-lg border-dashed">
