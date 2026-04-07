@@ -4,12 +4,11 @@ import { ChevronLeft, ChevronRight, Camera, Maximize2, X } from "lucide-react";
 import { getStoredData } from "@/src/lib/store";
 
 const demoMedia = [
-  { id: 1, type: 'image', url: 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?q=80&w=1000', title: 'Abertura do Campeonato' },
-  { id: 2, type: 'image', url: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1000', title: 'Aquecimento e Preparação' },
-  { id: 3, type: 'image', url: 'https://images.unsplash.com/photo-151860534846c-65576f3d1798?q=80&w=1000', title: 'Vibração da Torcida' },
-  { id: 4, type: 'image', url: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?q=80&w=1000', title: 'Chute ao Gol Decisivo' },
-  { id: 5, type: 'image', url: 'https://images.unsplash.com/photo-151860536846c-5954605178af?q=80&w=1000', title: 'Disputa de Bola Acirrada' },
-  { id: 6, type: 'image', url: 'https://images.unsplash.com/photo-1551953258-2d44cfc5ae3c?q=80&w=1000', title: 'A Grande Comemoração' }
+  { id: 1, type: 'image', url: '/gallery/galeria_1.jpg', title: 'Disputa Intensa em Quadra' },
+  { id: 2, type: 'image', url: '/gallery/galeria_2.jpg', title: 'Visão Clínica da Organização' },
+  { id: 3, type: 'image', url: '/gallery/galeria_3.jpg', title: 'Foco e Oração Pré-Jogo' },
+  { id: 4, type: 'image', url: '/gallery/galeria_4.jpg', title: 'A Emoção do Gol' },
+  { id: 5, type: 'image', url: '/gallery/galeria_5.jpg', title: 'Instruções Mestre: O Tempo Técnico' }
 ];
 
 export default function Gallery() {
