@@ -359,7 +359,7 @@ export default function Registration() {
                 Categorias Disputadas
               </h3>
               <div id="categories" className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {["SUB-10", "SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"].map((cat) => {
+                {["SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"].map((cat) => {
                   const isSelected = formData.categories.includes(cat);
                   return (
                     <label key={cat} className={cn(

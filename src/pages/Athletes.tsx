@@ -16,7 +16,7 @@ export default function Athletes() {
     return matchesSearch && matchesCategory;
   });
 
-  const categories = ["TODOS", "SUB-10", "SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"];
+  const categories = ["TODOS", "SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"];
 
   return (
     <div className="min-h-screen bg-dark py-12">

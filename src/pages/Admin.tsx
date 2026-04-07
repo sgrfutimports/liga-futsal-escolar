@@ -816,7 +816,7 @@ export default function Admin() {
           <label className={labelClass}>Categoria</label>
           <select required className={inputClass} value={currentData.category || ''} onChange={e => setCurrentData({...currentData, category: e.target.value})}>
              <option value="">Selecione</option>
-             {["SUB-10", "SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"].map(cat => (
+             {["SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"].map(cat => (
                <option key={cat} value={cat}>{cat}</option>
              ))}
           </select>
@@ -834,7 +834,7 @@ export default function Admin() {
           <label className={labelClass}>Categoria do Jogo</label>
           <select required className={inputClass} value={currentData.category || ''} onChange={e => setCurrentData({...currentData, category: e.target.value})}>
              <option value="">Selecione</option>
-             {["SUB-10", "SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"].map(cat => (
+             {["SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"].map(cat => (
                <option key={cat} value={cat}>{cat}</option>
              ))}
           </select>
