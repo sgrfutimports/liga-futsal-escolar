@@ -1,19 +1,21 @@
 export const mockTeams = [
-  { id: 1, name: "Colégio Santa Sofia", city: "Garanhuns", categories: "Feminino, Masculino Série Ouro", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Bras%C3%A3o_Col%C3%A9gio_Santa_Sofia.jpg/200px-Bras%C3%A3o_Col%C3%A9gio_Santa_Sofia.jpg" },
-  { id: 2, name: "Escola SESC", city: "Garanhuns", categories: "Masculino Série Ouro", logo: "https://upload.wikimedia.org/wikipedia/pt/b/b8/Logo_sesc.png" },
-  { id: 3, name: "Colégio XV de Novembro", city: "Garanhuns", categories: "Masculino Série Prata", logo: "https://via.placeholder.com/150/ff4500/ffffff?text=XV" },
-  { id: 4, name: "CMA - Colégio Monsenhor Adelmar", city: "Garanhuns", categories: "Feminino, Masculino Série Prata", logo: "https://via.placeholder.com/150/4169e1/ffffff?text=CMA" },
-  { id: 5, name: "Colégio Diocesano", city: "Correntes", categories: "Masculino Série Ouro", logo: "https://via.placeholder.com/150/228b22/ffffff?text=CD" }
+  { id: 1, name: "Colégio Santa Sofia", city: "Garanhuns", categories: "Feminino, Masculino Série Ouro", color: "#4f46e5", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Bras%C3%A3o_Col%C3%A9gio_Santa_Sofia.jpg/200px-Bras%C3%A3o_Col%C3%A9gio_Santa_Sofia.jpg" },
+  { id: 2, name: "Escola SESC", city: "Garanhuns", categories: "Masculino Série Ouro", color: "#2563eb", logo: "https://upload.wikimedia.org/wikipedia/pt/b/b8/Logo_sesc.png" },
+  { id: 3, name: "Colégio XV de Novembro", city: "Garanhuns", categories: "Masculino Série Prata", color: "#dc2626", logo: "https://via.placeholder.com/150/ff4500/ffffff?text=XV" },
+  { id: 4, name: "CMA - Colégio Monsenhor Adelmar", city: "Garanhuns", categories: "Feminino, Masculino Série Prata", color: "#059669", logo: "https://via.placeholder.com/150/4169e1/ffffff?text=CMA" },
+  { id: 5, name: "Colégio Diocesano", city: "Correntes", categories: "Masculino Série Ouro", color: "#d97706", logo: "https://via.placeholder.com/150/228b22/ffffff?text=CD" }
 ];
 
 export const mockAthletes = [
-  { id: 1, name: "João Pedro Silva", teamId: 1, team_id: 1, number: "10", category: "Masculino Série Ouro", goals: 5, photo: "https://randomuser.me/api/portraits/men/32.jpg" },
-  { id: 2, name: "Gabriel Santos", teamId: 1, team_id: 1, number: "7", category: "Masculino Série Ouro", goals: 3, photo: "https://randomuser.me/api/portraits/men/44.jpg" },
-  { id: 3, name: "Lucas Almeida", teamId: 2, team_id: 2, number: "9", category: "Masculino Série Ouro", goals: 6, photo: "https://randomuser.me/api/portraits/men/22.jpg" },
-  { id: 4, name: "Marcos Vinicius", teamId: 3, team_id: 3, number: "1", category: "Masculino Série Prata", goals: 0, photo: "https://randomuser.me/api/portraits/men/11.jpg" },
-  { id: 5, name: "Maria Clara", teamId: 4, team_id: 4, number: "10", category: "Feminino", goals: 2, photo: "https://randomuser.me/api/portraits/women/32.jpg" },
-  { id: 6, name: "Ana Beatriz", teamId: 1, team_id: 1, number: "9", category: "Feminino", goals: 4, photo: "https://randomuser.me/api/portraits/women/44.jpg" },
-  { id: 7, name: "Matheus Costa", teamId: 5, team_id: 5, number: "5", category: "Masculino Série Ouro", goals: 1, photo: "https://randomuser.me/api/portraits/men/55.jpg" },
+  { id: 1, name: "João Pedro Silva", teamId: 1, team_id: 1, number: "10", category: "SUB-17", position: "ALA", goals: 5, photo: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?q=80&w=600&auto=format&fit=crop" },
+  { id: 2, name: "Gabriel Santos", teamId: 1, team_id: 1, number: "7", category: "SUB-16", position: "FIXO", goals: 3, photo: "https://images.unsplash.com/photo-1511886929837-354d827aae26?q=80&w=600&auto=format&fit=crop" },
+  { id: 3, name: "Lucas Almeida", teamId: 2, team_id: 2, number: "9", category: "SUB-15", position: "PIVÔ", goals: 6, photo: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=600&auto=format&fit=crop" },
+  { id: 4, name: "Marcos Vinicius", teamId: 3, team_id: 3, number: "1", category: "SUB-14", position: "GOLEIRO", goals: 0, photo: "https://images.unsplash.com/photo-1628891435222-06592ce49660?q=80&w=600&auto=format&fit=crop" },
+  { id: 5, name: "Maria Clara", teamId: 4, team_id: 4, number: "10", category: "SUB-17", position: "ALA", goals: 2, photo: "https://images.unsplash.com/photo-1526676537331-7af3dd5cd2cf?q=80&w=600&auto=format&fit=crop" },
+  { id: 6, name: "Ana Beatriz", teamId: 1, team_id: 1, number: "9", category: "SUB-13", position: "PIVÔ", goals: 4, photo: "https://images.unsplash.com/photo-1551368321-1b91345cf1fd?q=80&w=600&auto=format&fit=crop" },
+  { id: 7, name: "Matheus Costa", teamId: 5, team_id: 5, number: "5", category: "SUB-18", position: "FIXO", goals: 1, photo: "https://images.unsplash.com/photo-1554844344-c34ea04258c4?q=80&w=600&auto=format&fit=crop" },
+  { id: 8, name: "Pedro Henrique", teamId: 2, team_id: 2, number: "11", category: "SUB-11", position: "ALA", goals: 8, photo: "https://images.unsplash.com/photo-1598971842065-4f0f089e9d6d?q=80&w=600&auto=format&fit=crop" },
+  { id: 9, name: "Carlos Eduardo", teamId: 3, team_id: 3, number: "8", category: "SUB-12", position: "FIXO", goals: 2, photo: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=600&auto=format&fit=crop" },
 ];
 
 export const mockGames = [

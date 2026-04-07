@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router";
 import { Shield, MapPin, Calendar, Trophy, Users, ChevronLeft, ChevronRight, Activity, Loader2, Image as ImageIcon, Camera, Goal } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "@/src/lib/utils";
-import { getStoredData } from "@/src/lib/store";
+import { useSupaData } from "@/src/lib/store";
 
 const mockGallery = [
   { id: 1, url: "https://images.unsplash.com/photo-1574629810360-7efbb1925713?q=80&w=800&auto=format&fit=crop", title: "Aquecimento pré-jogo" },
@@ -14,22 +14,31 @@ const mockGallery = [
 export default function TeamDetails() {
   const { id } = useParams();
   
-  const allTeams = getStoredData('teams') || [];
-  const allAthletes = getStoredData('athletes') || [];
-  const allGames = getStoredData('games') || [];
+  const { data: allTeams, loading: loadingTeams } = useSupaData('lfe_teams', []);
+  const { data: allAthletes } = useSupaData('lfe_athletes', []);
+  const { data: allGames } = useSupaData('lfe_games', []);
   
-  const team = allTeams.find((t: any) => t.id === Number(id)) || allTeams[0];
-  const players = allAthletes.filter((a: any) => a.teamId === Number(id));
+  if (loadingTeams) {
+    return (
+      <div className="min-h-screen bg-dark flex flex-col items-center justify-center text-primary gap-4">
+        <Loader2 className="w-12 h-12 animate-spin" />
+        <p className="font-display">Carregando dados da equipe...</p>
+      </div>
+    );
+  }
+
+  const team = allTeams.find((t: any) => t.id === Number(id));
+  const players = allAthletes.filter((a: any) => Number(a.teamId) === Number(id) || Number(a.team_id) === Number(id));
   
   // Calculate specific team stats based on games
-  const teamGames = allGames.filter((g: any) => g.status === 'Finalizado' && (g.homeTeamId === Number(id) || g.awayTeamId === Number(id)));
+  const teamGames = allGames.filter((g: any) => g.status === 'Finalizado' && (Number(g.home_team_id || g.homeTeamId) === Number(id) || Number(g.away_team_id || g.awayTeamId) === Number(id)));
   
   let wins = 0, draws = 0, losses = 0, goalsFor = 0, goalsAgainst = 0;
   
   teamGames.forEach((g: any) => {
-    const homeScore = Number(g.homeScore || 0);
-    const awayScore = Number(g.awayScore || 0);
-    if (g.homeTeamId === Number(id)) {
+    const homeScore = Number(g.home_score || g.homeScore || 0);
+    const awayScore = Number(g.away_score || g.awayScore || 0);
+    if (Number(g.home_team_id || g.homeTeamId) === Number(id)) {
       goalsFor += homeScore; goalsAgainst += awayScore;
       if (homeScore > awayScore) wins++;
       else if (homeScore === awayScore) draws++;
@@ -81,21 +90,26 @@ export default function TeamDetails() {
             </div>
             
             <div className="flex-1">
-              <div className="flex flex-wrap justify-center gap-2 mb-4">
-                {categoryArray.map((cat: string) => (
-                  <div key={cat} className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 font-display text-xs">
-                    {cat}
-                  </div>
-                ))}
+              <div className="flex flex-col items-center justify-center gap-2 mb-6">
+                <span className="text-[10px] text-gray-400 font-display uppercase tracking-[0.3em]">Categorias Participantes</span>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {categoryArray.map((cat: string) => (
+                    <div key={cat} className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary text-dark font-display text-xs md:text-sm font-bold shadow-[0_0_15px_rgba(204,255,0,0.3)]">
+                      {cat}
+                    </div>
+                  ))}
+                  {categoryArray.length === 0 && <span className="text-gray-500 italic">Nenhuma informada</span>}
+                </div>
               </div>
-              <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-6 leading-none">
+              
+              <h1 className="text-4xl md:text-6xl font-display font-black text-white mb-6 leading-none tracking-tighter uppercase drop-shadow-xl">
                 {team.name}
               </h1>
               
-              <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400 font-sans">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-primary" />
-                  {team.city || "Agreste Meridional"}
+              <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-300 font-sans bg-dark/50 inline-flex px-6 py-2 rounded-full border border-dark-border backdrop-blur-sm">
+                <div className="flex items-center gap-2 font-display uppercase tracking-widest">
+                  <MapPin className="w-5 h-5 text-primary" />
+                  Cidade: {team.city || "Sede Principal"}
                 </div>
               </div>
             </div>
@@ -143,8 +157,14 @@ export default function TeamDetails() {
                       {player.number}
                     </div>
 
-                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-dark border-2 border-dark-border flex items-center justify-center shrink-0 group-hover:border-primary group-hover:shadow-[0_0_20px_rgba(153,204,0,0.3)] transition-all duration-300 z-10 relative overflow-hidden">
-                      {player.photo ? <img src={player.photo} className="w-full h-full object-cover" /> : <span className="font-display text-2xl md:text-3xl font-bold text-primary italic z-10 drop-shadow-sm">{player.number}</span>}
+                    <div 
+                      className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-dark border-2 flex items-center justify-center shrink-0 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-300 z-10 relative overflow-hidden"
+                      style={{ 
+                        borderColor: team.color || 'var(--color-dark-border)',
+                        boxShadow: `inset 0 0 10px ${team.color ? team.color + '40' : 'transparent'}, 0 0 0 ${team.color ? team.color + '20' : 'transparent'}`
+                      }}
+                    >
+                      {player.photo ? <img src={player.photo} className="w-full h-full object-cover" /> : <span className="font-display text-2xl md:text-3xl font-bold text-primary italic z-10 drop-shadow-sm" style={{ color: team.color }}>{player.number}</span>}
                     </div>
 
                     <div className="flex-1 z-10 min-w-0">
@@ -179,16 +199,18 @@ export default function TeamDetails() {
             <div className="space-y-4">
               {teamGames.map((match: any) => {
                  let opponent = "", result = "E", score = "";
-                 if (match.homeTeamId === Number(id)) {
-                   opponent = allTeams.find((t:any) => t.id === Number(match.awayTeamId))?.name || "Desconhecido";
-                   if (match.homeScore > match.awayScore) result = "V";
-                   else if (match.homeScore < match.awayScore) result = "D";
-                   score = `${match.homeScore} - ${match.awayScore}`;
+                 const isHome = Number(match.home_team_id || match.homeTeamId) === Number(id);
+                 
+                 if (isHome) {
+                   opponent = allTeams.find((t:any) => t.id === Number(match.away_team_id || match.awayTeamId))?.name || "Desconhecido";
+                   if (match.home_score > match.away_score) result = "V";
+                   else if (match.home_score < match.away_score) result = "D";
+                   score = `${match.home_score} - ${match.away_score}`;
                  } else {
-                   opponent = allTeams.find((t:any) => t.id === Number(match.homeTeamId))?.name || "Desconhecido";
-                   if (match.awayScore > match.homeScore) result = "V";
-                   else if (match.awayScore < match.homeScore) result = "D";
-                   score = `${match.awayScore} - ${match.homeScore}`;
+                   opponent = allTeams.find((t:any) => t.id === Number(match.home_team_id || match.homeTeamId))?.name || "Desconhecido";
+                   if (match.away_score > match.home_score) result = "V";
+                   else if (match.away_score < match.home_score) result = "D";
+                   score = `${match.away_score} - ${match.home_score}`;
                  }
 
                  return (
