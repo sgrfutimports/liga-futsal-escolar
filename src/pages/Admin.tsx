@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Lock, Settings, Users, Trophy, Calendar, Database, Search, Filter, Check, X, Eye, Plus, Edit, Trash, Activity, Shield, Upload, Image, Video, Star, Camera, FileText, Download, Folder, LogOut, ClipboardList, ChevronDown, CheckCircle2, AlertTriangle } from "lucide-react";
-import jsPDF from "jspdf";
+import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { cn } from "@/src/lib/utils";
@@ -278,7 +278,7 @@ export default function Admin() {
   // =====================================================================
   // GERADOR DE SUMULAS - COMPLETO
   // =====================================================================
-  const [sumuiaState, setSumulaState] = useState<any>({
+  const [sumulaState, setSumulaState] = useState<any>({
     selectedGameId: null,
     referee: '',
     assistant1: '',
@@ -291,7 +291,7 @@ export default function Admin() {
     saved: false,
   });
 
-  const selectedGame = games.find((g: any) => g.id === sumuiaState.selectedGameId);
+  const selectedGame = games.find((g: any) => g.id === sumulaState.selectedGameId);
   const sumulaHomeTeam = selectedGame ? teams.find((t: any) => t.id === Number(selectedGame.homeTeamId || selectedGame.home_team_id)) : null;
   const sumulaAwayTeam = selectedGame ? teams.find((t: any) => t.id === Number(selectedGame.awayTeamId || selectedGame.away_team_id)) : null;
   const sumulaHomeAthletes = selectedGame ? athletes.filter((a: any) => {
@@ -316,352 +316,301 @@ export default function Admin() {
   };
 
   const generateSumulaPDF = async (sumulaData?: any) => {
-    const data = sumulaData || sumuiaState;
-    const game = sumulaData ? games.find((g: any) => g.id === sumulaData.selectedGameId) : selectedGame;
-    if (!game) return;
-
-    const homeTeam: any = teams.find((t: any) => t.id === Number(game.homeTeamId || game.home_team_id)) || { name: 'Equipe A' };
-    const awayTeam: any = teams.find((t: any) => t.id === Number(game.awayTeamId || game.away_team_id)) || { name: 'Equipe B' };
-    const homeAths = athletes.filter((a: any) =>
-      Number(a.teamId || a.team_id) === Number(game.homeTeamId || game.home_team_id) && (!game.category || a.category === game.category));
-    const awayAths = athletes.filter((a: any) =>
-      Number(a.teamId || a.team_id) === Number(game.awayTeamId || game.away_team_id) && (!game.category || a.category === game.category));
-    const evH: any[] = data.homeEvents || [];
-    const evA: any[] = data.awayEvents || [];
-
-    const doc = new jsPDF({ orientation: 'landscape', format: 'a4', unit: 'mm' });
-    const PW = 297, PH = 210, ML = 3, MR = 3, MT = 2;
-    const half = PW / 2; // 148.5 – divides the two teams
-
-    // Image helper
-    const loadImg = (url: string): Promise<HTMLImageElement | null> => {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = () => resolve(null);
-        img.src = url;
-      });
-    };
-
-    const leagueLogo = await loadImg('/logos/logo.jpg');
-    const kagivaLogo = await loadImg('/logos/BC_ENERGIA_LOGO.jpg'); // Using available as placeholder for Kagiva
-    const homeLogoImg = homeTeam.logo ? await loadImg(homeTeam.logo) : null;
-    const awayLogoImg = awayTeam.logo ? await loadImg(awayTeam.logo) : null;
-
-    // Column widths per team half
-    const cReg = 6, cName = 37, cNum = 5, cAm = 4, cVm = 4;
-    const cFixed = cReg + cName + cNum + cAm + cVm; // 56
-    const cSubs = 4, cSubW = 3.8, cSubsTotal = cSubs * cSubW; // 15.2
-    const teamW = half - ML; // ~145.5mm
-    const cSepW = 1.2; // separator "|" column
-    const numSeps = 2, numGols = 34;
-    const cGolsArea = teamW - cFixed - cSubsTotal;
-    const cGol = (cGolsArea - numSeps * cSepW) / numGols;
-
-    const golNums: (number | '|')[] = [
-      1,2,3,4,5,6,7,8,9,10,'|',
-      11,12,13,14,15,16,17,18,19,20,'|',
-      21,22,23,24,25,26,27,28,29,30,
-      31,32,33,34
-    ];
-
-    // helpers
-    const B = (x: number, y: number, w: number, h: number) => doc.rect(x, y, w, h, 'S');
-    const F = (x: number, y: number, w: number, h: number, r: number, g: number, b: number) => {
-      doc.setFillColor(r, g, b); doc.rect(x, y, w, h, 'F');
-    };
-    const FB = (x: number, y: number, w: number, h: number, r: number, g: number, b: number) => {
-      doc.setFillColor(r, g, b); doc.rect(x, y, w, h, 'FD');
-    };
-    const T = (s: string, x: number, y: number, size = 6, bold = false,
-               align: 'left'|'center'|'right' = 'left', col: [number,number,number] = [0,0,0]) => {
-      doc.setFontSize(size); doc.setFont('helvetica', bold ? 'bold' : 'normal');
-      doc.setTextColor(...col); doc.text(s, x, y, { align });
-    };
-    const VL = (x: number, y: number, h: number) => doc.line(x, y, x, y + h);
-
-    doc.setDrawColor(0,0,0); doc.setLineWidth(0.2);
-
-    // ── HEADER ────────────────────────────────────────────────────────────
-    let Y = MT;
-    const hH = 10;
-    FB(ML, Y, PW-ML-MR, hH, 15, 15, 15);
-    T('LIGA DE FUTSAL ESCOLAR — GARANHUNS/PE', ML+25, Y+6.5, 14, true, 'left', [204,255,0]);
-    T('Súmula de Futsal', half+45, Y+6.5, 14, true, 'left', [255,255,255]);
-    
-    // Liga Logo
-    if (leagueLogo) {
-      doc.addImage(leagueLogo, 'JPEG', ML+2, Y+1, 18, hH-2);
-      doc.addImage(leagueLogo, 'JPEG', PW-MR-17, Y+1, 15, hH-2);
-    } else {
-      FB(PW-MR-17, Y+1, 15, hH-2, 180, 0, 0);
-      T('LOGO', PW-MR-9.5, Y+6, 5, true, 'center', [255,255,255]);
-    }
-    Y += hH;
-
-    // ── INFO ROWS (3 × 4mm) ────────────────────────────────────────────────
-    const iH = 4.2;
-    // Row 1
-    B(ML, Y, PW-ML-MR, iH); VL(half, Y, iH); VL(PW-MR-55, Y, iH);
-    T('CAMPEONATO: Liga de Futsal Escolar 2026', ML+1, Y+3, 5.5);
-    T('Jogo Nº: '+(game.id||'___'), half+1, Y+3, 5.5);
-    T('Horário: '+(game.time||'__:__'), PW-MR-54, Y+3, 5.5);
-    Y += iH;
-    // Row 2
-    B(ML, Y, PW-ML-MR, iH);
-    VL(ML+18, Y, iH); VL(ML+82, Y, iH); VL(ML+98, Y, iH); VL(ML+112, Y, iH);
-    VL(half+1, Y, iH); VL(half+58, Y, iH);
-    T('Etapa:', ML+1, Y+3, 5);
-    T('LOCAL: '+(game.location||'______________________'), ML+19, Y+3, 5);
-    T('Divisão', ML+83, Y+3, 5); T('Fase: '+(game.category||'__'), ML+99, Y+3, 5);
-    T('Data: '+(game.date||'__/__/____'), half+2, Y+3, 5);
-    T('Naipe: Futsal Escolar', half+59, Y+3, 5);
-    Y += iH;
-    // Row 3
-    B(ML, Y, PW-ML-MR, iH);
-    VL(ML+38, Y, iH); VL(half-10, Y, iH); VL(half+1, Y, iH);
-    T('Futsal', ML+1, Y+3, 5);
-    T('CHAVE: '+(game.category||'___'), ML+39, Y+3, 5);
-    T('Estado: PE', half-9, Y+3, 5);
-    T('Município: Garanhuns/PE    |   Santa Catarina 2026', half+2, Y+3, 5);
-    Y += iH;
-
-    // ── TEAM BLOCKS ────────────────────────────────────────────────────────
-    const tbH = 16;
-    FB(ML, Y, teamW, tbH, 245,245,245);
-    FB(half, Y, teamW, tbH, 245,245,245);
-    
-    // VS oval - Fixed position and size to avoid overlap
-    doc.setFillColor(255,255,255); 
-    doc.ellipse(half, Y+8, 8, 5, 'FD');
-    T('X', half, Y+10, 14, true, 'center', [0,0,0]);
-
-    // Home
-    T('Equipe [A]', ML+1, Y+4, 6, true);
-    if (homeLogoImg) {
-      doc.addImage(homeLogoImg, 'PNG', ML+2, Y+5, 10, 10);
-      T(homeTeam.name, ML+13, Y+10, 9, true, 'left', [0,0,120]);
-    } else {
-      T(homeTeam.name, ML+2, Y+10, 9, true, 'left', [0,0,120]);
-    }
-    T('Saída', ML+1, Y+15, 4.5);
-    doc.setDrawColor(80,80,80); doc.circle(ML+12, Y+14.2, 1.3, 'S'); doc.setDrawColor(0,0,0);
-
-    // Away
-    T('Equipe [B]', PW-MR-1, Y+4, 6, true, 'right');
-    if (awayLogoImg) {
-      doc.addImage(awayLogoImg, 'PNG', PW-MR-12, Y+5, 10, 10);
-      T(awayTeam.name, PW-MR-14, Y+10, 9, true, 'right', [120,0,0]);
-    } else {
-      T(awayTeam.name, PW-MR-2, Y+10, 9, true, 'right', [120,0,0]);
-    }
-    T('Saída', PW-MR-14, Y+15, 4.5, false, 'right');
-    doc.setDrawColor(80,80,80); doc.circle(PW-MR-16, Y+14.2, 1.3, 'S'); doc.setDrawColor(0,0,0);
-
-    Y += tbH;
-
-    // ── TIMEOUTS + FOULS ───────────────────────────────────────────────────
-    const toH = 8;
-    const drawTO = (sx: number, lbl: string) => {
-      B(sx, Y, teamW, toH);
-      T('Pedidos de Tempo '+lbl, sx+1, Y+2.5, 4.5, true);
-      B(sx, Y+3, 22, 5); T('1º Período', sx+1, Y+6.5, 4);
-      B(sx+22, Y+3, 22, 5); T('2º Período', sx+23, Y+6.5, 4);
+    try {
+      const data = sumulaData || sumulaState;
+      const gameId = sumulaData ? sumulaData.selectedGameId : sumulaState.selectedGameId;
+      const game = games.find((g: any) => String(g.id) === String(gameId)) || selectedGame;
       
-      // Kagiva / Sponsor Logo area
-      if (kagivaLogo) {
-        doc.addImage(kagivaLogo, 'JPEG', sx+47, Y+0.5, 22, toH-1);
-      } else {
-        FB(sx+47, Y+0.5, 22, toH-1, 228,228,228);
-        T('KAGIVA', sx+58, Y+5, 4.5, true, 'center', [100,100,100]);
+      if (!game) {
+        alert("Erro: Jogo não encontrado no sistema. Selecione novamente.");
+        return;
       }
 
-      T('Faltas Acumulativas', sx+73, Y+2, 4.5, true);
-      T('1º Per.:', sx+73, Y+5, 4); for(let i=0;i<5;i++) B(sx+90+i*5, Y+3, 4.5, 2.5);
-      T('2º Per.:', sx+73, Y+7.3, 4); for(let i=0;i<5;i++) B(sx+90+i*5, Y+5.8, 4.5, 2);
-    };
-    drawTO(ML, '[A]'); drawTO(half, '[B]');
-    Y += toH;
+      const hId = game.homeTeamId || game.home_team_id;
+      const aId = game.awayTeamId || game.away_team_id;
 
-    // ── TÉCNICO + CAPITÃO ──────────────────────────────────────────────────
-    const tlH = 4;
-    B(ML, Y, teamW, tlH); B(half, Y, teamW, tlH);
-    T('Técnico:', ML+1, Y+3, 5, true); T('Capitão:', ML+cFixed+22, Y+3, 5, true);
-    T('Técnico:', half+1, Y+3, 5, true); T('Capitão:', half+cFixed+22, Y+3, 5, true);
-    Y += tlH;
+      const homeTeam: any = teams.find((t: any) => String(t.id) === String(hId)) || { name: 'Equipe A' };
+      const awayTeam: any = teams.find((t: any) => String(t.id) === String(aId)) || { name: 'Equipe B' };
+      
+      const homeAths = athletes.filter((a: any) => String(a.teamId || a.team_id) === String(hId) && (!game.category || a.category === game.category));
+      const awayAths = athletes.filter((a: any) => String(a.teamId || a.team_id) === String(aId) && (!game.category || a.category === game.category));
+      
+      const evH: any[] = data.homeEvents || [];
+      const evA: any[] = data.awayEvents || [];
 
-    // ── COLUMN HEADERS ────────────────────────────────────────────────────
-    const chH = 6;
-    const DK: [number,number,number] = [30,30,30];
+      let doc: any;
+      try {
+        doc = new (window as any).jsPDF({ orientation: 'landscape', format: 'a4', unit: 'mm' });
+      } catch (e) {
+        doc = new jsPDF({ orientation: 'landscape', format: 'a4', unit: 'mm' });
+      }
 
-    const drawHdrs = (sx: number) => {
-      let x = sx; const cy = Y;
-      const hc = (w: number, tx: string, col: [number,number,number]=[255,255,255]) => {
-        FB(x, cy, w, chH, ...DK); T(tx, x+0.5, cy+chH/2+1.5, 3.5, true, 'left', col); x += w;
+      const loadImg = (url: string): Promise<HTMLImageElement | null> => {
+        return new Promise((resolve) => {
+          if (!url) { resolve(null); return; }
+          const img = new window.Image();
+          img.crossOrigin = "anonymous";
+          let resolved = false;
+          img.onload = () => { if(!resolved){ resolved=true; resolve(img); } };
+          img.onerror = () => { if(!resolved){ resolved=true; resolve(null); } };
+          setTimeout(() => { if(!resolved){ resolved=true; resolve(null); } }, 4000);
+          img.src = url;
+        });
       };
-      hc(cReg,'Reg'); hc(cName,'ATLETAS'); hc(cNum,'nº');
-      hc(cAm,'Am',[255,200,0]); hc(cVm,'Vm',[255,70,70]);
-      // GOLS top banner
-      const gX0 = x; const totGW = cGolsArea;
-      FB(gX0, cy, totGW, chH/2, ...DK);
-      T('GOLS', gX0+totGW/2, cy+chH/4+1, 4, true, 'center', [255,255,255]);
-      // Goal number cells
-      let gx = gX0; const ny = cy+chH/2; const nh = chH/2;
-      for (const gn of golNums) {
-        if (gn === '|') {
-          FB(gx, ny, cSepW, nh, 50,50,50);
-          T(':', gx+cSepW/2, ny+nh-0.5, 3, false, 'center', [200,200,200]);
-          gx += cSepW;
-        } else {
-          const blue = gn === 11 || gn === 21;
-          const bg: [number,number,number] = blue ? [0,60,160] : (Number(gn)%2===0?[230,230,230]:[255,255,255]);
-          const ft: [number,number,number] = blue ? [255,255,255] : [0,0,0];
-          FB(gx, ny, cGol, nh, ...bg);
-          T(String(gn), gx+cGol/2, ny+nh-0.5, 3, false, 'center', ft);
-          gx += cGol;
-        }
+
+      const leagueLogo = await loadImg('/logos/logo.jpg') || (settings.leagueLogo ? await loadImg(settings.leagueLogo) : null);
+      const homeLogoImg = homeTeam.logo ? await loadImg(homeTeam.logo) : null;
+      const awayLogoImg = awayTeam.logo ? await loadImg(awayTeam.logo) : null;
+      const sponsorLogoImg = await loadImg('/logos/logo-sesc.png');
+
+      const PW = 297, PH = 210, ML = 5, MR = 5, MT = 5, MB = 5;
+      const wD = PW - ML - MR;
+      const half = PW / 2;
+      
+      const B = (x: number, y: number, w: number, h: number) => doc.rect(x, y, w, h, 'S');
+      const F = (x: number, y: number, w: number, h: number, c: [number,number,number]) => { doc.setFillColor(...c); doc.rect(x, y, w, h, 'F'); };
+      const FB = (x: number, y: number, w: number, h: number, c: [number,number,number]) => { doc.setFillColor(...c); doc.rect(x, y, w, h, 'FD'); };
+      const T = (s: string, x: number, y: number, size = 6, bold = false, align: 'left'|'center'|'right' = 'left', c: [number,number,number] = [0,0,0]) => {
+        doc.setFontSize(size); doc.setFont('helvetica', bold ? 'bold' : 'normal'); doc.setTextColor(...c); doc.text(String(s || ''), x, y, { align });
+      };
+      const VL = (x: number, y: number, h: number) => doc.line(x, y, x, y + h);
+
+      doc.setDrawColor(0,0,0); doc.setLineWidth(0.2);
+
+      // Main Outer Border
+      B(ML, MT, wD, PH - MT - MB);
+
+      let Y = MT, hH = 14;
+      let w1 = wD * 0.55, w2 = wD * 0.25, w3 = wD * 0.20;
+
+      // ROW 1
+      B(ML, Y, wD, hH); VL(ML + w1, Y, hH); VL(ML + w1 + w2, Y, hH);
+      T('LIGA DE FUTSAL ESCOLAR', ML + w1/2, Y + 9, 14, true, 'center');
+      T('Súmula de FUTSAL', ML + w1 + w2/2, Y + 9, 11, true, 'center');
+      if (leagueLogo) {
+        try { doc.addImage(leagueLogo, "AUTO", ML + w1 + w2 + w3/2 - 5, Y + 1, 10, hH - 2); } catch(e){}
+      } else {
+        T('LOGO', ML + w1 + w2 + w3/2, Y + 9, 9, true, 'center');
       }
-      // SUBSTITUIÇÕES
-      x = gx;
-      FB(x, cy, cSubsTotal, chH, ...DK);
-      T('SUBSTITUIÇÕES', x+cSubsTotal/2, cy+chH/2+1.5, 3.5, true, 'center', [255,255,255]);
-      for(let s=0;s<cSubs;s++) B(x+s*cSubW, cy, cSubW, chH);
-    };
-    drawHdrs(ML); drawHdrs(half);
-    Y += chH;
+      Y += hH; hH = 5;
 
-    // ── PLAYER ROWS ───────────────────────────────────────────────────────
-    const rH = 4.3;
-    const maxR = 18;
+      // ROW 2
+      B(ML, Y, wD, hH); VL(ML + w1, Y, hH); VL(ML + w1 + w2, Y, hH);
+      T('CAMPEONATO:', ML + 1, Y + 3.5, 6, true);
+      T('Jogo Nº: ' + (game.id||'____'), ML + w1 + 1, Y + 3.5, 6, true);
+      T('Horário: ' + (game.time||'__:__'), ML + w1 + w2 + 1, Y + 3.5, 6, true);
+      Y += hH;
 
-    const drawRow = (sx: number, ath: any, evts: any[], idx: number) => {
-      const even = idx%2===0;
-      const rb: [number,number,number] = even ? [255,255,255] : [246,246,246];
-      let x = sx;
-      // registro
-      FB(x, Y, cReg, rH, ...rb); x += cReg;
-      // name
-      FB(x, Y, cName, rH, ...rb);
-      if(ath) T(ath.name, x+0.5, Y+rH/2+1.2, 4.3, false, 'left', [0,0,0]);
-      x += cName;
-      // nº
-      FB(x, Y, cNum, rH, ...rb);
-      if(ath) T(String(ath.number||''), x+cNum/2, Y+rH/2+1.2, 4.8, true, 'center');
-      x += cNum;
-      // Amarelo
-      FB(x, Y, cAm, rH, ...rb);
-      if(ath){ const n=evts.filter(e=>e.type==='amarelo'&&String(e.playerId)===String(ath.id)).length; if(n>0){FB(x+0.3,Y+0.3,cAm-0.6,rH-0.6,255,200,0);T(String(n),x+cAm/2,Y+rH/2+1.2,4.8,true,'center');} }
-      x += cAm;
-      // Vermelho
-      FB(x, Y, cVm, rH, ...rb);
-      if(ath){ const n=evts.filter(e=>e.type==='vermelho'&&String(e.playerId)===String(ath.id)).length; if(n>0){FB(x+0.3,Y+0.3,cVm-0.6,rH-0.6,210,20,20);T('V',x+cVm/2,Y+rH/2+1.2,4.8,true,'center',[255,255,255]);} }
-      x += cVm;
-      // Goal cells
-      const tg = ath ? evts.filter(e=>e.type==='gol'&&String(e.playerId)===String(ath.id)).length : 0;
-      let gi = 0;
-      for(const gn of golNums) {
-        if(gn==='|'){ FB(x,Y,cSepW,rH,200,200,200); x+=cSepW; }
-        else {
-          gi++;
-          const mk = tg >= gi;
-          FB(x, Y, cGol, rH, ...(mk?[20,160,20] as [number,number,number]:rb));
-          if(mk) T('●', x+cGol/2, Y+rH/2+1.2, 2.8, false, 'center', [255,255,255]);
-          else B(x, Y, cGol, rH);
-          x += cGol;
-        }
-      }
-      // Subs
-      for(let s=0;s<cSubs;s++){ FB(x,Y,cSubW,rH,...rb); x+=cSubW; }
-    };
+      // ROW 3
+      B(ML, Y, wD, hH);
+      let cw = w1 / 4;
+      VL(ML + cw, Y, hH); VL(ML + cw*3, Y, hH); VL(ML + w1, Y, hH);
+      T('Etapa:', ML + 1, Y + 3.5, 5); T('LOCAL: ' + (game.location||''), ML + cw + 1, Y + 3.5, 5, true);
+      T('Divisão:', ML + cw*3 + 1, Y + 3.5, 5); T('Fase: ' + (game.category||''), ML + w1 - 20, Y + 3.5, 5, true);
+      VL(ML + w1 + w2, Y, hH); T('Data: ' + (game.date||'__/__/__'), ML + w1 + 1, Y + 3.5, 5, true);
+      T('Naipe: Futsal Escolar', ML + w1 + w2 + 1, Y + 3.5, 5, true);
+      Y += hH;
 
-    for(let r=0;r<maxR;r++) {
-      drawRow(ML, homeAths[r]||null, evH, r);
-      drawRow(half, awayAths[r]||null, evA, r);
-      Y += rH;
-    }
+      // ROW 4
+      B(ML, Y, wD, hH); VL(ML + cw, Y, hH); VL(ML + cw*3, Y, hH); VL(ML + w1, Y, hH);
+      T('Futsal', ML + 1, Y + 3.5, 5, true); T('CHAVE: ' + (game.category||''), ML + cw*3 + 1, Y + 3.5, 5, true);
+      T('Estado:', ML + w1 + 1, Y + 3.5, 5, true); T('PERNAMBUCO', ML + w1 + w2 + w3/2, Y + 3.5, 6, true, 'center');
+      Y += hH;
 
-    // ── STAFF WITH GOAL COLUMNS (Técnico + Aux) ───────────────────────────
-    const stH = 3.6;
-    const drawStaffGoalRow = (label: string, ri: number) => {
-      const rb: [number,number,number] = ri%2===0?[250,250,250]:[244,244,244];
-      [ML, half].forEach(sx => {
+      // ROW 5 Teams
+      hH = 8; B(ML, Y, wD, hH);
+      let midW = 15; let tW = (wD - midW) / 2;
+      VL(ML + tW, Y, hH); VL(PW - MR - tW, Y, hH);
+      T('Equipe [A]', ML + 1, Y + 3, 5, true);
+      if (homeLogoImg) try { doc.addImage(homeLogoImg, "AUTO", ML + 20, Y + 1, 6, 6); } catch(e){}
+      T(homeTeam.name, ML + 30, Y + 5.5, 8, true);
+      T('Saída O', ML + 1, Y + 7, 5);
+      
+      doc.setFillColor(255,255,255); doc.ellipse(ML + tW + midW/2, Y + 4, 6, 3, 'F');
+      T('X', ML + tW + midW/2, Y + 6, 12, true, 'center');
+      
+      T('Equipe [B]', PW - MR - tW + 1, Y + 3, 5, true);
+      if (awayLogoImg) try { doc.addImage(awayLogoImg, "AUTO", PW - MR - tW + 20, Y + 1, 6, 6); } catch(e){}
+      T(awayTeam.name, PW - MR - tW + 30, Y + 5.5, 8, true);
+      T('Saída O', PW - MR - tW + 1, Y + 7, 5);
+      Y += hH;
+
+      // ROW 6 Timeouts
+      hH = 10;
+      const drawTO = (sx: number, lbl: string) => {
+        B(sx, Y, tW * 0.35, hH); B(sx, Y, tW * 0.35, 4);
+        T('Pedidos de Tempo Equipe ' + lbl, sx + 1, Y + 3, 4, true);
+        T('1º Período', sx + 1, Y + 6, 4); B(sx + 15, Y + 4.5, 12, 2.5);
+        T('2º Período', sx + 1, Y + 9, 4); B(sx + 15, Y + 7.5, 12, 2.5);
+        
+        B(sx + tW * 0.35, Y, tW * 0.25, hH);
+        if (sponsorLogoImg) try { doc.addImage(sponsorLogoImg, "AUTO", sx + tW*0.35 + 2, Y + 1, tW*0.25 - 4, hH - 2); } catch(e){}
+        
+        B(sx + tW * 0.6, Y, tW * 0.4 + midW/2, hH); B(sx + tW * 0.6, Y, tW * 0.4 + midW/2, 4);
+        T('Faltas Acumulativas', sx + tW * 0.6 + (tW*0.4+midW/2)/2, Y + 3, 4, true, 'center');
+        T('1º Período', sx + tW * 0.6 + 1, Y + 6, 4);
+        for(let i=0; i<5; i++) B(sx + tW * 0.6 + 15 + i*5.5, Y + 4.5, 5, 2.5);
+        T('2º Período', sx + tW * 0.6 + 1, Y + 9, 4);
+        for(let i=0; i<5; i++) B(sx + tW * 0.6 + 15 + i*5.5, Y + 7.5, 5, 2.5);
+      };
+      drawTO(ML, '[A]'); drawTO(PW - MR - tW - midW/2, '[B]');
+      Y += hH;
+
+      // ROW 7 Capitão
+      hH = 5;
+      B(ML, Y, tW + midW/2, hH); B(PW - MR - tW - midW/2, Y, tW + midW/2, hH);
+      T('Técnico:________________________ Capitão:___________________', ML + 1, Y + 3.5, 5, true);
+      T('Técnico:________________________ Capitão:___________________', PW - MR - tW - midW/2 + 1, Y + 3.5, 5, true);
+      Y += hH;
+
+      // Tables
+      let thH = 6;
+      let offLeft = ML, offRight = PW - MR - tW - midW/2;
+      let wT = tW + midW/2; // width of each table side = 135
+      // Columns: registro (15), ATLETAS (60), n (8), Am (5), Vm (5), GOLS (12), SUBST (30) => total 135
+      let cwCol = { r: 15, a: 52, n: 8, am: 5, vm: 5, g: 12, s: 38 }; // Sum = 135
+      
+      const drawTh = (sx: number) => {
         let x = sx;
-        FB(x,Y,cReg,stH,...rb); x+=cReg;
-        FB(x,Y,cName,stH,...rb); T(label,x+0.5,Y+stH/2+1.0,4.2); x+=cName;
-        FB(x,Y,cNum,stH,...rb); x+=cNum;
-        FB(x,Y,cAm,stH,...rb); x+=cAm;
-        FB(x,Y,cVm,stH,...rb); x+=cVm;
-        for(const gn of golNums){
-          if(gn==='|'){FB(x,Y,cSepW,stH,200,200,200);x+=cSepW;}
-          else{FB(x,Y,cGol,stH,...rb);B(x,Y,cGol,stH);x+=cGol;}
-        }
-        for(let s=0;s<cSubs;s++){FB(x,Y,cSubW,stH,...rb);x+=cSubW;}
+        B(x, Y, cwCol.r, thH); T('registro', x + cwCol.r/2, Y + 4, 5, false, 'center'); x += cwCol.r;
+        B(x, Y, cwCol.a, thH); T('ATLETAS', x + cwCol.a/2, Y + 4, 5, true, 'center'); x += cwCol.a;
+        B(x, Y, cwCol.n, thH); T('nº', x + cwCol.n/2, Y + 4, 5, true, 'center'); x += cwCol.n;
+        B(x, Y, cwCol.am, thH); T('Am', x + cwCol.am/2, Y + 4, 4, false, 'center'); x += cwCol.am;
+        B(x, Y, cwCol.vm, thH); T('Vm', x + cwCol.vm/2, Y + 4, 4, false, 'center'); x += cwCol.vm;
+        B(x, Y, cwCol.g, thH/2); T('GOLS', x + cwCol.g/2, Y + 2.5, 4, true, 'center'); 
+        VL(x + cwCol.g/2, Y + thH/2, thH/2); x += cwCol.g;
+        B(x, Y, cwCol.s, thH/2); T('SUBSTITUIÇÕES', x + cwCol.s/2, Y + 2.5, 4, true, 'center');
+        let nSub = Math.floor(cwCol.s / 3.8); // about 10 sub cols
+        for(let i=0; i<10; i++) VL(x + (cwCol.s/10)*i, Y + thH/2, thH/2);
+      };
+      drawTh(offLeft); drawTh(offRight);
+      Y += thH;
+
+      let rH = 6.4;
+      let goalIndex = 0;
+      
+      const drawRow = (sx: number, ath: any, evts: any[]) => {
+        let x = sx;
+        B(x, Y, cwCol.r, rH); x += cwCol.r;
+        B(x, Y, cwCol.a, rH); if(ath) T(ath.name.substring(0, 30), x + 1, Y + 4, 5); x += cwCol.a;
+        B(x, Y, cwCol.n, rH); if(ath) T(String(ath.number||''), x + cwCol.n/2, Y + 4, 6, true, 'center'); x += cwCol.n;
+        
+        let amC = ath ? evts.filter(e=>e.type==='amarelo'&&String(e.playerId)===String(ath.id)).length : 0;
+        let vmC = ath ? evts.filter(e=>e.type==='vermelho'&&String(e.playerId)===String(ath.id)).length : 0;
+        B(x, Y, cwCol.am, rH); if(amC>0) { FB(x,Y,cwCol.am,rH,[255,200,0]); T(String(amC), x+cwCol.am/2, Y+4, 5, true, 'center'); } x += cwCol.am;
+        B(x, Y, cwCol.vm, rH); if(vmC>0) { FB(x,Y,cwCol.vm,rH,[230,0,0]); T('V', x+cwCol.vm/2, Y+4, 5, true, 'center',[255,255,255]); } x += cwCol.vm;
+        
+        B(x, Y, cwCol.g, rH); VL(x + cwCol.g/2, Y, rH); doc.line(x, Y + rH/2, x + cwCol.g, Y + rH/2);
+        T(String(goalIndex+1), x + cwCol.g/4, Y + 2.5, 4, false, 'center');
+        T(String(goalIndex+2), x + cwCol.g*0.75, Y + 2.5, 4, false, 'center');
+        T(':', x + cwCol.g/4, Y + rH - 1, 4, false, 'center'); T(':', x + cwCol.g*0.75, Y + rH - 1, 4, false, 'center');
+        x += cwCol.g;
+        
+        B(x, Y, cwCol.s, rH); doc.line(x, Y + rH/2, x + cwCol.s, Y + rH/2);
+        for(let i=0; i<10; i++) VL(x + (cwCol.s/10)*i, Y, rH);
+      };
+
+      for(let r=0; r<14; r++) {
+        let sY = Y, giOrig = goalIndex;
+        drawRow(offLeft, homeAths[r]||null, evH);
+        goalIndex = giOrig; // Left and Right share the same numbered layout (1 to x down both sides)
+        drawRow(offRight, awayAths[r]||null, evA);
+        goalIndex += 2;
+        Y += rH;
+      }
+
+      // Staff rows (6)
+      rH = 5.2;
+      const drawStaffRow = (sx: number, label: string) => {
+        let x = sx;
+        B(x, Y, cwCol.r, rH); x += cwCol.r;
+        B(x, Y, cwCol.a, rH); T(label, x + 1, Y + 3.5, 4.5); x += cwCol.a;
+        B(x, Y, cwCol.n, rH); x += cwCol.n;
+        B(x, Y, cwCol.am, rH); x += cwCol.am;
+        B(x, Y, cwCol.vm, rH); x += cwCol.vm;
+        B(x, Y, cwCol.g, rH); VL(x + cwCol.g/2, Y, rH); doc.line(x, Y + rH/2, x + cwCol.g, Y + rH/2);
+        T(String(goalIndex+1), x + cwCol.g/4, Y + 2, 4, false, 'center');
+        T(String(goalIndex+2), x + cwCol.g*0.75, Y + 2, 4, false, 'center');
+        T(':', x + cwCol.g/4, Y + rH - 0.5, 4, false, 'center'); T(':', x + cwCol.g*0.75, Y + rH - 0.5, 4, false, 'center');
+        x += cwCol.g;
+        B(x, Y, cwCol.s, rH); doc.line(x, Y + rH/2, x + cwCol.s, Y + rH/2);
+        for(let i=0; i<10; i++) VL(x + (cwCol.s/10)*i, Y, rH);
+      };
+
+      const staffs = ['Técnico:', 'Aux. Técnico:', 'Prep. Físico:', 'Atendente:', 'Fisioterapeuta:', 'SUPERVISOR:'];
+      for(let r=0; r<6; r++) {
+        let sY = Y, giOrig = goalIndex;
+        drawStaffRow(offLeft, staffs[r]);
+        goalIndex = giOrig;
+        drawStaffRow(offRight, staffs[r]);
+        goalIndex += 2;
+        Y += rH;
+      }
+
+      // Arbitragem
+      B(ML, Y, wD, PH - MB - Y);
+      let fH = (PH - MB - Y) / 6;
+      T('Equipe de Arbitragem:', ML + 20, Y + 3, 5, true, 'center');
+      let arbW = 80;
+      VL(ML + arbW, Y, PH - MB - Y);
+      const arb = [['ÁRBITRO 1:', data.referee], ['ÁRBITRO 2:', data.assistant1], ['ANOTADOR:', data.assistant2], ['CRONOMETRISTA:', ''], ['REPRESENTANTE:', '']];
+      let aY = Y + fH;
+      arb.forEach(([l, v], i) => {
+        B(ML, aY, arbW, fH); T(l, ML + 1, aY + 3.5, 4.5, true); T(v||'______________________________', ML + 28, aY + 3.5, 5);
+        aY += fH;
       });
-      Y += stH;
-    };
-    drawStaffGoalRow('Técnico:', 0);
-    drawStaffGoalRow('Aux. Técnico:', 1);
 
-    // Remaining staff (no goal columns)
-    ['Prep. Físico:','Atendente:','Fisioterapeuta:','Supervisor:'].forEach((label, i) => {
-      B(ML,Y,teamW,stH); T(label,ML+1,Y+stH/2+1.0,4.0);
-      B(half,Y,teamW,stH); T(label,half+1,Y+stH/2+1.0,4.0);
-      Y += stH;
-    });
+      let hW = 100;
+      VL(ML + arbW + hW, Y, PH - MB - Y);
+      
+      let cy = Y;
+      B(ML + arbW, cy, hW, fH);
+      let s2 = hW / 3;
+      VL(ML + arbW + s2, cy, fH); VL(ML + arbW + s2*2, cy, fH);
+      T('HORÁRIO', ML + arbW + s2/2, cy + 3.5, 4.5, true, 'center'); T('INÍCIO', ML + arbW + s2 + s2/2, cy + 3.5, 4.5, true, 'center'); T('TÉRMINO', ML + arbW + s2*2 + s2/2, cy + 3.5, 4.5, true, 'center');
+      cy += fH;
+      ['1º Período', '2º Período', 'Período Extra', '', 'VENCEDOR:'].forEach((p, i) => {
+        B(ML + arbW, cy, hW, fH);
+        if (i < 3) {
+          VL(ML + arbW + s2, cy, fH); VL(ML + arbW + s2*2, cy, fH);
+        }
+        if (p) T(p, ML + arbW + 1, cy + 3.5, 4.5, true);
+        if (p === 'VENCEDOR:') {
+          let wn = (data.homeScore!==''&&data.awayScore!=='') ? (Number(data.homeScore)>Number(data.awayScore)?homeTeam.name:Number(data.awayScore)>Number(data.homeScore)?awayTeam.name:'EMPATE') : '';
+          T(wn, ML + arbW + 20, cy + 3.5, 6, true);
+        }
+        cy += fH;
+      });
 
-    // ── FOOTER ────────────────────────────────────────────────────────────
-    const fY = Y, fH = PH - 2 - fY;
-    FB(ML, fY, PW-ML-MR, fH, 240,240,240);
+      let cW = wD - arbW - hW;
+      let oC = ML + arbW + hW;
+      cy = Y;
+      B(oC, cy, cW, fH);
+      T('CONTAGENS', oC + cW/2, cy + 3.5, 4.5, true, 'center');
+      cy += fH;
+      ['1º Período', '2º Período', 'Período Extra', 'Penalidades', 'FINAL'].forEach((p, i) => {
+        B(oC, cy, cW, fH);
+        let s2c = cW * 0.7;
+        VL(oC + s2c, cy, fH);
+        T(p, oC + 1, cy + 3.5, 4.5, true);
+        if (i === 4) {
+          let fs = (data.homeScore!==''&&data.awayScore!=='') ? data.homeScore + ' X ' + data.awayScore : 'X';
+          T(fs, oC + s2c + (cW-s2c)/2, cy + 4, 6, true, 'center');
+        } else {
+          T('X', oC + s2c + (cW-s2c)/2, cy + 3.5, 4.5, true, 'center');
+        }
+        cy += fH;
+      });
 
-    // Arbitration block
-    const arbW = 82;
-    T('Equipe de Arbitragem:', ML+2, fY+3.5, 5.5, true);
-    const arb = [
-      ['ÁRBITRO 1:', data.referee||''],['ÁRBITRO 2:', data.assistant1||''],
-      ['ANOTADOR:', data.assistant2||''],['CRONOMETRISTA:',''],['REPRESENTANTE:',''],
-    ];
-    let aY = fY+5;
-    arb.forEach(([l, v]) => {
-      B(ML,aY,arbW,4.2); T(l,ML+1,aY+3,5,true); T(v||'________________________________',ML+34,aY+3,5); aY+=4.2;
-    });
-
-    // Horário block
-    const hX = ML+arbW+1, hW = 72, hCW = hW/3;
-    T('HORÁRIO', hX+hW/2, fY+3.5, 5.5, true, 'center');
-    let hY = fY+5;
-    [['',hX],[' INÍCIO',hX+hCW],['TÉRMINO',hX+hCW*2]].forEach(([l,x]) => {
-      FB(Number(x),hY,hCW,4,50,50,50); T(String(l),Number(x)+hCW/2,hY+3,4,true,'center',[255,255,255]);
-    });
-    hY += 4;
-    ['1º Período','2º Período','Período Extra'].forEach(p => {
-      B(hX,hY,hCW,5); T(p,hX+1,hY+3.5,4.5,true);
-      B(hX+hCW,hY,hCW,5); B(hX+hCW*2,hY,hCW,5); hY+=5;
-    });
-    const wn = (data.homeScore!==''&&data.awayScore!=='')
-      ? (Number(data.homeScore)>Number(data.awayScore)?homeTeam.name:Number(data.awayScore)>Number(data.homeScore)?awayTeam.name:'EMPATE')
-      : '';
-    FB(hX,hY,hW,5,20,20,20); T('VENCEDOR: '+wn,hX+1,hY+3.5,5,true,'left', [204, 255, 0]);
-
-    // Contagens block
-    const cX = hX+hW+1, cW = PW-MR-cX, cc = cW*2/3;
-    T('CONTAGENS', cX+cW/2, fY+3.5, 5.5, true, 'center');
-    let ctY = fY+5;
-    FB(cX,ctY,cc,4,50,50,50); T('PERÍODO',cX+1,ctY+3,4,true,'left',[255,255,255]);
-    FB(cX+cc,ctY,cW-cc,4,50,50,50); T('PLACAR',cX+cc+1,ctY+3,4,true,'left',[255,255,255]);
-    ctY += 4;
-    const fs = `${data.homeScore!==''?data.homeScore:'-'} x ${data.awayScore!==''?data.awayScore:'-'}`;
-    ['1º Período','2º Período','Período Extra','Penalidades','FINAL'].forEach(p => {
-      const isF = p==='FINAL';
-      FB(cX,ctY,cc,5,...(isF?[20,20,20] as [number,number,number]:[248,248,248]));
-      T(p,cX+1,ctY+3.5,isF?5:4.5,isF,'left',isF?[204,255,0]:[0,0,0]);
-      FB(cX+cc,ctY,cW-cc,5,...(isF?[20,20,20] as [number,number,number]:[255,255,255]));
-      T(isF?fs:'X',cX+cc+1,ctY+3.5,isF?5:4.5,isF,'left',isF?[204,255,0]:[0,0,0]);
-      ctY += 5;
-    });
-
-    doc.setFontSize(4); doc.setTextColor(160,160,160);
-    doc.text('Liga de Futsal Escolar — Garanhuns/PE — Documento Oficial — '+new Date().toLocaleDateString('pt-BR'), PW/2, PH-1, {align:'center'});
-    doc.save('sumula_'+(game.category||'jogo').replace(/\s+/g,'_')+'_'+homeTeam.name?.split(' ')[0]+'_vs_'+awayTeam.name?.split(' ')[0]+'.pdf');
+      doc.setFontSize(4); doc.setTextColor(160,160,160);
+      doc.text('Liga de Futsal Escolar — ' + new Date().toLocaleDateString('pt-BR'), half, PH-1, {align:'center'});
+      const fileName = `sumula_${(game.category||'jogo').replace(/\s+/g,'_')}_${(homeTeam.name||'A').split(' ')[0]}_vs_${(awayTeam.name||'B').split(' ')[0]}.pdf`;
+      doc.save(fileName);
+      console.log("PDF finalizado!");
+    } catch (err: any) {
+      console.error("ERRO GERAL:", err);
+      alert("ERRO CRÍTICO AO GERAR: " + (err.message || 'Desconhecido') + "\nVeja o console (F12).");
+    }
   };
 
   const DataTable = ({ title, data, columns, onAdd, onEdit, onDelete, onMoveUp, onMoveDown, extraActions }: any) => (
@@ -1113,7 +1062,7 @@ export default function Admin() {
             games={games}
             teams={teams}
             athletes={athletes}
-            sumulaState={sumuiaState}
+            sumulaState={sumulaState}
             setSumulaState={setSumulaState}
             selectedGame={selectedGame}
             homeTeam={sumulaHomeTeam}
