@@ -908,8 +908,24 @@ export default function Admin() {
 
       <Modal isOpen={modalType === 'banner'} onClose={closeModal} title={currentData?.id ? "Editar Banner" : "Novo Banner"}>
         <form onSubmit={(e) => handleSave(e, 'banner', banners, setBanners)}>
-          <label className={labelClass}>URL da Imagem (Fundo)</label>
-          <input required type="text" className={inputClass} value={currentData.image || ''} onChange={e => setCurrentData({...currentData, image: e.target.value})} placeholder="https://images.unsplash..." />
+          <label className={labelClass}>Upload de Imagem (ou URL direta)</label>
+          <div className="flex items-center gap-4 mb-2">
+            {currentData.image ? <img src={currentData.image} className="w-24 h-12 object-cover rounded shadow border border-dark-border" /> : <div className="w-24 h-12 bg-dark rounded border border-dark-border flex items-center justify-center flex-shrink-0"><Image className="w-5 h-5 text-gray-500" /></div>}
+            <input type="file" accept="image/*" onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                 const img = new window.Image();
+                 img.onload = () => {
+                   resizeImage(file, 1920, 1080).then(base64 => {
+                     setCurrentData((prev: any) => ({ ...prev, image: base64, dimensions: `${img.width}x${img.height}` }));
+                   });
+                 };
+                 img.src = URL.createObjectURL(file);
+              }
+            }} className="text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-dark hover:file:bg-primary-dark" />
+          </div>
+          {currentData.dimensions && <p className="text-xs text-primary font-bold mb-4">Dimensões da Imagem: {currentData.dimensions}px</p>}
+          <input required type="text" className={inputClass} value={currentData.image || ''} onChange={e => setCurrentData({...currentData, image: e.target.value})} placeholder="https://images.unsplash... ou faça upload" />
           <label className={labelClass}>Título</label>
           <input required type="text" className={inputClass} value={currentData.title || ''} onChange={e => setCurrentData({...currentData, title: e.target.value})} />
           <label className={labelClass}>Subtítulo</label>

@@ -16,7 +16,28 @@ export default function Home() {
   const settings = settingsArr[0] ?? {};
 
   // Safety fallbacks
-  const carouselItems = banners?.length > 0 ? banners : [];
+  const carouselItems = banners?.length > 0 ? banners : [
+    {
+      id: "default-1",
+      image: "/banner-principal.png",
+      title: "LIGA DE FUTSAL ESCOLAR",
+      subtitle: "A Maior Competição Regional",
+      description: "Jovens talentos em quadra disputando a glória máxima do esporte estudantil.",
+      ctaText: "VER EQUIPES",
+      ctaLink: "/equipes",
+      accent: "primary"
+    },
+    {
+      id: "default-2",
+      image: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?q=80&w=1920&auto=format&fit=crop",
+      title: "INSCRIÇÕES ABERTAS",
+      subtitle: "Temporada 2026",
+      description: "Garanta a vaga da sua escola na maior competição do ano. Vagas limitadas por categoria.",
+      ctaText: "INSCREVA-SE",
+      ctaLink: "/inscricoes",
+      accent: "secondary"
+    }
+  ];
   const loadedTeams = teams || [];
   const nextGames = (games || []).filter((g: any) => g.status !== 'Finalizado').slice(0, 4);
 
