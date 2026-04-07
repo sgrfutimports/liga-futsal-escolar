@@ -302,40 +302,54 @@ export default function Home() {
               <div className="flex items-center justify-between border-b border-dark-border pb-4">
                 <h2 className="text-3xl font-display text-white flex items-center gap-3">
                   <Trophy className="text-primary w-8 h-8" />
-                  TOP 5 - GERAL
+                  TOP 5 POR SÉRIE
                 </h2>
               </div>
-              <div className="bg-dark-card border border-dark-border rounded-lg overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-dark text-gray-400 font-display text-sm border-b border-dark-border">
-                      <th className="p-3 font-normal">POS</th>
-                      <th className="p-3 font-normal">EQUIPE</th>
-                      <th className="p-3 font-normal text-center">PTS</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {standings.map((team: any, idx: number) => (
-                      <tr key={team.id} className="border-b border-dark-border/50 hover:bg-dark transition-colors">
-                        <td className="p-3 font-display">
-                          <span className={cn(
-                            "w-6 h-6 rounded flex items-center justify-center text-xs",
-                            idx === 0 ? "bg-primary text-dark" : "text-gray-400"
-                          )}>
-                            {idx + 1}
-                          </span>
-                        </td>
-                        <td className="p-3 font-display text-sm">{team.name}</td>
-                        <td className="p-3 font-display text-primary text-center">{team.pts}</td>
-                      </tr>
-                    ))}
-                    {standings.length === 0 && (
-                      <tr><td colSpan={3} className="p-4 text-center text-gray-500">Nenhum dado</td></tr>
-                    )}
-                  </tbody>
-                </table>
-                <Link to="/classificacao" className="block w-full text-center p-3 font-display text-sm text-gray-400 hover:text-primary hover:bg-dark transition-colors">
-                  VER TABELA COMPLETA
+              <div className="space-y-8">
+                {Object.keys(groupedStandings).length === 0 ? (
+                  <div className="text-gray-500 font-display py-8 text-center border border-dark-border rounded-lg border-dashed">
+                    Nenhuma classificação registrada ainda.
+                  </div>
+                ) : Object.entries(groupedStandings).sort().map(([category, standings]: [string, any]) => (
+                  <div key={category} className="space-y-3">
+                    <h3 className="text-sm font-display text-primary/80 uppercase tracking-widest border-b border-dark-border pb-1">
+                      TOP 5 - {category}
+                    </h3>
+                    <div className="bg-dark-card border border-dark-border rounded-lg overflow-hidden shadow-lg">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-dark text-gray-400 font-display text-[10px] md:text-sm border-b border-dark-border">
+                            <th className="p-2 md:p-3 font-normal lg:w-16">POS</th>
+                            <th className="p-2 md:p-3 font-normal">EQUIPE</th>
+                            <th className="p-2 md:p-3 font-normal text-center lg:w-16">PTS</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {standings.map((team: any, idx: number) => (
+                            <tr key={team.id} className="border-b border-dark-border/50 hover:bg-dark transition-colors">
+                              <td className="p-2 md:p-3 font-display">
+                                <span className={cn(
+                                  "w-5 h-5 md:w-6 md:h-6 mx-auto rounded flex items-center justify-center text-[10px] md:text-xs",
+                                  idx === 0 ? "bg-primary text-dark font-bold shadow-[0_0_10px_rgba(204,255,0,0.3)]" : "text-gray-400"
+                                )}>
+                                  {idx + 1}
+                                </span>
+                              </td>
+                              <td className="p-2 md:p-3 font-sans text-xs md:text-sm text-gray-200 truncate">
+                                {team.name}
+                              </td>
+                              <td className="p-2 md:p-3 text-center text-primary font-display font-bold">
+                                {team.pts}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+                <Link to="/classificacao" className="block w-full text-center p-3 font-display text-sm text-gray-400 hover:text-primary hover:bg-dark transition-colors border border-dark-border rounded-lg bg-dark-card mt-4">
+                  VER TABELAS COMPLETAS
                 </Link>
               </div>
             </div>
