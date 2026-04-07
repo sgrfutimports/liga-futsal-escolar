@@ -35,25 +35,31 @@ export default function TeamDetails() {
   const pastGames = allTeamGames.filter((g: any) => g.status === 'Finalizado');
   const upcomingGames = allTeamGames.filter((g: any) => g.status === 'Agendado');
   
-  let wins = 0, draws = 0, losses = 0, goalsFor = 0, goalsAgainst = 0;
-  
-  pastGames.forEach((g: any) => {
-    const homeScore = Number(g.home_score || g.homeScore || 0);
-    const awayScore = Number(g.away_score || g.awayScore || 0);
-    if (Number(g.home_team_id || g.homeTeamId) === Number(id)) {
-      goalsFor += homeScore; goalsAgainst += awayScore;
-      if (homeScore > awayScore) wins++;
-      else if (homeScore === awayScore) draws++;
-      else losses++;
-    } else {
-      goalsFor += awayScore; goalsAgainst += homeScore;
-      if (awayScore > homeScore) wins++;
-      else if (awayScore === homeScore) draws++;
-      else losses++;
+  const catStats = pastGames.reduce((acc: any, g: any) => {
+    const cat = g.category || "Geral";
+    if (!acc[cat]) {
+      acc[cat] = { wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0 };
     }
-  });
-
-  const points = (wins * 3) + draws;
+    
+    const homeScore = Number(g.home_score ?? g.homeScore ?? 0);
+    const awayScore = Number(g.away_score ?? g.awayScore ?? 0);
+    
+    if (Number(g.home_team_id || g.homeTeamId) === Number(id)) {
+      acc[cat].goalsFor += homeScore; acc[cat].goalsAgainst += awayScore;
+      if (homeScore > awayScore) acc[cat].wins++;
+      else if (homeScore === awayScore) acc[cat].draws++;
+      else acc[cat].losses++;
+    } else {
+      acc[cat].goalsFor += awayScore; acc[cat].goalsAgainst += homeScore;
+      if (awayScore > homeScore) acc[cat].wins++;
+      else if (homeScore === awayScore) acc[cat].draws++;
+      else acc[cat].losses++;
+    }
+    
+    acc[cat].points = (acc[cat].wins * 3) + acc[cat].draws;
+    
+    return acc;
+  }, {});
 
   if (!team) {
     return (
@@ -118,21 +124,36 @@ export default function TeamDetails() {
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-12">
-          {[
-            { label: "PONTOS", value: points, highlight: true },
-            { label: "VITÓRIAS", value: wins },
-            { label: "EMPATES", value: draws },
-            { label: "DERROTAS", value: losses },
-            { label: "GOLS PRÓ", value: goalsFor },
-            { label: "GOLS CONTRA", value: goalsAgainst },
-          ].map((stat, idx) => (
-            <div key={idx} className={cn("bg-dark-card border rounded-xl p-4 text-center", stat.highlight ? "border-primary/50 bg-primary/5" : "border-dark-border")}>
-              <span className="text-[10px] text-gray-500 font-display tracking-wider block mb-1">{stat.label}</span>
-              <span className={cn("text-3xl font-display", stat.highlight ? "text-primary" : "text-white")}>{stat.value}</span>
+        {/* Stats Grid per Category */}
+        <div className="mb-12 space-y-8">
+          {Object.entries(catStats).sort().map(([cat, stat]: [string, any]) => (
+            <div key={cat} className="space-y-3">
+              <h3 className="text-sm font-display text-primary/80 uppercase tracking-widest border-b border-dark-border pb-2">
+                ESTATÍSTICAS - {cat}
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-4">
+                {[
+                  { label: "PONTOS", value: stat.points, highlight: true },
+                  { label: "VITÓRIAS", value: stat.wins },
+                  { label: "EMPATES", value: stat.draws },
+                  { label: "DERROTAS", value: stat.losses },
+                  { label: "GOLS PRÓ", value: stat.goalsFor },
+                  { label: "GOLS CONTRA", value: stat.goalsAgainst },
+                ].map((s, idx) => (
+                  <div key={idx} className={cn("bg-dark-card border rounded-xl p-3 md:p-4 text-center shadow-sm hover:border-primary/30 transition-colors", s.highlight ? "border-primary/50 bg-primary/10" : "border-dark-border")}>
+                    <span className="text-[9px] md:text-[10px] text-gray-400 font-display tracking-wider block mb-1 uppercase drop-shadow-sm">{s.label}</span>
+                    <span className={cn("text-2xl md:text-4xl font-display font-black tracking-tighter", s.highlight ? "text-primary drop-shadow-[0_0_15px_rgba(204,255,0,0.5)]" : "text-white")}>{s.value}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
+          
+          {Object.keys(catStats).length === 0 && (
+            <div className="text-gray-500 font-display py-8 text-center border border-dark-border rounded-lg border-dashed text-sm">
+              Nenhuma estatística registrada. A equipe ainda não possui jogos finalizados.
+            </div>
+          )}
         </div>
 
         {/* Main Content: Roster & Matches */}
