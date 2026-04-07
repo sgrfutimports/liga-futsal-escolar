@@ -34,7 +34,7 @@ export default function Home() {
       subtitle: "Temporada 2026",
       description: "Garanta a vaga da sua escola na maior competição do ano. Vagas limitadas por categoria.",
       ctaText: "INSCREVA-SE",
-      ctaLink: "/inscricoes",
+      ctaLink: "/inscricao",
       accent: "secondary"
     }
   ];
