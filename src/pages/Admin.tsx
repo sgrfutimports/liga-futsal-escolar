@@ -934,11 +934,12 @@ export default function Admin() {
   const [email, setEmail] = useState('admin@lfe.com');
   const [password, setPassword] = useState('123456');
   const [authError, setAuthError] = useState('');
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
-    setIsLoading(true);
+    setIsLoginLoading(true);
     
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -955,7 +956,7 @@ export default function Admin() {
     } catch (err) {
       setAuthError('Erro de conexão ao autenticar.');
     } finally {
-      setIsLoading(false);
+      setIsLoginLoading(false);
     }
   };
 
@@ -1000,9 +1001,9 @@ export default function Admin() {
             <button 
               type="submit" 
               className="w-full py-3 bg-primary text-dark font-display text-lg rounded hover:bg-primary-dark transition-colors disabled:opacity-50"
-              disabled={isLoading}
+              disabled={isLoginLoading}
             >
-              {isLoading ? 'ENTRANDO...' : 'ENTRAR'}
+              {isLoginLoading ? 'ENTRANDO...' : 'ENTRAR'}
             </button>
           </form>
           <div className="mt-6 p-4 bg-dark border border-dark-border rounded text-xs text-gray-400">
