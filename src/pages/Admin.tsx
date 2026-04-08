@@ -114,19 +114,43 @@ export default function Admin() {
     if (!table) return;
 
     try {
+      const payload = { ...currentData };
+      
+      // Correção de Types e Nomes de Colunas pro Postgres
+      if (payload.id === '') delete payload.id;
+      
+      if (type === 'team' && typeof payload.categories === 'string') {
+        payload.categories = payload.categories.split(',').map((s: string) => s.trim()).filter(Boolean);
+      }
+      if (type === 'athlete') {
+        if (payload.teamId) { payload.team_id = String(payload.teamId); delete payload.teamId; }
+        if (payload.number) { payload.number = String(payload.number); }
+      }
+      if (type === 'game') {
+        if (payload.homeTeamId) { payload.home_team_id = String(payload.homeTeamId); delete payload.homeTeamId; }
+        if (payload.awayTeamId) { payload.away_team_id = String(payload.awayTeamId); delete payload.awayTeamId; }
+        if (payload.homeScore !== undefined) { payload.home_score = Number(payload.homeScore); delete payload.homeScore; }
+        if (payload.awayScore !== undefined) { payload.away_score = Number(payload.awayScore); delete payload.awayScore; }
+      }
+      if (type === 'banner') {
+        if (payload.ctaText) { payload.cta_text = payload.ctaText; delete payload.ctaText; }
+        if (payload.ctaLink) { payload.cta_link = payload.ctaLink; delete payload.ctaLink; }
+      }
+
       // Sync to Supabase
-      await supaUpsert(table, currentData);
+      await supaUpsert(table, payload);
       
       // Update local state
       if (currentData.id) {
-        setCollection(collection.map((item: any) => item.id === currentData.id ? currentData : item));
+        setCollection(collection.map((item: any) => item.id === currentData.id ? payload : item));
       } else {
         // Refresh after insert to get proper UUID/ID from DB
         const refreshed = await supaFetch(table);
         if (refreshed) setCollection(refreshed);
       }
       closeModal();
-    } catch (err) {
+    } catch (err: any) {
+      console.error(err);
       alert("Erro ao salvar no banco de dados.");
     }
   };
