@@ -948,13 +948,19 @@ export default function Admin() {
       });
 
       if (error) {
-        setAuthError('E-mail ou senha inválidos.');
+        setAuthError(error.message === 'Invalid login credentials' 
+          ? 'E-mail ou senha inválidos.' 
+          : 'Erro ao autenticar: ' + error.message);
       } else if (data.session) {
         setIsAuthenticated(true);
         localStorage.setItem('lfe_admin_authenticated', 'true');
+      } else if (data.user) {
+        setAuthError('E-mail ainda pendente de confirmação. Verifique sua caixa de entrada.');
+      } else {
+        setAuthError('Falha ao obter sessão do servidor.');
       }
     } catch (err) {
-      setAuthError('Erro de conexão ao autenticar.');
+      setAuthError('Erro de conexão ao servidor Supabase.');
     } finally {
       setIsLoginLoading(false);
     }
