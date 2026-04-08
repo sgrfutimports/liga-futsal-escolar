@@ -5,6 +5,7 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { cn } from "@/src/lib/utils";
 import { resizeImage, defaultData, supaFetch, supaUpsert, supaInsert, supaUpdate, supaDelete } from "@/src/lib/store";
+import { supabase } from "@/src/lib/supabase";
 
 // --- Sub-components ---
 function Modal({ isOpen, onClose, title, children }: any) {
@@ -929,7 +930,35 @@ export default function Admin() {
     </div>
   );
 
-  // Authentication Mock
+  // Authentication Supabase
+  const [email, setEmail] = useState('admin@lfe.com');
+  const [password, setPassword] = useState('123456');
+  const [authError, setAuthError] = useState('');
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setAuthError('E-mail ou senha inválidos.');
+      } else if (data.session) {
+        setIsAuthenticated(true);
+        localStorage.setItem('lfe_admin_authenticated', 'true');
+      }
+    } catch (err) {
+      setAuthError('Erro de conexão ao autenticar.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-dark py-20 flex items-center justify-center">
@@ -938,17 +967,48 @@ export default function Admin() {
             <Lock className="w-8 h-8 text-primary" />
           </div>
           <h2 className="text-3xl font-display text-white mb-8 text-center">ÁREA RESTRITA</h2>
-          <form onSubmit={(e) => { e.preventDefault(); setIsAuthenticated(true); localStorage.setItem('lfe_admin_authenticated', 'true'); }} className="space-y-6">
+          
+          {authError && (
+            <div className="mb-4 bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded text-sm text-center">
+              {authError}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className={labelClass}>E-mail</label>
-              <input type="email" required className={inputClass} placeholder="admin@lfe.com" defaultValue="admin@lfe.com" />
+              <input 
+                type="email" 
+                required 
+                className={inputClass} 
+                placeholder="admin@lfe.com" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
             <div>
               <label className={labelClass}>Senha</label>
-              <input type="password" required className={inputClass} placeholder="••••••••" defaultValue="123456" />
+              <input 
+                type="password" 
+                required 
+                className={inputClass} 
+                placeholder="••••••••" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
-            <button type="submit" className="w-full py-3 bg-primary text-dark font-display text-lg rounded hover:bg-primary-dark transition-colors">ENTRAR</button>
+            <button 
+              type="submit" 
+              className="w-full py-3 bg-primary text-dark font-display text-lg rounded hover:bg-primary-dark transition-colors disabled:opacity-50"
+              disabled={isLoading}
+            >
+              {isLoading ? 'ENTRANDO...' : 'ENTRAR'}
+            </button>
           </form>
+          <div className="mt-6 p-4 bg-dark border border-dark-border rounded text-xs text-gray-400">
+            <p className="font-bold text-gray-300 mb-1">Acesso via Supabase Auth</p>
+            <p>Para criar o login, vá no Dashboard do Supabase → Authentication → Add User → Create New User. Cadastre o e-mail e senha desejados.</p>
+          </div>
         </div>
       </div>
     );

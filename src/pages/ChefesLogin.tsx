@@ -11,29 +11,46 @@ export default function ChefesLogin() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    const registrations = JSON.parse(localStorage.getItem('lfe_registrations') || '[]');
-    const match = registrations.find((r: any) => 
-      r.email?.toLowerCase() === email.toLowerCase() && 
-      r.password === password
-    );
+    try {
+      const { supabase } = await import('@/src/lib/supabase');
+      // Simple custom login checking against lfe_registrations
+      const { data, error: dbError } = await supabase
+        .from('lfe_registrations')
+        .select('*')
+        .eq('email', email)
+        .eq('password', password);
 
-    setTimeout(() => {
-      // Allow access with any non-empty credential
-      if (email && password) {
+      if (dbError) throw dbError;
+
+      if (data && data.length > 0) {
+        const match = data[0];
+        if (match.status !== 'Homologada') {
+          setError("Sua inscrição ainda está pendente de aprovação ou foi recusada pela equipe.");
+          setIsLoading(false);
+          return;
+        }
+
         localStorage.setItem('lfe_is_chefe', 'true');
-        localStorage.setItem('lfe_chefe_email', email);
-        localStorage.setItem('lfe_chefe_school', match ? (match.schoolName || match.school) : "Escola de Demonstração");
+        localStorage.setItem('lfe_chefe_email', match.email);
+        localStorage.setItem('lfe_chefe_school', match.school);
+        if (match.team_id) {
+          localStorage.setItem('lfe_team_id', String(match.team_id));
+        }
+        
         navigate('/dep-tecnico');
       } else {
-        setError("Por favor, preencha todos os campos.");
-        setIsLoading(false);
+        setError("E-mail ou senha incorretos.");
       }
-    }, 500);
+    } catch (err) {
+      setError("Erro de conexão ao servidor. Tente novamente mais tarde.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

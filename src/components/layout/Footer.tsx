@@ -55,7 +55,7 @@ export default function Footer() {
               <li><Link to="/classificacao" className="text-gray-400 hover:text-primary text-sm transition-colors">Classificação</Link></li>
               <li><Link to="/equipes" className="text-gray-400 hover:text-primary text-sm transition-colors">Equipes</Link></li>
               <li><Link to="/atletas" className="text-gray-400 hover:text-primary text-sm transition-colors">Atletas</Link></li>
-              <li><a href="#" className="text-gray-400 hover:text-primary text-sm transition-colors">Regulamento (PDF)</a></li>
+              <li><Link to="/dep-tecnico" className="text-gray-400 hover:text-primary text-sm transition-colors">Regulamento (PDF)</Link></li>
             </ul>
           </div>
 
@@ -85,8 +85,8 @@ export default function Footer() {
             © {new Date().getFullYear()} Liga de Futsal Escolar. Todos os direitos reservados.
           </p>
           <div className="flex gap-4 text-sm text-gray-500">
-            <a href="#" className="hover:text-white transition-colors">Termos de Uso</a>
-            <a href="#" className="hover:text-white transition-colors">Privacidade</a>
+            <Link to="/" className="hover:text-white transition-colors">Termos de Uso</Link>
+            <Link to="/" className="hover:text-white transition-colors">Privacidade</Link>
           </div>
         </div>
       </div>
