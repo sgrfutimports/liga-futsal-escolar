@@ -81,7 +81,7 @@ export default function Teams() {
         {/* Teams Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {teams.map((team: any) => {
-             const teamAthletesCount = athletes.filter((a: any) => a.teamId === team.id).length;
+             const teamAthletesCount = athletes.filter((a: any) => (a.teamId || a.team_id) === team.id).length;
              const categoryArray = team.categories ? team.categories.split(',').map((c: string) => c.trim()) : [];
 
              return (

@@ -317,15 +317,15 @@ export default function Admin() {
   });
 
   const selectedGame = games.find((g: any) => g.id === sumulaState.selectedGameId);
-  const sumulaHomeTeam = selectedGame ? teams.find((t: any) => t.id === Number(selectedGame.homeTeamId || selectedGame.home_team_id)) : null;
-  const sumulaAwayTeam = selectedGame ? teams.find((t: any) => t.id === Number(selectedGame.awayTeamId || selectedGame.away_team_id)) : null;
+  const sumulaHomeTeam = selectedGame ? teams.find((t: any) => t.id === (selectedGame.homeTeamId || selectedGame.home_team_id)) : null;
+  const sumulaAwayTeam = selectedGame ? teams.find((t: any) => t.id === (selectedGame.awayTeamId || selectedGame.away_team_id)) : null;
   const sumulaHomeAthletes = selectedGame ? athletes.filter((a: any) => {
-    const sameTeam = Number(a.teamId || a.team_id) === Number(selectedGame.homeTeamId || selectedGame.home_team_id);
+    const sameTeam = (a.teamId || a.team_id) === (selectedGame.homeTeamId || selectedGame.home_team_id);
     const sameCategory = !selectedGame.category || a.category === selectedGame.category;
     return sameTeam && sameCategory;
   }) : [];
   const sumulaAwayAthletes = selectedGame ? athletes.filter((a: any) => {
-    const sameTeam = Number(a.teamId || a.team_id) === Number(selectedGame.awayTeamId || selectedGame.away_team_id);
+    const sameTeam = (a.teamId || a.team_id) === (selectedGame.awayTeamId || selectedGame.away_team_id);
     const sameCategory = !selectedGame.category || a.category === selectedGame.category;
     return sameTeam && sameCategory;
   }) : [];
@@ -714,7 +714,7 @@ export default function Admin() {
       columns={[
         { label: "FOTO", render: (a: any) => a.photo ? <img src={a.photo} className="w-10 h-10 object-cover rounded-full" /> : <Users className="w-8 h-8 text-gray-500" /> },
         { label: "NOME", key: "name", render: (a: any) => <span className="font-display text-white">{a.name}</span>, renderText: (a: any) => a.name },
-        { label: "EQUIPE", render: (a: any) => teams.find(t => t.id === Number(a.teamId))?.name || "Desconhecida", renderText: (a: any) => teams.find(t => t.id === Number(a.teamId))?.name || "Desconhecida" },
+        { label: "EQUIPE", render: (a: any) => teams.find(t => t.id === (a.teamId || a.team_id))?.name || "Desconhecida", renderText: (a: any) => teams.find(t => t.id === (a.teamId || a.team_id))?.name || "Desconhecida" },
         { label: "NÚMERO", key: "number", renderText: (a: any) => a.number },
         { label: "CATEGORIA", key: "category", renderText: (a: any) => a.category }
       ]}
@@ -1150,7 +1150,7 @@ export default function Admin() {
             columns={[
               { label: "CATEGORIA", key: "category", renderText: (g: any) => g.category },
               { label: "DATA/HORA", render: (g: any) => `${g.date} às ${g.time}`, renderText: (g: any) => `${g.date} às ${g.time}` },
-              { label: "CONFRONTO", render: (g: any) => `${teams.find(t=>t.id===Number(g.homeTeamId))?.name || "A"} vs ${teams.find(t=>t.id===Number(g.awayTeamId))?.name || "B"}`, renderText: (g: any) => `${teams.find(t=>t.id===Number(g.homeTeamId))?.name || "A"} vs ${teams.find(t=>t.id===Number(g.awayTeamId))?.name || "B"}` },
+              { label: "CONFRONTO", render: (g: any) => `${teams.find(t=>t.id===(g.homeTeamId || g.home_team_id))?.name || "A"} vs ${teams.find(t=>t.id===(g.awayTeamId || g.away_team_id))?.name || "B"}`, renderText: (g: any) => `${teams.find(t=>t.id===(g.homeTeamId || g.home_team_id))?.name || "A"} vs ${teams.find(t=>t.id===(g.awayTeamId || g.away_team_id))?.name || "B"}` },
               { label: "STATUS", key: "status", renderText: (g: any) => g.status }
             ]}
             onAdd={() => { setCurrentData({ events: [] }); setModalType('game'); }}
@@ -1223,7 +1223,7 @@ export default function Admin() {
           <label className={labelClass}>Nome</label>
           <input required type="text" className={inputClass} value={currentData.name || ''} onChange={e => setCurrentData({...currentData, name: e.target.value})} />
           <label className={labelClass}>Equipe</label>
-          <select required className={inputClass} value={currentData.teamId || ''} onChange={e => setCurrentData({...currentData, teamId: Number(e.target.value)})}>
+          <select required className={inputClass} value={currentData.teamId || currentData.team_id || ''} onChange={e => setCurrentData({...currentData, teamId: e.target.value})}>
             <option value="">Selecione a equipe</option>
             {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
@@ -1288,8 +1288,8 @@ export default function Admin() {
                <div className="flex gap-2 mb-2">
                  <select className="px-2 py-2 bg-dark-card border border-dark-border text-white text-xs rounded flex-1" id="eventPlayer">
                    <option value="">Selecione Jogador</option>
-                   {athletes.filter(a => a.teamId === Number(currentData.homeTeamId) || a.teamId === Number(currentData.awayTeamId)).map(a => (
-                     <option key={a.id} value={a.id}>{a.name} ({a.teamId === Number(currentData.homeTeamId) ? 'Casa' : 'Fora'})</option>
+                   {athletes.filter(a => (a.teamId || a.team_id) === (currentData.homeTeamId || currentData.home_team_id) || (a.teamId || a.team_id) === (currentData.awayTeamId || currentData.away_team_id)).map(a => (
+                     <option key={a.id} value={a.id}>{a.name} ({(a.teamId || a.team_id) === (currentData.homeTeamId || currentData.home_team_id) ? 'Casa' : 'Fora'})</option>
                    ))}
                  </select>
                  <select className="px-2 py-2 bg-dark-card border border-dark-border text-white text-xs rounded w-[100px]" id="eventType">
@@ -1301,9 +1301,9 @@ export default function Admin() {
                    const pid = (document.getElementById('eventPlayer') as HTMLSelectElement).value;
                    const type = (document.getElementById('eventType') as HTMLSelectElement).value;
                    if(!pid) return;
-                   const athlete = athletes.find(a => a.id === Number(pid));
+                   const athlete = athletes.find(a => a.id === pid);
                    const events = currentData.events || [];
-                   setCurrentData({...currentData, events: [...events, { id: Date.now(), playerId: Number(pid), type, teamId: athlete.teamId }]});
+                   setCurrentData({...currentData, events: [...events, { id: Date.now(), playerId: pid, type, teamId: athlete.teamId || athlete.team_id }]});
                  }} className="px-3 py-1 bg-primary text-dark font-bold text-xs rounded">Add</button>
                </div>
                
@@ -1470,13 +1470,13 @@ function SumulasTab({ games, teams, athletes, sumulaState, setSumulaState, selec
         <h3 className="font-display text-lg text-white mb-4 flex items-center gap-2"><ClipboardList className="w-5 h-5 text-primary" /> SELECIONAR JOGO</h3>
         <select
           value={sumulaState.selectedGameId || ''}
-          onChange={e => setSumulaState((p: any) => ({ ...p, selectedGameId: Number(e.target.value), homeEvents: [], awayEvents: [] }))}
+          onChange={e => setSumulaState((p: any) => ({ ...p, selectedGameId: e.target.value, homeEvents: [], awayEvents: [] }))}
           className={inputCls}
         >
           <option value="">-- Selecione um jogo para gerar a súmula --</option>
           {games.map((g: any) => {
-            const ht = teams.find((t: any) => t.id === Number(g.homeTeamId || g.home_team_id));
-            const at = teams.find((t: any) => t.id === Number(g.awayTeamId || g.away_team_id));
+            const ht = teams.find((t: any) => t.id === (g.homeTeamId || g.home_team_id));
+            const at = teams.find((t: any) => t.id === (g.awayTeamId || g.away_team_id));
             return (
               <option key={g.id} value={g.id}>
                 [{g.category}] {ht?.name || 'Casa'} vs {at?.name || 'Fora'} — {g.date} {g.time}

@@ -27,11 +27,11 @@ export default function TeamDetails() {
     );
   }
 
-  const team = allTeams.find((t: any) => t.id === Number(id));
-  const players = allAthletes.filter((a: any) => Number(a.teamId) === Number(id) || Number(a.team_id) === Number(id));
+  const team = allTeams.find((t: any) => t.id === id);
+  const players = allAthletes.filter((a: any) => (a.teamId || a.team_id) === id);
   
   // Calculate specific team stats based on games
-  const allTeamGames = allGames.filter((g: any) => (Number(g.home_team_id || g.homeTeamId) === Number(id) || Number(g.away_team_id || g.awayTeamId) === Number(id)));
+  const allTeamGames = allGames.filter((g: any) => ((g.home_team_id || g.homeTeamId) === id || (g.away_team_id || g.awayTeamId) === id));
   const pastGames = allTeamGames.filter((g: any) => g.status === 'Finalizado');
   const upcomingGames = allTeamGames.filter((g: any) => g.status === 'Agendado');
   
@@ -44,7 +44,7 @@ export default function TeamDetails() {
     const homeScore = Number(g.home_score ?? g.homeScore ?? 0);
     const awayScore = Number(g.away_score ?? g.awayScore ?? 0);
     
-    if (Number(g.home_team_id || g.homeTeamId) === Number(id)) {
+    if ((g.home_team_id || g.homeTeamId) === id) {
       acc[cat].goalsFor += homeScore; acc[cat].goalsAgainst += awayScore;
       if (homeScore > awayScore) acc[cat].wins++;
       else if (homeScore === awayScore) acc[cat].draws++;
@@ -260,11 +260,11 @@ export default function TeamDetails() {
                       <div className="space-y-3">
                         {catGames.slice(0, 2).map((match: any) => {
                            let opponent = "";
-                           const isHome = Number(match.home_team_id || match.homeTeamId) === Number(id);
+                           const isHome = (match.home_team_id || match.homeTeamId) === id;
                            if (isHome) {
-                             opponent = allTeams.find((t:any) => t.id === Number(match.away_team_id || match.awayTeamId))?.name || "Desconhecido";
+                             opponent = allTeams.find((t:any) => t.id === (match.away_team_id || match.awayTeamId))?.name || "Desconhecido";
                            } else {
-                             opponent = allTeams.find((t:any) => t.id === Number(match.home_team_id || match.homeTeamId))?.name || "Desconhecido";
+                             opponent = allTeams.find((t:any) => t.id === (match.home_team_id || match.homeTeamId))?.name || "Desconhecido";
                            }
   
                            return (
@@ -318,15 +318,15 @@ export default function TeamDetails() {
                            let opponent = "", result = "E", score = "";
                            const homeScore = Number(match.home_score ?? match.homeScore ?? 0);
                            const awayScore = Number(match.away_score ?? match.awayScore ?? 0);
-                           const isHome = Number(match.home_team_id || match.homeTeamId) === Number(id);
+                           const isHome = (match.home_team_id || match.homeTeamId) === id;
                            
                            if (isHome) {
-                             opponent = allTeams.find((t:any) => t.id === Number(match.away_team_id || match.awayTeamId))?.name || "Desconhecido";
+                             opponent = allTeams.find((t:any) => t.id === (match.away_team_id || match.awayTeamId))?.name || "Desconhecido";
                              if (homeScore > awayScore) result = "V";
                              else if (homeScore < awayScore) result = "D";
                              score = `${homeScore} - ${awayScore}`;
                            } else {
-                             opponent = allTeams.find((t:any) => t.id === Number(match.home_team_id || match.homeTeamId))?.name || "Desconhecido";
+                             opponent = allTeams.find((t:any) => t.id === (match.home_team_id || match.homeTeamId))?.name || "Desconhecido";
                              if (awayScore > homeScore) result = "V";
                              else if (awayScore < homeScore) result = "D";
                              score = `${awayScore} - ${homeScore}`;
