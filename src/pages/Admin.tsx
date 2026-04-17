@@ -142,7 +142,7 @@ export default function Admin() {
       
       // Update local state
       if (currentData.id) {
-        setCollection(collection.map((item: any) => item.id === currentData.id ? payload : item));
+        setCollection(collection.map((item: any) => String(item.id) === String(currentData.id) ? payload : item));
       } else {
         // Refresh after insert to get proper UUID/ID from DB
         const refreshed = await supaFetch(table);
@@ -155,11 +155,11 @@ export default function Admin() {
     }
   };
 
-  const handleDelete = async (table: any, id: any, collection: any[], setCollection: any) => {
-    if (!window.confirm("Deseja realmente excluir este registro?")) return;
+  const handleDelete = async (id: any, table: string, collection: any[], setCollection: Function) => {
+    if(!window.confirm("Excluir item?")) return;
     try {
       await supaDelete(table, id);
-      setCollection(collection.filter(item => item.id !== id));
+      setCollection(collection.filter(item => String(item.id) !== String(id)));
     } catch (err) {
       alert("Erro ao excluir do banco de dados.");
     }
@@ -251,7 +251,7 @@ export default function Admin() {
 
       // 4. Refresh local state
       setTeams(prev => [...prev, { ...newTeamData, id: newTeamId }]);
-      setRegistrations(prev => prev.map(r => r.id === reg.id
+      setRegistrations(prev => prev.map(r => String(r.id) === String(reg.id)
         ? { ...r, status: 'Homologada', team_id: newTeamId }
         : r
       ));
@@ -316,19 +316,11 @@ export default function Admin() {
     saved: false,
   });
 
-  const selectedGame = games.find((g: any) => g.id === sumulaState.selectedGameId);
-  const sumulaHomeTeam = selectedGame ? teams.find((t: any) => t.id === (selectedGame.homeTeamId || selectedGame.home_team_id)) : null;
-  const sumulaAwayTeam = selectedGame ? teams.find((t: any) => t.id === (selectedGame.awayTeamId || selectedGame.away_team_id)) : null;
-  const sumulaHomeAthletes = selectedGame ? athletes.filter((a: any) => {
-    const sameTeam = (a.teamId || a.team_id) === (selectedGame.homeTeamId || selectedGame.home_team_id);
-    const sameCategory = !selectedGame.category || a.category === selectedGame.category;
-    return sameTeam && sameCategory;
-  }) : [];
-  const sumulaAwayAthletes = selectedGame ? athletes.filter((a: any) => {
-    const sameTeam = (a.teamId || a.team_id) === (selectedGame.awayTeamId || selectedGame.away_team_id);
-    const sameCategory = !selectedGame.category || a.category === selectedGame.category;
-    return sameTeam && sameCategory;
-  }) : [];
+  const selectedGame = games.find((g: any) => String(g.id) === String(sumulaState.selectedGameId));
+  const sumulaHomeTeam = selectedGame ? teams.find((t: any) => String(t.id) === String(selectedGame.homeTeamId || selectedGame.home_team_id)) : null;
+  const sumulaAwayTeam = selectedGame ? teams.find((t: any) => String(t.id) === String(selectedGame.awayTeamId || selectedGame.away_team_id)) : null;
+  const sumulaHomeAthletes = sumulaHomeTeam ? athletes.filter((a: any) => String(a.teamId || a.team_id) === String(sumulaHomeTeam.id) && (!selectedGame.category || a.category === selectedGame.category)) : [];
+  const sumulaAwayAthletes = sumulaAwayTeam ? athletes.filter((a: any) => String(a.teamId || a.team_id) === String(sumulaAwayTeam.id) && (!selectedGame.category || a.category === selectedGame.category)) : [];
 
   const addEvent = (side: 'home' | 'away', type: string, playerId: string, minute: string) => {
     const key = side === 'home' ? 'homeEvents' : 'awayEvents';
@@ -704,7 +696,7 @@ export default function Admin() {
       ]}
       onAdd={() => { setCurrentData({}); setModalType('team'); }}
       onEdit={(team: any) => { setCurrentData(team); setModalType('team'); }}
-      onDelete={(id: number) => setTeams(teams.filter(t => t.id !== id))}
+      onDelete={(id: number) => handleDelete(id, 'lfe_teams', teams, setTeams)}
     />
   );
 
@@ -714,13 +706,13 @@ export default function Admin() {
       columns={[
         { label: "FOTO", render: (a: any) => a.photo ? <img src={a.photo} className="w-10 h-10 object-cover rounded-full" /> : <Users className="w-8 h-8 text-gray-500" /> },
         { label: "NOME", key: "name", render: (a: any) => <span className="font-display text-white">{a.name}</span>, renderText: (a: any) => a.name },
-        { label: "EQUIPE", render: (a: any) => teams.find(t => t.id === (a.teamId || a.team_id))?.name || "Desconhecida", renderText: (a: any) => teams.find(t => t.id === (a.teamId || a.team_id))?.name || "Desconhecida" },
+        { label: "EQUIPE", render: (a: any) => teams.find(t => String(t.id) === String(a.teamId || a.team_id))?.name || "Desconhecida", renderText: (a: any) => teams.find(t => String(t.id) === String(a.teamId || a.team_id))?.name || "Desconhecida" },
         { label: "NÚMERO", key: "number", renderText: (a: any) => a.number },
         { label: "CATEGORIA", key: "category", renderText: (a: any) => a.category }
       ]}
       onAdd={() => { setCurrentData({}); setModalType('athlete'); }}
       onEdit={(athlete: any) => { setCurrentData(athlete); setModalType('athlete'); }}
-      onDelete={(id: number) => setAthletes(athletes.filter(a => a.id !== id))}
+      onDelete={(id: number) => handleDelete(id, 'lfe_athletes', athletes, setAthletes)}
     />
   );
 
@@ -739,7 +731,7 @@ export default function Admin() {
         ]}
         onAdd={() => { setCurrentData({ accent: 'primary' }); setModalType('banner'); }}
         onEdit={(banner: any) => { setCurrentData(banner); setModalType('banner'); }}
-        onDelete={(id: number) => setBanners(banners.filter(b => b.id !== id))}
+        onDelete={(id: number) => handleDelete(id, 'lfe_banners', banners, setBanners)}
       />
     </>
   );
@@ -758,7 +750,7 @@ export default function Admin() {
         ]}
         onAdd={() => { setCurrentData({}); setModalType('gallery'); }}
         onEdit={(g: any) => { setCurrentData(g); setModalType('gallery'); }}
-        onDelete={(id: number) => setGallery(gallery.filter(g => g.id !== id))}
+        onDelete={(id: number) => handleDelete(id, 'lfe_gallery', gallery, setGallery)}
       />
     </>
   );
@@ -767,7 +759,7 @@ export default function Admin() {
     const moveSponsor = (id: number, direction: 'up' | 'down', type: 'premium' | 'official') => {
       const collection = type === 'premium' ? [...sponsorsPremium] : [...sponsorsOfficial];
       const setCollection = type === 'premium' ? setSponsorsPremium : setSponsorsOfficial;
-      const index = collection.findIndex(s => s.id === id);
+    const index = collection.findIndex(s => String(s.id) === String(id));
       if (index === -1) return;
       if (direction === 'up' && index === 0) return;
       if (direction === 'down' && index === collection.length - 1) return;
@@ -794,7 +786,7 @@ export default function Admin() {
           ]}
           onAdd={() => { setCurrentData({ type: 'premium' }); setModalType('sponsor'); }}
           onEdit={(sponsor: any) => { setCurrentData({ ...sponsor, type: 'premium' }); setModalType('sponsor'); }}
-          onDelete={(id: number) => setSponsorsPremium(sponsorsPremium.filter(s => s.id !== id))}
+          onDelete={(id: number) => handleDelete(id, 'lfe_sponsors', sponsorsPremium, setSponsorsPremium)}
           onMoveUp={(id: number) => moveSponsor(id, 'up', 'premium')}
           onMoveDown={(id: number) => moveSponsor(id, 'down', 'premium')}
         />
@@ -807,7 +799,7 @@ export default function Admin() {
           ]}
           onAdd={() => { setCurrentData({ type: 'official' }); setModalType('sponsor'); }}
           onEdit={(sponsor: any) => { setCurrentData({ ...sponsor, type: 'official' }); setModalType('sponsor'); }}
-          onDelete={(id: number) => setSponsorsOfficial(sponsorsOfficial.filter(s => s.id !== id))}
+          onDelete={(id: number) => handleDelete(id, 'lfe_sponsors', sponsorsOfficial, setSponsorsOfficial)}
           onMoveUp={(id: number) => moveSponsor(id, 'up', 'official')}
           onMoveDown={(id: number) => moveSponsor(id, 'down', 'official')}
         />
@@ -830,7 +822,7 @@ export default function Admin() {
         ]}
         onAdd={() => { setCurrentData({ category: 'NOTAS OFICIAIS', date: new Date().toLocaleDateString('pt-BR') }); setModalType('tech_doc'); }}
         onEdit={(d: any) => { setCurrentData(d); setModalType('tech_doc'); }}
-        onDelete={(id: number) => setTechnicalDocs(technicalDocs.filter(d => d.id !== id))}
+        onDelete={(id: number) => handleDelete(id, 'lfe_technical_documents', technicalDocs, setTechnicalDocs)}
       />
     </>
   );
@@ -1127,7 +1119,7 @@ export default function Admin() {
             ]}
             onAdd={() => alert("As inscrições são feitas pelo portal público.")}
             onEdit={(r: any) => handleApproveRegistration(r)}
-            onDelete={(id: number) => setRegistrations(registrations.filter(r => r.id !== id))}
+            onDelete={(id: any) => handleDelete(id, 'lfe_registrations', registrations, setRegistrations)}
             extraActions={(r: any) => r.status === 'Pendente' && (
               <button 
                 onClick={() => handleApproveRegistration(r)} 
@@ -1150,12 +1142,12 @@ export default function Admin() {
             columns={[
               { label: "CATEGORIA", key: "category", renderText: (g: any) => g.category },
               { label: "DATA/HORA", render: (g: any) => `${g.date} às ${g.time}`, renderText: (g: any) => `${g.date} às ${g.time}` },
-              { label: "CONFRONTO", render: (g: any) => `${teams.find(t=>t.id===(g.homeTeamId || g.home_team_id))?.name || "A"} vs ${teams.find(t=>t.id===(g.awayTeamId || g.away_team_id))?.name || "B"}`, renderText: (g: any) => `${teams.find(t=>t.id===(g.homeTeamId || g.home_team_id))?.name || "A"} vs ${teams.find(t=>t.id===(g.awayTeamId || g.away_team_id))?.name || "B"}` },
+              { label: "CONFRONTO", render: (g: any) => `${teams.find(t=>String(t.id)===String(g.homeTeamId || g.home_team_id))?.name || "A"} vs ${teams.find(t=>String(t.id)===String(g.awayTeamId || g.away_team_id))?.name || "B"}`, renderText: (g: any) => `${teams.find(t=>String(t.id)===String(g.homeTeamId || g.home_team_id))?.name || "A"} vs ${teams.find(t=>String(t.id)===String(g.awayTeamId || g.away_team_id))?.name || "B"}` },
               { label: "STATUS", key: "status", renderText: (g: any) => g.status }
             ]}
             onAdd={() => { setCurrentData({ events: [] }); setModalType('game'); }}
             onEdit={(g: any) => { setCurrentData(g); setModalType('game'); }}
-            onDelete={(id: number) => setGames(games.filter(g => g.id !== id))}
+            onDelete={(id: number) => handleDelete(id, 'lfe_games', games, setGames)}
             extraActions={(g: any) => (
               <button onClick={() => { setSumulaState((p: any) => ({...p, selectedGameId: g.id})); setActiveTab('Súmulas'); }} className="p-2 text-primary hover:bg-primary/10 rounded" title="Abrir Súmula">
                 <FileText className="w-4 h-4" />
@@ -1223,9 +1215,9 @@ export default function Admin() {
           <label className={labelClass}>Nome</label>
           <input required type="text" className={inputClass} value={currentData.name || ''} onChange={e => setCurrentData({...currentData, name: e.target.value})} />
           <label className={labelClass}>Equipe</label>
-          <select required className={inputClass} value={currentData.teamId || currentData.team_id || ''} onChange={e => setCurrentData({...currentData, teamId: e.target.value})}>
+          <select required className={inputClass} value={String(currentData.teamId || currentData.team_id || '')} onChange={e => setCurrentData({...currentData, teamId: e.target.value})}>
             <option value="">Selecione a equipe</option>
-            {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            {teams.map(t => <option key={t.id} value={String(t.id)}>{t.name}</option>)}
           </select>
           <label className={labelClass}>Número</label>
           <input required type="number" className={inputClass} value={currentData.number || ''} onChange={e => setCurrentData({...currentData, number: e.target.value})} />
@@ -1255,12 +1247,12 @@ export default function Admin() {
              ))}
           </select>
           <label className={labelClass}>Equipes</label>
-          <div className="flex gap-4">
-            <select required className={inputClass} value={currentData.homeTeamId || ''} onChange={e => setCurrentData({...currentData, homeTeamId: e.target.value})}>
-              <option value="">CASA</option>{teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+          <div className=\"flex gap-4\">
+            <select required className={inputClass} value={String(currentData.homeTeamId || currentData.home_team_id || '')} onChange={e => setCurrentData({...currentData, homeTeamId: e.target.value})}>
+              <option value=\"\">CASA</option>{teams.map(t => <option key={t.id} value={String(t.id)}>{t.name}</option>)}
             </select>
-            <select required className={inputClass} value={currentData.awayTeamId || ''} onChange={e => setCurrentData({...currentData, awayTeamId: e.target.value})}>
-              <option value="">FORA</option>{teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            <select required className={inputClass} value={String(currentData.awayTeamId || currentData.away_team_id || '')} onChange={e => setCurrentData({...currentData, awayTeamId: e.target.value})}>
+              <option value=\"\">FORA</option>{teams.map(t => <option key={t.id} value={String(t.id)}>{t.name}</option>)}
             </select>
           </div>
           <label className={labelClass}>Local</label>
@@ -1288,8 +1280,8 @@ export default function Admin() {
                <div className="flex gap-2 mb-2">
                  <select className="px-2 py-2 bg-dark-card border border-dark-border text-white text-xs rounded flex-1" id="eventPlayer">
                    <option value="">Selecione Jogador</option>
-                   {athletes.filter(a => (a.teamId || a.team_id) === (currentData.homeTeamId || currentData.home_team_id) || (a.teamId || a.team_id) === (currentData.awayTeamId || currentData.away_team_id)).map(a => (
-                     <option key={a.id} value={a.id}>{a.name} ({(a.teamId || a.team_id) === (currentData.homeTeamId || currentData.home_team_id) ? 'Casa' : 'Fora'})</option>
+                   {athletes.filter(a => String(a.teamId || a.team_id) === String(currentData.homeTeamId || currentData.home_team_id) || String(a.teamId || a.team_id) === String(currentData.awayTeamId || currentData.away_team_id)).map(a => (
+                     <option key={a.id} value={a.id}>{a.name} ({String(a.teamId || a.team_id) === String(currentData.homeTeamId || currentData.home_team_id) ? 'Casa' : 'Fora'})</option>
                    ))}
                  </select>
                  <select className="px-2 py-2 bg-dark-card border border-dark-border text-white text-xs rounded w-[100px]" id="eventType">
@@ -1310,8 +1302,8 @@ export default function Admin() {
                <div className="space-y-1 mt-4 max-h-32 overflow-y-auto pr-2">
                  {(currentData.events || []).map((ev: any) => (
                    <div key={ev.id} className="flex justify-between items-center text-xs text-gray-300 bg-dark-card p-2 rounded border border-dark-border">
-                     <span>{athletes.find((a: any) => a.id === ev.playerId)?.name || "Desconhecido"} - {ev.type === 'goal' ? 'GOL ⚽' : ev.type === 'yellow' ? 'AMARELO 🟨' : 'VERMELHO 🟥'}</span>
-                     <button type="button" onClick={() => setCurrentData({...currentData, events: currentData.events.filter((e:any)=>e.id !== ev.id)})} className="text-danger hover:text-red-400 font-bold">X</button>
+                     <span>{athletes.find((a: any) => String(a.id) === String(ev.playerId))?.name || "Desconhecido"} - {ev.type === 'goal' ? 'GOL ⚽' : ev.type === 'yellow' ? 'AMARELO 🟨' : 'VERMELHO 🟥'}</span>
+                     <button type="button" onClick={() => setCurrentData({...currentData, events: currentData.events.filter((e:any)=> String(e.id) !== String(ev.id))})} className="text-danger hover:text-red-400 font-bold">X</button>
                    </div>
                  ))}
                  {(currentData.events || []).length === 0 && <div className="text-xs text-gray-500 italic">Nenhum evento registrado.</div>}
@@ -1475,8 +1467,8 @@ function SumulasTab({ games, teams, athletes, sumulaState, setSumulaState, selec
         >
           <option value="">-- Selecione um jogo para gerar a súmula --</option>
           {games.map((g: any) => {
-            const ht = teams.find((t: any) => t.id === (g.homeTeamId || g.home_team_id));
-            const at = teams.find((t: any) => t.id === (g.awayTeamId || g.away_team_id));
+            const ht = teams.find((t: any) => String(t.id) === String(g.homeTeamId || g.home_team_id));
+            const at = teams.find((t: any) => String(t.id) === String(g.awayTeamId || g.away_team_id));
             return (
               <option key={g.id} value={g.id}>
                 [{g.category}] {ht?.name || 'Casa'} vs {at?.name || 'Fora'} — {g.date} {g.time}

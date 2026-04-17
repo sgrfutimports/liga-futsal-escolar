@@ -47,20 +47,20 @@ export default function Home() {
      
      const involvedTeamIds = new Set();
      categoryGames.forEach((g: any) => {
-        involvedTeamIds.add(Number(g.homeTeamId || g.home_team_id));
-        involvedTeamIds.add(Number(g.awayTeamId || g.away_team_id));
+        involvedTeamIds.add(String(g.homeTeamId || g.home_team_id));
+        involvedTeamIds.add(String(g.awayTeamId || g.away_team_id));
      });
      
-     const catStandings = loadedTeams.filter((t: any) => involvedTeamIds.has(t.id)).map((t: any) => {
+     const catStandings = loadedTeams.filter((t: any) => involvedTeamIds.has(String(t.id))).map((t: any) => {
         let pts = 0;
         categoryGames.forEach((g: any) => {
           if (g.status === 'Finalizado') {
             const homeScore = Number(g.home_score ?? g.homeScore ?? 0);
             const awayScore = Number(g.away_score ?? g.awayScore ?? 0);
-            if (Number(g.homeTeamId || g.home_team_id) === t.id) {
+            if (String(g.homeTeamId || g.home_team_id) === String(t.id)) {
               if (homeScore > awayScore) pts += 3;
               else if (homeScore === awayScore) pts += 1;
-            } else if (Number(g.awayTeamId || g.away_team_id) === t.id) {
+            } else if (String(g.awayTeamId || g.away_team_id) === String(t.id)) {
               if (awayScore > homeScore) pts += 3;
               else if (homeScore === awayScore) pts += 1;
             }
@@ -258,8 +258,8 @@ export default function Home() {
                       <h3 className="text-sm font-display text-primary/80 uppercase tracking-widest border-b border-dark-border pb-1">{category}</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {catGames.slice(0, 4).map((game: any) => {
-                          const home = loadedTeams.find((t: any) => t.id === Number(game.homeTeamId || game.home_team_id));
-                          const away = loadedTeams.find((t: any) => t.id === Number(game.awayTeamId || game.away_team_id));
+                          const home = loadedTeams.find((t: any) => String(t.id) === String(game.homeTeamId || game.home_team_id));
+                          const away = loadedTeams.find((t: any) => String(t.id) === String(game.awayTeamId || game.away_team_id));
                           return (
                             <Link to={`/equipes/${home?.id}`} key={game.id} className="bg-dark-card border border-dark-border rounded-lg p-4 hover:border-primary/50 transition-colors group cursor-pointer block">
                               <div className="flex justify-between items-center mb-4 text-xs font-display text-gray-400">

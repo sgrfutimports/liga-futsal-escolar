@@ -41,12 +41,12 @@ export default function Standings() {
       if (g.status === 'Finalizado') {
         const homeScore = Number(g.homeScore || 0);
         const awayScore = Number(g.awayScore || 0);
-        if (g.homeTeamId === t.id.toString() || g.homeTeamId === t.id) {
+        if (String(g.homeTeamId || g.home_team_id) === String(t.id)) {
           j++; gp += homeScore; gc += awayScore;
           if (homeScore > awayScore) v++;
           else if (homeScore === awayScore) e++;
           else d++;
-        } else if (g.awayTeamId === t.id.toString() || g.awayTeamId === t.id) {
+        } else if (String(g.awayTeamId || g.away_team_id) === String(t.id)) {
           j++; gp += awayScore; gc += homeScore;
           if (awayScore > homeScore) v++;
           else if (awayScore === homeScore) e++;
@@ -73,7 +73,7 @@ export default function Standings() {
     categoryGames.forEach((g: any) => {
       if (g.status === 'Finalizado' && g.events) {
         g.events.forEach((ev: any) => {
-          if (ev.playerId === a.id) {
+          if (String(ev.playerId || ev.player_id) === String(a.id)) {
             if (ev.type === 'goal') goals++;
             if (ev.type === 'yellow') yellows++;
             if (ev.type === 'red') reds++;
@@ -95,7 +95,7 @@ export default function Standings() {
     categoryGames.forEach((g: any) => {
       if (g.status === 'Finalizado' && g.events) {
         g.events.forEach((ev: any) => {
-          if ((ev.teamId || ev.team_id) === t.id) {
+          if (String(ev.teamId || ev.team_id) === String(t.id)) {
             if (ev.type === 'yellow') teamYellows++;
             if (ev.type === 'red') teamReds++;
           }
@@ -197,7 +197,7 @@ export default function Standings() {
           {activeTab === "ARTILHARIA" && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
               {topScorers.map((player: any, idx: number) => {
-                const team = teams.find((t: any) => t.id == player.teamId);
+                const team = teams.find((t: any) => String(t.id) === String(player.teamId || player.team_id));
                 return (
                   <div key={player.id} className="flex items-center gap-4 bg-dark p-4 rounded-lg border border-dark-border relative overflow-hidden group">
                     <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity"><Goal className="w-32 h-32" /></div>
@@ -229,8 +229,8 @@ export default function Standings() {
               {categoryGames.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {categoryGames.map((game: any) => {
-                    const home = teams.find((t: any) => t.id === (game.homeTeamId || game.home_team_id));
-                    const away = teams.find((t: any) => t.id === (game.awayTeamId || game.away_team_id));
+                    const home = teams.find((t: any) => String(t.id) === String(game.homeTeamId || game.home_team_id));
+                    const away = teams.find((t: any) => String(t.id) === String(game.awayTeamId || game.away_team_id));
                     return (
                       <div key={game.id} className="bg-dark border border-dark-border rounded-lg p-4 hover:border-primary/50 transition-colors group">
                         <div className="flex justify-between items-center mb-4 text-xs font-display text-gray-400">

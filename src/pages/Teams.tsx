@@ -25,8 +25,10 @@ export default function Teams() {
   const [activeCategory, setActiveCategory] = useState("TODOS");
 
   const teams = allTeams.filter((t: any) => {
-    const matchesSearch = t.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = activeCategory === "TODOS" || t.categories?.includes(activeCategory);
+    const name = t.name || "";
+    const categories = t.categories || "";
+    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = activeCategory === "TODOS" || categories.includes(activeCategory);
     return matchesSearch && matchesCategory;
   });
 
@@ -81,7 +83,9 @@ export default function Teams() {
         {/* Teams Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {teams.map((team: any) => {
-             const teamAthletesCount = athletes.filter((a: any) => (a.teamId || a.team_id) === team.id).length;
+             const teamAthletesCount = athletes.filter((a: any) => 
+               String(a.teamId || a.team_id) === String(team.id)
+             ).length;
              const categoryArray = team.categories ? team.categories.split(',').map((c: string) => c.trim()) : [];
 
              return (

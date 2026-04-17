@@ -69,7 +69,7 @@ export default function Athletes() {
         {/* Athletes Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredAthletes.map((athlete: any) => {
-            const team = allTeams.find((t: any) => t.id === (athlete.teamId || athlete.team_id));
+            const team = allTeams.find((t: any) => String(t.id) === String(athlete.teamId || athlete.team_id));
             return (
               <div 
                 key={athlete.id} 
