@@ -32,7 +32,7 @@ export default function Standings() {
   const categoryGames = games.filter((g: any) => g.category === activeCategory);
 
   // Filter teams that have this category
-  const categoryTeams = teams.filter((t: any) => t.categories?.includes(activeCategory));
+  const categoryTeams = teams.filter((t: any) => String(t.categories || "").includes(activeCategory));
 
   // 1. Standings calculation
   const standings = categoryTeams.map((t: any) => {

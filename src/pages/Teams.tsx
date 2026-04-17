@@ -86,7 +86,7 @@ export default function Teams() {
              const teamAthletesCount = athletes.filter((a: any) => 
                String(a.teamId || a.team_id) === String(team.id)
              ).length;
-             const categoryArray = team.categories ? String(team.categories).split(',').map((c: string) => c.trim()) : [];
+             const categoryArray = String(team.categories || "").split(',').filter(c => c.trim()).map((c: string) => c.trim());
 
              return (
               <Link 

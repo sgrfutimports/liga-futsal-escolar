@@ -131,7 +131,8 @@ export default function Athletes() {
                   
                   {/* Divisão do nome para emular o estilo do modelo bruto */}
                   {(() => {
-                    const nameParts = athlete.name.split(' ');
+                    const name = String(athlete.name || "Uniformado");
+                    const nameParts = name.split(' ');
                     const firstName = nameParts[0];
                     const lastName = nameParts.slice(1).join(' ') || firstName;
                     return (

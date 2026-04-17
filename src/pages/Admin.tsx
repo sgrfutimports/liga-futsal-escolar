@@ -227,7 +227,7 @@ export default function Admin() {
       const newTeamData = {
         name: reg.school,
         city: reg.city || 'Garanhuns',
-        categories: reg.categories || '',
+        categories: Array.isArray(reg.categories) ? reg.categories.join(', ') : (reg.categories || ''),
         logo: reg.logo || '',
       };
       const newTeam = await supaInsert('lfe_teams', newTeamData);
