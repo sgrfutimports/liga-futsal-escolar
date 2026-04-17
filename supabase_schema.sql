@@ -61,6 +61,9 @@ CREATE TABLE IF NOT EXISTS public.lfe_games (
   away_score    INT DEFAULT 0,
   status        TEXT DEFAULT 'Agendado',  -- 'Agendado' | 'Ao Vivo' | 'Finalizado'
   category      TEXT DEFAULT '',          -- Ex: "SUB-17"
+  phase         TEXT DEFAULT 'Classificatória', -- Ex: "Grupo A", "Semifinal"
+  home_team_name TEXT,                    -- Nome redundante para estabilidade
+  away_team_name TEXT,                    -- Nome redundante para estabilidade
   events        JSONB DEFAULT '[]',       -- Array de eventos (gols, cartões)
   created_at    TIMESTAMPTZ DEFAULT NOW()
 );

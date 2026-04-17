@@ -132,6 +132,15 @@ export default function Admin() {
 
         if (payload.awayTeamId) { payload.away_team_id = String(payload.awayTeamId); delete payload.awayTeamId; }
         else if (payload.away_team_id === '') payload.away_team_id = null;
+
+        // Populate redundant names for stability
+        if (payload.home_team_id) {
+          payload.home_team_name = teams.find(t => String(t.id) === String(payload.home_team_id))?.name;
+        }
+        if (payload.away_team_id) {
+          payload.away_team_name = teams.find(t => String(t.id) === String(payload.away_team_id))?.name;
+        }
+
         if (payload.homeScore !== undefined) { payload.home_score = Number(payload.homeScore); delete payload.homeScore; }
         if (payload.awayScore !== undefined) { payload.away_score = Number(payload.awayScore); delete payload.awayScore; }
       }
@@ -1242,13 +1251,30 @@ export default function Admin() {
             <input required type="date" className={inputClass} value={currentData.date || ''} onChange={e => setCurrentData({...currentData, date: e.target.value})} />
             <input required type="time" className={inputClass} value={currentData.time || ''} onChange={e => setCurrentData({...currentData, time: e.target.value})} />
           </div>
-          <label className={labelClass}>Categoria do Jogo</label>
-          <select required className={inputClass} value={currentData.category || ''} onChange={e => setCurrentData({...currentData, category: e.target.value})}>
-             <option value="">Selecione</option>
-             {["SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"].map(cat => (
-               <option key={cat} value={cat}>{cat}</option>
-             ))}
-          </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Fase / Grupo</label>
+              <select className={inputClass} value={currentData.phase || 'Classificatória'} onChange={e => setCurrentData({...currentData, phase: e.target.value})}>
+                <option value="Classificatória">Classificatória</option>
+                <option value="Grupo A">Grupo A</option>
+                <option value="Grupo B">Grupo B</option>
+                <option value="Grupo C">Grupo C</option>
+                <option value="Quartas">Quartas de Final</option>
+                <option value="Semifinal">Semifinal</option>
+                <option value="Final">Final</option>
+                <option value="Amistoso">Amistoso</option>
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Categoria do Jogo</label>
+              <select required className={inputClass} value={currentData.category || ''} onChange={e => setCurrentData({...currentData, category: e.target.value})}>
+                <option value="">Selecione</option>
+                {["SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"].map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+          </div>
           <label className={labelClass}>Equipes</label>
           <div className="flex gap-4">
             <select required className={inputClass} value={String(currentData.homeTeamId || currentData.home_team_id || '')} onChange={e => setCurrentData({...currentData, homeTeamId: e.target.value})}>

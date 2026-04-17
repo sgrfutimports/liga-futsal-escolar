@@ -35,7 +35,18 @@ export default function TeamDetails() {
     const homeId = String(g.home_team_id || g.homeTeamId || '').toLowerCase().trim();
     const awayId = String(g.away_team_id || g.awayTeamId || '').toLowerCase().trim();
     const currentId = String(id || '').toLowerCase().trim();
-    return homeId === currentId || awayId === currentId;
+    
+    // Check if IDs match
+    const matchesId = homeId === currentId || awayId === currentId;
+    
+    // Fallback: Check if names match (redundant safety)
+    const teamName = (team?.name || '').toLowerCase().trim();
+    const matchesName = teamName && (
+      String(g.home_team_name || '').toLowerCase().trim().includes(teamName) ||
+      String(g.away_team_name || '').toLowerCase().trim().includes(teamName)
+    );
+
+    return matchesId || matchesName;
   });
   const pastGames = allTeamGames.filter((g: any) => String(g.status || '').toLowerCase() === 'finalizado');
   const upcomingGames = allTeamGames.filter((g: any) => String(g.status || '').toLowerCase() !== 'finalizado').sort((a: any, b: any) => new Date(a.date || a.game_date).getTime() - new Date(b.date || b.game_date).getTime());
