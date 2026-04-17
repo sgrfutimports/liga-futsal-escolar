@@ -46,7 +46,7 @@ export default function Athletes() {
               NOSSOS <span className="text-primary">ATLETAS</span>
             </h1>
             <p className="text-gray-400 text-lg max-w-2xl">
-              Os talentos que fazem a Liga de Futsal Escolar acontecer.
+              As grandes promessas da Liga de Futsal Escolar.
             </p>
           </div>
           
@@ -82,98 +82,108 @@ export default function Athletes() {
         </div>
 
         {/* Athletes Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {filteredAthletes.map((athlete: any) => {
             const team = allTeams.find((t: any) => String(t.id) === String(athlete.teamId || athlete.team_id));
+            const goals = getAthleteGoals(athlete.id);
+            const nameParts = (athlete.name || "Uniformado").split(' ');
+            const firstName = nameParts[0];
+            const lastName = nameParts.slice(1).join(' ') || firstName;
+
             return (
               <div 
                 key={athlete.id} 
-                className="relative bg-[#001736] border rounded-2xl overflow-hidden transition-all duration-500 group cursor-pointer flex flex-col shadow-2xl hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(204,255,0,0.15)] aspect-[5/7]"
+                className="relative bg-[#020617] border-2 rounded-[2.5rem] overflow-hidden transition-all duration-500 group cursor-pointer flex flex-col shadow-2xl hover:-translate-y-4 hover:shadow-[0_30px_60px_rgba(204,255,0,0.25)] aspect-[10/14]"
                 style={{
-                  borderColor: team?.color || 'rgba(255,255,255,0.05)',
-                  boxShadow: team?.color ? `0 10px 30px ${team.color}15` : undefined
+                  borderColor: team?.color ? `${team.color}40` : 'rgba(255,255,255,0.05)',
                 }}
               >
                 
-                {/* Fundo quadriculado (Blueprint) */}
-                <div 
-                  className="absolute inset-0 opacity-10 pointer-events-none z-0"
-                  style={{
-                    backgroundImage: 'linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)',
-                    backgroundSize: '40px 40px',
-                    backgroundPosition: 'center center'
-                  }}
-                />
+                {/* Sports Texture Layer */}
+                <div className="absolute inset-0 opacity-[0.05] z-0 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
 
-                {/* Distintivo de Categoria (Top Left) - Renderizado apenas na visão "TODOS" */}
-                {activeCategory === "TODOS" && (
-                  <div className="absolute top-5 left-5 z-20">
-                    <span className="inline-flex items-center justify-center px-2 py-1 bg-white/10 backdrop-blur-md text-white font-display text-[10px] md:text-xs font-black uppercase tracking-widest rounded border border-white/20 shadow-lg">
-                      {athlete.category || "SUB-XX"}
-                    </span>
-                  </div>
-                )}
+                {/* Team Badge (Top Left Corner - Reposicionado) */}
+                <div className="absolute top-8 left-8 z-30 w-14 h-14 bg-white rounded-2xl shadow-2xl p-2 border-2 border-white/20 transform -rotate-6 group-hover:rotate-0 transition-transform duration-500">
+                    {team?.logo ? (
+                      <img src={team.logo} className="w-full h-full object-contain" />
+                    ) : (
+                      <Trophy className="w-full h-full text-gray-300" />
+                    )}
+                </div>
 
-                {/* Número e Posição do Jogador no Canto Superior Direito */}
-                <div className="absolute top-5 right-6 text-white z-20 flex flex-col items-center">
-                  <span className="font-display font-black text-6xl md:text-7xl leading-none drop-shadow-md">{athlete.number || "-"}</span>
-                  <span className="font-display font-bold text-sm md:text-base text-gray-300 drop-shadow-md tracking-widest uppercase mt-1">
+                {/* Jersey Number (Top Right Corner - XL Style) */}
+                <div className="absolute top-6 right-10 z-30 flex flex-col items-end">
+                  <span className="font-display font-black text-9xl text-white/5 absolute -top-10 -right-4 italic select-none">
+                    {athlete.number}
+                  </span>
+                  <span className="relative font-display font-black text-7xl text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] italic leading-none">
+                    {athlete.number}
+                  </span>
+                  <span className="bg-primary px-3 py-1 rounded-md text-dark font-display font-black text-xs uppercase tracking-widest mt-1 shadow-xl transform skew-x-[-10deg]">
                     {athlete.position || "JOG"}
                   </span>
                 </div>
 
-                {/* Logo do Time logo abaixo da Posição */}
-                <div className="absolute top-[6.5rem] md:top-[7.5rem] right-7 w-12 h-12 bg-white rounded-full overflow-hidden border border-white/20 shadow-lg z-20 flex items-center justify-center p-1">
-                  {team?.logo ? (
-                    <img src={team.logo} className="max-w-full max-h-full object-contain" />
-                  ) : (
-                    <Trophy className="w-6 h-6 text-gray-400" />
-                  )}
+                {/* Category Floater */}
+                <div className="absolute top-24 left-8 z-30">
+                  <span className="px-4 py-1.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white font-display text-[10px] uppercase tracking-[0.2em] font-black shadow-lg">
+                    {athlete.category || "SUB-XX"}
+                  </span>
                 </div>
 
-                {/* Imagem do Jogador */}
-                {athlete.photo ? (
-                  <img src={athlete.photo} alt={athlete.name} className="absolute inset-0 w-full h-[100%] object-cover object-top z-10 transition-transform duration-700 group-hover:scale-[1.03]" referrerPolicy="no-referrer" />
-                ) : (
-                  <User className="absolute inset-x-0 bottom-10 mx-auto w-3/4 h-3/4 object-contain text-gray-700 opacity-20 z-10 transition-transform duration-700 group-hover:scale-105" />
-                )}
+                {/* Photo Container - Clear Face Area */}
+                <div className="absolute inset-x-0 top-0 h-[80%] z-10 overflow-hidden">
+                  {athlete.photo ? (
+                    <img 
+                      src={athlete.photo} 
+                      alt={athlete.name} 
+                      className="w-full h-full object-cover object-top transition-transform duration-1000 group-hover:scale-110 group-hover:rotate-1" 
+                      referrerPolicy="no-referrer" 
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-dark-card/50">
+                      <User className="w-48 h-48 text-gray-900 opacity-30" />
+                    </div>
+                  )}
+                </div>
                 
-                {/* Fade Escuro na Base para Contraste do Nome */}
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#000b1a] via-[#000e24]/70 to-transparent z-10" />
-                
-                {/* Sobreposição de Informações de Texto (Nome e Linha) */}
-                <div className="absolute inset-x-0 bottom-0 z-20 flex flex-col items-center justify-end pb-8 px-4 h-full">
+                {/* Premium Footer - Moving Name from Face Area */}
+                <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black via-black/95 to-transparent z-20 flex flex-col justify-end p-10 pt-0">
                   
-                  {/* Divisão do nome para emular o estilo do modelo bruto */}
-                  {(() => {
-                    const name = String(athlete.name || "Uniformado");
-                    const nameParts = name.split(' ');
-                    const firstName = nameParts[0];
-                    const lastName = nameParts.slice(1).join(' ') || firstName;
-                    return (
-                      <>
-                        <span className="text-white font-display font-bold italic text-lg md:text-xl uppercase leading-none mb-1 tracking-wider drop-shadow-md">
-                          {firstName}
-                        </span>
-                        <h3 className="font-display font-black italic text-[2.5rem] md:text-5xl text-white uppercase leading-none tracking-tighter drop-shadow-xl text-center">
-                          {lastName}
-                        </h3>
-                      </>
-                    )
-                  })()}
+                  {/* Name Layout */}
+                  <div className="flex flex-col items-center text-center -mb-2">
+                    <span className="text-primary font-display font-black italic text-2xl uppercase tracking-[0.25em] opacity-90 mb-[-12px] drop-shadow-md">
+                      {firstName}
+                    </span>
+                    <h3 className="font-display font-black italic text-5xl md:text-6xl text-white uppercase leading-none tracking-tighter drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
+                      {lastName}
+                    </h3>
+                  </div>
 
-                  {/* Linha Inferior com a Cor do Time */}
+                  {/* Dynamic Team Colored Divider */}
                   <div 
-                    className="w-16 h-1 mt-4 mb-3 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.2)]" 
-                    style={{ backgroundColor: team?.color || 'var(--color-primary)' }}
+                    className="w-full h-1.5 mt-8 mb-6 rounded-full" 
+                    style={{ 
+                      backgroundColor: team?.color || 'var(--color-primary)',
+                      boxShadow: `0 0 20px ${team?.color || 'rgba(204,255,0,0.6)'}`
+                    }}
                   />
 
-                  {/* Informações de Gols Rodapé */}
-                  <div className="flex items-center gap-2 text-center bg-black/20 px-3 py-1 rounded-full border border-white/10 backdrop-blur-sm">
-                    <Goal className="w-3 h-3 text-white/70" />
-                    <span className="font-display text-[10px] md:text-xs text-white/70 uppercase tracking-widest">
-                       Gols <strong className="text-white text-sm ml-1">{athlete.goals || 0}</strong>
-                    </span>
+                  {/* Stats & Info Footer */}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 flex items-center gap-3 bg-white/5 hover:bg-white/10 px-5 py-3 rounded-2xl border border-white/10 transition-colors backdrop-blur-md">
+                      <Goal className="w-5 h-5 text-primary" />
+                      <div className="flex flex-col">
+                        <span className="font-display text-[10px] text-gray-400 uppercase tracking-widest leading-none">Total Gols</span>
+                        <span className="font-display text-xl text-white font-black leading-none mt-1">{goals}</span>
+                      </div>
+                    </div>
+                    {team?.city && (
+                      <div className="flex flex-col items-end">
+                        <span className="text-[10px] text-gray-500 font-display uppercase tracking-widest font-bold">Cidade</span>
+                        <span className="text-xs text-white/80 font-display font-black">{team.city}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
