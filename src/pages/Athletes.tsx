@@ -10,7 +10,7 @@ export default function Athletes() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("TODOS");
 
-  // Cálculo de gols dinâmico via súmulas (Sincronizado com Banco)
+  // Cálculo de gols dinâmico via súmulas
   const getAthleteGoals = (athleteId: string) => {
     let total = 0;
     games.forEach((game: any) => {
@@ -25,7 +25,7 @@ export default function Athletes() {
   };
 
   const filteredAthletes = athletes.filter((athlete: any) => {
-    const matchesSearch = athlete.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = (athlete.name || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = activeCategory === "TODOS" || athlete.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
@@ -88,13 +88,31 @@ export default function Athletes() {
             return (
               <div 
                 key={athlete.id}
-                className="group relative flex flex-col bg-[#010a1a] rounded-[2.5rem] border-2 border-white/5 overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] aspect-[10/14]"
+                className="group relative flex flex-col bg-[#010a1a] rounded-[2.5rem] border-2 border-white/5 overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] aspect-[10/14]"
               >
-                {/* 1. TOP HEADER (Limpando o Rosto) */}
-                <div className="p-6 flex justify-between items-start z-30">
+                {/* 1. BACKGROUND PHOTO (Takes full area) */}
+                <div className="absolute inset-0 z-0">
+                  {athlete.photo ? (
+                    <img 
+                      src={athlete.photo} 
+                      className="w-full h-full object-cover object-top transition-transform duration-1000 group-hover:scale-110"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+                      <User className="w-32 h-32 text-white/5" />
+                    </div>
+                  )}
+                  {/* Overlays for depth and readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                  <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-black/60 to-transparent" />
+                </div>
+
+                {/* 2. OVERLAY HEADER (Top corner info) */}
+                <div className="relative z-20 p-6 flex justify-between items-start">
                   {/* CATEGORIA (Superior Esquerdo) */}
-                  <div className="px-3 py-1 bg-black/40 backdrop-blur-md rounded-lg border border-white/10 shadow-lg">
-                    <span className="text-[10px] font-display font-black text-white uppercase tracking-widest leading-none">
+                  <div className="px-4 py-1.5 bg-black/60 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl">
+                    <span className="text-[11px] font-display font-black text-white uppercase tracking-[0.2em] leading-none">
                       {athlete.category || "---"}
                     </span>
                   </div>
@@ -103,67 +121,48 @@ export default function Athletes() {
                   <div className="flex items-start gap-3">
                     <div className="flex flex-col items-end">
                       <span 
-                        className="font-display font-black text-6xl italic leading-none drop-shadow-2xl"
-                        style={{ color: teamColor }}
+                        className="font-display font-black text-7xl italic leading-none drop-shadow-[0_0_15px_rgba(0,0,0,0.8)]"
+                        style={{ color: teamColor, textShadow: `0 0 20px ${teamColor}60` }}
                       >
                         {athlete.number}
                       </span>
-                      <span className="text-[9px] font-display font-bold text-gray-500 uppercase tracking-widest mt-1">
+                      <span className="text-[10px] font-display font-black text-white/80 uppercase tracking-widest mt-1 bg-black/40 px-2 py-0.5 rounded backdrop-blur-md">
                         {athlete.position || "JOG"}
                       </span>
                     </div>
                     {team?.logo && (
-                      <div className="w-12 h-12 bg-white rounded-xl p-1.5 shadow-xl border border-white/10">
+                      <div className="w-14 h-14 bg-white rounded-2xl p-2 shadow-2xl border border-white/20 transform rotate-3 group-hover:rotate-0 transition-transform">
                         <img src={team.logo} className="w-full h-full object-contain" />
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* 2. ÁREA DA FOTO (Sem cortes, Sem sobreposição) */}
-                <div className="absolute inset-0 z-10 p-2 pt-24 pb-32">
-                  <div className="w-full h-full relative">
-                    {athlete.photo ? (
-                      <img 
-                        src={athlete.photo} 
-                        className="w-full h-full object-cover object-top rounded-3xl"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-slate-900/50 rounded-3xl flex items-center justify-center">
-                        <User className="w-32 h-32 text-white/5" />
-                      </div>
-                    )}
-                    {/* Gradiente sutil para suavizar a base */}
-                    <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#010a1a] to-transparent rounded-b-3xl" />
-                  </div>
-                </div>
+                {/* 3. OVERLAY FOOTER (Full Name and Stats) */}
+                <div className="relative z-20 mt-auto p-8">
+                  <div className="flex flex-col items-center">
+                    {/* FULL NAME OVERLAYED AT BASE */}
+                    <h3 className="font-display font-black text-3xl text-white text-center uppercase leading-none tracking-tighter mb-6 drop-shadow-[0_5px_15px_rgba(0,0,0,1)]">
+                      {athlete.name}
+                    </h3>
 
-                {/* 3. BASE DATA (Nome Completo e Stats) */}
-                <div className="mt-auto p-6 z-20 flex flex-col items-center">
-                  {/* NOME COMPLETO NA BASE */}
-                  <h3 className="font-display font-black text-2xl text-white text-center uppercase leading-none tracking-tighter mb-4 px-2 group-hover:text-primary transition-colors">
-                    {athlete.name}
-                  </h3>
-
-                  <div className="w-full grid grid-cols-2 gap-2 bg-white/5 backdrop-blur-md p-3 rounded-2xl border border-white/10">
-                    <div className="flex flex-col items-center justify-center border-r border-white/10">
-                      <span className="text-[8px] text-gray-500 uppercase tracking-widest font-bold mb-1">Gols</span>
-                      <div className="flex items-center gap-1.5">
-                        <Goal className="w-3 h-3 text-primary" />
-                        <span className="text-sm font-display font-black text-white">{goals}</span>
+                    <div className="w-full grid grid-cols-2 gap-4 bg-black/60 backdrop-blur-2xl p-4 rounded-2xl border border-white/10 shadow-2xl">
+                      <div className="flex flex-col items-center justify-center border-r border-white/10">
+                        <span className="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-1">Gols Oficiais</span>
+                        <div className="flex items-center gap-2">
+                          <Goal className="w-4 h-4 text-primary" />
+                          <span className="text-xl font-display font-black text-white leading-none">{goals}</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-col items-center justify-center">
-                      <span className="text-[8px] text-gray-400 uppercase tracking-widest font-bold mb-1">Equipe</span>
-                      <span className="text-[9px] font-display font-bold text-gray-200 truncate max-w-full text-center">
-                        {team?.name || "Sem Clube"}
-                      </span>
+                      <div className="flex flex-col items-center justify-center">
+                        <span className="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-1">Equipe</span>
+                        <span className="text-[10px] font-display font-bold text-white truncate max-w-full text-center uppercase">
+                          {team?.name || "Sem Clube"}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-[#010a1a] to-transparent pointer-events-none z-0" />
               </div>
             );
           })}
