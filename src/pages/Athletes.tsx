@@ -80,92 +80,89 @@ export default function Athletes() {
         </div>
 
         {/* Athletes Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {filteredAthletes.map((athlete: any) => {
             const team = teams.find((t: any) => String(t.id) === String(athlete.team_id || athlete.teamId));
             const goals = getAthleteGoals(athlete.id);
             const teamColor = team?.color || "#ccff00";
             
-            // Name Splitting for Gvardiol Style
-            const nameParts = (athlete.name || "Uniformado").trim().split(" ");
+            const nameParts = (athlete.name || "Atleta").trim().split(" ");
             const firstName = nameParts[0];
             const lastName = nameParts.slice(1).join(" ") || firstName;
 
             return (
               <div 
                 key={athlete.id}
-                className="group relative flex flex-col bg-[#011429] rounded-[1.5rem] border border-white/10 overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] aspect-[10/14]"
+                className="group relative flex flex-col bg-[#011429] rounded-[2rem] border border-white/10 overflow-hidden transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_60px_90px_-20px_rgba(0,0,0,1)] aspect-[10/14]"
               >
-                {/* 1. TECHNICAL GRID BACKGROUND */}
-                <div className="absolute inset-0 z-0 opacity-[0.2]" style={{ 
-                  backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.1) 1px, transparent 0)`,
-                  backgroundSize: '24px 24px'
+                {/* 1. BACKGROUND (Technical Grid) */}
+                <div className="absolute inset-0 z-0 opacity-[0.25]" style={{ 
+                  backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.1) 1px, transparent 0)`,
+                  backgroundSize: '30px 30px'
                 }}></div>
-                <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#011429]/0 via-[#011429]/50 to-[#011429]" />
+                <div className="absolute inset-0 z-0 bg-gradient-to-t from-[#011429] via-transparent to-transparent" />
 
-                {/* 2. ATHLETE DISOBEDIENT IMAGE (Full area) */}
-                <div className="absolute inset-x-0 top-0 bottom-0 z-10 flex items-center justify-center p-4">
+                {/* 2. ATHLETE PHOTO (Isolated) */}
+                <div className="absolute inset-0 z-10 flex items-end justify-center">
                   {athlete.photo ? (
                     <img 
                       src={athlete.photo} 
-                      className="w-full h-full object-contain object-bottom transition-transform duration-700 group-hover:scale-105"
+                      className="w-[95%] h-[95%] object-contain object-bottom transition-transform duration-1000 group-hover:scale-105"
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <User className="w-48 h-48 text-white/5" />
+                    <User className="w-56 h-56 text-white/5" />
                   )}
+                  {/* Bottom fade to integrate name */}
+                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#011429] via-[#011429]/40 to-transparent pointer-events-none" />
                 </div>
 
-                {/* 3. OVERLAYS (Standard Style) */}
-                <div className="relative z-20 p-6 h-full flex flex-col">
-                  {/* Category - Left Top */}
-                  <div className="flex justify-start">
-                     <span className="text-[10px] font-display font-black text-white/40 uppercase tracking-[0.3em]">
+                {/* 3. INFO OVERLAYS (Gvardiol Style) */}
+                <div className="relative z-20 h-full flex flex-col p-6">
+                  {/* TOP: Category & Number/Logo */}
+                  <div className="flex justify-between items-start">
+                    <span className="text-[12px] font-display font-black text-white/30 uppercase tracking-[0.4em] pt-2">
                        {athlete.category || "LFE"}
-                     </span>
-                  </div>
-
-                  {/* Number and Logo - Right Top */}
-                  <div className="absolute top-4 right-6 flex flex-col items-center">
-                    <span 
-                      className="font-display font-black text-7xl leading-none italic tracking-tighter drop-shadow-xl text-white"
-                    >
-                      {athlete.number}
                     </span>
-                    {team?.logo && (
-                      <div className="w-12 h-12 bg-white rounded-full p-2 mt-2 border-2 border-white/20 shadow-xl overflow-hidden flex items-center justify-center">
-                        <img src={team.logo} className="w-full h-full object-contain" />
-                      </div>
-                    )}
+                    
+                    <div className="flex flex-col items-center">
+                      <span className="font-display font-black text-7xl leading-none italic tracking-tighter text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.8)]">
+                         {athlete.number}
+                      </span>
+                      {team?.logo && (
+                        <div className="w-12 h-12 bg-white rounded-full p-2 mt-2 border-2 border-white/10 shadow-2xl flex items-center justify-center overflow-hidden">
+                           <img src={team.logo} className="w-full h-full object-contain" />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  {/* NAME AND STATS - Bottom */}
-                  <div className="mt-auto flex flex-col items-center">
-                    {/* GIANT NAME (Gvardiol Pattern) */}
-                    <div className="flex flex-col items-center text-center">
-                      <span className="text-white font-display font-black text-sm uppercase tracking-[0.4em] mb-[-4px] opacity-80">
+                  {/* BOTTOM: Name & Stats (Fixed at the base) */}
+                  <div className="mt-auto flex flex-col items-center pb-2">
+                    {/* Name block - Pushed lower */}
+                    <div className="flex flex-col items-center text-center -mb-2">
+                      <span className="text-white font-display font-black text-sm uppercase tracking-[0.5em] mb-[-6px] opacity-70">
                         {firstName}
                       </span>
-                      <h3 className="relative font-display font-black italic text-4xl text-white uppercase leading-none tracking-tighter">
-                        {/* Glitch/Offset effect simulation */}
-                        <span className="absolute -top-[1px] -left-[1px] text-primary/30 blur-[1px]">{lastName}</span>
-                        <span className="relative z-10 drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">{lastName}</span>
+                      <h3 className="relative font-display font-black italic text-5xl text-white uppercase leading-none tracking-tighter">
+                        <span className="absolute -top-[1.5px] -left-[1.5px] text-primary/40 blur-[1px]">{lastName}</span>
+                        <span className="relative z-10 drop-shadow-[0_8px_8px_rgba(0,0,0,0.8)]">{lastName}</span>
                       </h3>
                     </div>
 
-                    {/* Small accent bar */}
-                    <div className="w-10 h-1 rounded-full bg-primary mt-4 mb-6 shadow-[0_0_10px_rgba(204,255,0,0.6)]" />
+                    {/* Accent Bar */}
+                    <div className="w-12 h-1.5 rounded-full bg-primary mt-6 mb-10 shadow-[0_0_20px_rgba(204,255,0,0.8)]" />
 
-                    {/* Stats */}
-                    <div className="w-full flex justify-center gap-6 pb-2">
+                    {/* Footer Stats */}
+                    <div className="w-full flex justify-center gap-8 bg-black/40 backdrop-blur-xl p-4 rounded-2xl border border-white/5">
                        <div className="flex flex-col items-center">
-                          <span className="text-[8px] text-gray-500 uppercase font-black tracking-widest">Gols</span>
-                          <span className="text-lg font-display font-black text-white">{goals}</span>
+                          <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest leading-none mb-2">Gols</span>
+                          <span className="text-xl font-display font-black text-white leading-none">{goals}</span>
                        </div>
-                       <div className="w-[1px] h-8 bg-white/10" />
+                       <div className="w-[1px] h-10 bg-white/10" />
                        <div className="flex flex-col items-center">
-                          <span className="text-[8px] text-gray-500 uppercase font-black tracking-widest">Cidade</span>
-                          <span className="text-sm font-display font-bold text-white uppercase">{athlete.city || "LFE"}</span>
+                          <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest leading-none mb-2">Cidade</span>
+                          <span className="text-xs font-display font-bold text-white uppercase leading-none">{athlete.city || "LFE"}</span>
                        </div>
                     </div>
                   </div>
@@ -174,6 +171,13 @@ export default function Athletes() {
             );
           })}
         </div>
+
+        {filteredAthletes.length === 0 && (
+          <div className="py-24 text-center">
+            <Trophy className="w-20 h-20 text-gray-800 mx-auto mb-6 opacity-20" />
+            <p className="text-gray-500 font-display text-xl uppercase tracking-widest">Nenhum atleta encontrado</p>
+          </div>
+        )}
       </div>
     </div>
   );
