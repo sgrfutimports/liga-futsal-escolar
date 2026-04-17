@@ -5,13 +5,20 @@ import { cn } from "@/src/lib/utils";
 import { useSupaData } from "@/src/lib/store";
 
 const TeamLogoSmall = ({ teamId, teamName, logo, className }: { teamId: number, teamName: string, logo?: string, className?: string }) => {
+  const safeName = String(teamName || "").trim();
+  const initials = safeName.length >= 2 
+    ? safeName.substring(0, 2).toUpperCase() 
+    : safeName.length === 1 
+      ? safeName.toUpperCase() 
+      : "??";
+
   return (
     <div className={cn("bg-dark rounded-full border border-dark-border flex items-center justify-center overflow-hidden shrink-0", className)}>
       {logo ? (
-        <img src={logo} alt={teamName} className="w-full h-full object-contain p-0.5 bg-white" referrerPolicy="no-referrer" />
+        <img src={logo} alt={safeName} className="w-full h-full object-contain p-0.5 bg-white" referrerPolicy="no-referrer" />
       ) : (
         <span className="text-[10px] text-gray-500 font-display">
-          {teamName ? String(teamName).substring(0, 2).toUpperCase() : "??"}
+          {initials}
         </span>
       )}
     </div>

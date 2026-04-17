@@ -5,13 +5,20 @@ import { useSupaData } from "@/src/lib/store";
 import { cn } from "@/src/lib/utils";
 
 const TeamLogo = ({ teamName, logo }: { teamName: string, logo?: string }) => {
+  const safeName = String(teamName || "").trim();
+  const initials = safeName.length >= 2 
+    ? safeName.substring(0, 2).toUpperCase() 
+    : safeName.length === 1 
+      ? safeName.toUpperCase() 
+      : "??";
+
   return (
     <div className="w-24 h-24 bg-white rounded-2xl border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-500 shadow-2xl relative z-10 overflow-hidden shrink-0">
       {logo ? (
-        <img src={logo} alt={teamName} className="w-full h-full object-contain p-3" referrerPolicy="no-referrer" />
+        <img src={logo} alt={safeName} className="w-full h-full object-contain p-3" referrerPolicy="no-referrer" />
       ) : (
         <span className="font-display text-4xl text-gray-300 group-hover:text-primary transition-all duration-300">
-          {teamName ? String(teamName).substring(0, 2).toUpperCase() : "??"}
+          {initials}
         </span>
       )}
     </div>

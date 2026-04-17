@@ -81,6 +81,7 @@ export default function TeamDetails() {
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12">
                     {catPlayers.map((player: any) => {
                       const goals = getAthleteGoals(player.id);
+                      const safePlayerName = String(player.name || "Uniformado").trim();
 
                       return (
                         <div 
@@ -111,7 +112,7 @@ export default function TeamDetails() {
                           {/* 3. CABEÇALHO */}
                           <div className="relative z-10 p-8 flex justify-between items-start">
                             <span className="px-3 py-1 bg-white/80 backdrop-blur-md border border-slate-100 rounded-lg text-[10px] font-display font-black text-slate-900 uppercase tracking-widest shadow-sm">
-                              {player.category || "---"}
+                              {String(player.category || "---").toUpperCase()}
                             </span>
 
                             <div className="flex flex-col items-center">
@@ -120,7 +121,7 @@ export default function TeamDetails() {
                               </span>
                               {team?.logo && (
                                 <div className="w-12 h-12 bg-white rounded-full p-2 mt-2 shadow-lg border border-slate-100 overflow-hidden flex items-center justify-center transform rotate-2">
-                                  <img src={team.logo} className="w-full h-full object-contain" />
+                                  <img src={team.logo} alt={safePlayerName} className="w-full h-full object-contain" />
                                 </div>
                               )}
                             </div>
@@ -129,7 +130,7 @@ export default function TeamDetails() {
                           {/* 4. NOME NA BASE */}
                           <div className="relative z-10 mt-auto p-10 flex flex-col items-center bg-gradient-to-t from-white via-white/80 to-transparent">
                             <h3 className="font-display font-black text-3xl text-slate-900 text-center uppercase leading-none tracking-tighter group-hover:text-primary transition-colors">
-                              {player.name}
+                              {safePlayerName}
                             </h3>
                             <div className="w-12 h-1.5 bg-slate-900 rounded-full mt-4 group-hover:bg-primary transition-colors" />
                           </div>
