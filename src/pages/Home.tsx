@@ -54,7 +54,7 @@ export default function Home() {
      const catStandings = loadedTeams.filter((t: any) => involvedTeamIds.has(String(t.id))).map((t: any) => {
         let pts = 0;
         categoryGames.forEach((g: any) => {
-          if (g.status === 'Finalizado') {
+          if (String(g.status || '').toLowerCase() === 'finalizado') {
             const homeScore = Number(g.home_score ?? g.homeScore ?? 0);
             const awayScore = Number(g.away_score ?? g.awayScore ?? 0);
             if (String(g.homeTeamId || g.home_team_id) === String(t.id)) {
@@ -73,7 +73,7 @@ export default function Home() {
      return acc;
   }, {});
 
-  const groupedNextGames = (games || []).filter((g: any) => g.status !== 'Finalizado').reduce((acc: any, game: any) => {
+  const groupedNextGames = (games || []).filter((g: any) => String(g.status || '').toLowerCase() !== 'finalizado').reduce((acc: any, game: any) => {
      const cat = game.category || "Geral";
      if (!acc[cat]) acc[cat] = [];
      acc[cat].push(game);

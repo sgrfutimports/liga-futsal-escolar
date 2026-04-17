@@ -31,15 +31,12 @@ export default function TeamDetails() {
   const players = allAthletes.filter((a: any) => String(a.teamId || a.team_id) === String(id));
   
   // Calculate specific team stats based on games
-  const teamIdStr = String(id || "").trim().toLowerCase();
-  const allTeamGames = allGames.filter((g: any) => {
-    const homeId = String(g.home_team_id || g.homeTeamId || "").trim().toLowerCase();
-    const awayId = String(g.away_team_id || g.awayTeamId || "").trim().toLowerCase();
-    return homeId === teamIdStr || awayId === teamIdStr;
-  });
-  
-  const pastGames = allTeamGames.filter((g: any) => String(g.status || "").trim().toLowerCase() === 'finalizado');
-  const upcomingGames = allTeamGames.filter((g: any) => String(g.status || "").trim().toLowerCase() === 'agendado');
+  const allTeamGames = allGames.filter((g: any) => (
+    String(g.home_team_id || g.homeTeamId) === String(id) || 
+    String(g.away_team_id || g.awayTeamId) === String(id)
+  ));
+  const pastGames = allTeamGames.filter((g: any) => String(g.status || '').toLowerCase() === 'finalizado');
+  const upcomingGames = allTeamGames.filter((g: any) => String(g.status || '').toLowerCase() !== 'finalizado').sort((a: any, b: any) => new Date(a.date || a.game_date).getTime() - new Date(b.date || b.game_date).getTime());
   
   const catStats = pastGames.reduce((acc: any, g: any) => {
     const cat = g.category || "Geral";
@@ -258,13 +255,20 @@ export default function TeamDetails() {
                       acc[cat].push(match);
                       return acc;
                     }, {})
-                  ).sort().map(([category, catGames]: [string, any]) => (
+                  ).sort().map(([category, catGames]: [string, any]) => {
+                    const sortedGames = [...catGames].sort((a: any, b: any) => {
+                      const d1 = new Date(`${a.date || '9999-12-31'}T${a.time || '23:59'}`);
+                      const d2 = new Date(`${b.date || '9999-12-31'}T${b.time || '23:59'}`);
+                      return d1.getTime() - d2.getTime();
+                    });
+
+                    return (
                     <div key={category} className="space-y-3">
                       <h3 className="text-xs font-display text-secondary/70 uppercase tracking-widest border-b border-dark-border pb-2">
                         {category}
                       </h3>
                       <div className="space-y-3">
-                        {catGames.slice(0, 2).map((match: any) => {
+                        {sortedGames.slice(0, 3).map((match: any) => {
                            let opponent = "";
                            const isHome = String(match.home_team_id || match.homeTeamId) === String(id);
                            if (isHome) {
@@ -289,8 +293,8 @@ export default function TeamDetails() {
                         })}
                       </div>
                     </div>
-                  ))
-                )}
+                  )
+                ))}
               </div>
             </div>
 
@@ -314,13 +318,20 @@ export default function TeamDetails() {
                       acc[cat].push(match);
                       return acc;
                     }, {})
-                  ).sort().map(([category, catGames]: [string, any]) => (
+                  ).sort().map(([category, catGames]: [string, any]) => {
+                    const sortedGames = [...catGames].sort((a: any, b: any) => {
+                      const d1 = new Date(`${a.date || '1970-01-01'}T${a.time || '00:00'}`);
+                      const d2 = new Date(`${b.date || '1970-01-01'}T${b.time || '00:00'}`);
+                      return d2.getTime() - d1.getTime();
+                    });
+
+                    return (
                     <div key={category} className="space-y-3">
                       <h3 className="text-xs font-display text-primary/70 uppercase tracking-widest border-b border-dark-border pb-2">
                         {category}
                       </h3>
                       <div className="space-y-3">
-                        {catGames.slice(0, 2).map((match: any) => {
+                        {sortedGames.slice(0, 3).map((match: any) => {
                            let opponent = "", result = "E", score = "";
                            const homeScore = Number(match.home_score ?? match.homeScore ?? 0);
                            const awayScore = Number(match.away_score ?? match.awayScore ?? 0);

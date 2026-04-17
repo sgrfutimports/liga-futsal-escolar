@@ -38,9 +38,9 @@ export default function Standings() {
   const standings = categoryTeams.map((t: any) => {
     let pts = 0, j = 0, v = 0, e = 0, d = 0, gp = 0, gc = 0;
     categoryGames.forEach((g: any) => {
-      if (g.status === 'Finalizado') {
-        const homeScore = Number(g.homeScore || 0);
-        const awayScore = Number(g.awayScore || 0);
+      if (String(g.status || '').toLowerCase() === 'finalizado') {
+        const homeScore = Number(g.home_score ?? g.homeScore ?? 0);
+        const awayScore = Number(g.away_score ?? g.awayScore ?? 0);
         if (String(g.homeTeamId || g.home_team_id) === String(t.id)) {
           j++; gp += homeScore; gc += awayScore;
           if (homeScore > awayScore) v++;
@@ -71,7 +71,7 @@ export default function Standings() {
     if (a.goals && !isNaN(a.goals)) goals += Number(a.goals);
 
     categoryGames.forEach((g: any) => {
-      if (g.status === 'Finalizado' && g.events) {
+      if (String(g.status || '').toLowerCase() === 'finalizado' && g.events) {
         g.events.forEach((ev: any) => {
           if (String(ev.playerId || ev.player_id) === String(a.id)) {
             if (ev.type === 'goal') goals++;
@@ -93,7 +93,7 @@ export default function Standings() {
   const teamStats = categoryTeams.map((t: any) => {
     let teamYellows = 0, teamReds = 0;
     categoryGames.forEach((g: any) => {
-      if (g.status === 'Finalizado' && g.events) {
+      if (String(g.status || '').toLowerCase() === 'finalizado' && g.events) {
         g.events.forEach((ev: any) => {
           if (String(ev.teamId || ev.team_id) === String(t.id)) {
             if (ev.type === 'yellow') teamYellows++;
@@ -246,9 +246,9 @@ export default function Standings() {
                           </Link>
 
                           <div className="w-1/3 flex flex-col items-center justify-center">
-                            {game.status === "Finalizado" ? (
+                            {String(game.status || '').toLowerCase() === 'finalizado' ? (
                               <div className="flex items-center gap-3 font-display text-3xl text-white">
-                                <span>{game.homeScore}</span><span className="text-gray-600 text-xl">X</span><span>{game.awayScore}</span>
+                                <span>{game.homeScore ?? game.home_score}</span><span className="text-gray-600 text-xl">X</span><span>{game.awayScore ?? game.away_score}</span>
                               </div>
                             ) : (<span className="text-2xl font-display text-gray-600">VS</span>)}
                             <span className="text-xs text-gray-500 mt-2 text-center truncate w-full px-2">{game.location}</span>
