@@ -31,12 +31,15 @@ export default function TeamDetails() {
   const players = allAthletes.filter((a: any) => String(a.teamId || a.team_id) === String(id));
   
   // Calculate specific team stats based on games
-  const allTeamGames = allGames.filter((g: any) => (
-    String(g.home_team_id || g.homeTeamId) === String(id) || 
-    String(g.away_team_id || g.awayTeamId) === String(id)
-  ));
-  const pastGames = allTeamGames.filter((g: any) => g.status === 'Finalizado');
-  const upcomingGames = allTeamGames.filter((g: any) => g.status === 'Agendado');
+  const teamIdStr = String(id || "").trim().toLowerCase();
+  const allTeamGames = allGames.filter((g: any) => {
+    const homeId = String(g.home_team_id || g.homeTeamId || "").trim().toLowerCase();
+    const awayId = String(g.away_team_id || g.awayTeamId || "").trim().toLowerCase();
+    return homeId === teamIdStr || awayId === teamIdStr;
+  });
+  
+  const pastGames = allTeamGames.filter((g: any) => String(g.status || "").trim().toLowerCase() === 'finalizado');
+  const upcomingGames = allTeamGames.filter((g: any) => String(g.status || "").trim().toLowerCase() === 'agendado');
   
   const catStats = pastGames.reduce((acc: any, g: any) => {
     const cat = g.category || "Geral";
