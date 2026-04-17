@@ -71,8 +71,8 @@ export default function Standings() {
     let yellows = 0;
     let reds = 0;
 
-    // Add baseline goals if defined manually in Athlete modal
-    if (a.goals && !isNaN(a.goals)) goals += Number(a.goals);
+    // REMOVED manual baseline goals to ensure 100% dynamic sync with match events
+    // if (a.goals && !isNaN(a.goals)) goals += Number(a.goals);
 
     categoryGames.forEach((g: any) => {
       if (String(g.status || '').toLowerCase() === 'finalizado' && g.events) {
@@ -201,7 +201,8 @@ export default function Standings() {
           {activeTab === "ARTILHARIA" && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
               {topScorers.map((player: any, idx: number) => {
-                const team = teams.find((t: any) => String(t.id) === String(player.teamId || player.team_id));
+                const teamId = player.team_id || player.teamId;
+                const team = teams.find((t: any) => String(t.id) === String(teamId));
                 return (
                   <div key={player.id} className="flex items-center gap-4 bg-dark p-4 rounded-lg border border-dark-border relative overflow-hidden group">
                     <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity"><Goal className="w-32 h-32" /></div>
