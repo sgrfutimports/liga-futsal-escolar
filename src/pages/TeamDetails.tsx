@@ -31,10 +31,12 @@ export default function TeamDetails() {
   const players = allAthletes.filter((a: any) => String(a.teamId || a.team_id) === String(id));
   
   // Calculate specific team stats based on games
-  const allTeamGames = allGames.filter((g: any) => (
-    String(g.home_team_id || g.homeTeamId) === String(id) || 
-    String(g.away_team_id || g.awayTeamId) === String(id)
-  ));
+  const allTeamGames = allGames.filter((g: any) => {
+    const homeId = String(g.home_team_id || g.homeTeamId || '').toLowerCase().trim();
+    const awayId = String(g.away_team_id || g.awayTeamId || '').toLowerCase().trim();
+    const currentId = String(id || '').toLowerCase().trim();
+    return homeId === currentId || awayId === currentId;
+  });
   const pastGames = allTeamGames.filter((g: any) => String(g.status || '').toLowerCase() === 'finalizado');
   const upcomingGames = allTeamGames.filter((g: any) => String(g.status || '').toLowerCase() !== 'finalizado').sort((a: any, b: any) => new Date(a.date || a.game_date).getTime() - new Date(b.date || b.game_date).getTime());
   

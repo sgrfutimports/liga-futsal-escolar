@@ -41,12 +41,16 @@ export default function Standings() {
       if (String(g.status || '').toLowerCase() === 'finalizado') {
         const homeScore = Number(g.home_score ?? g.homeScore ?? 0);
         const awayScore = Number(g.away_score ?? g.awayScore ?? 0);
-        if (String(g.homeTeamId || g.home_team_id) === String(t.id)) {
+        const homeId = String(g.home_team_id || g.homeTeamId || '').toLowerCase().trim();
+        const awayId = String(g.away_team_id || g.awayTeamId || '').toLowerCase().trim();
+        const currentId = String(t.id || '').toLowerCase().trim();
+
+        if (homeId === currentId) {
           j++; gp += homeScore; gc += awayScore;
           if (homeScore > awayScore) v++;
           else if (homeScore === awayScore) e++;
           else d++;
-        } else if (String(g.awayTeamId || g.away_team_id) === String(t.id)) {
+        } else if (awayId === currentId) {
           j++; gp += awayScore; gc += homeScore;
           if (awayScore > homeScore) v++;
           else if (awayScore === homeScore) e++;
