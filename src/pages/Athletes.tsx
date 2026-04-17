@@ -34,16 +34,16 @@ export default function Athletes() {
   const categories = ["TODOS", "SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-[#020617] py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header */}
+        {/* Header - Restaurando Tipografia Branca Original */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
-            <h1 className="text-5xl md:text-6xl font-display font-bold text-slate-900 mb-4 uppercase tracking-tighter">
+            <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-4 uppercase tracking-tighter">
               ELITE <span className="text-primary">ATLETAS</span>
             </h1>
-            <p className="text-slate-500 text-lg max-w-2xl font-sans">
+            <p className="text-gray-400 text-lg max-w-2xl font-sans">
               O banco de talentos oficial da Liga de Futsal Escolar.
             </p>
           </div>
@@ -56,14 +56,14 @@ export default function Athletes() {
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="block w-full pl-10 pr-3 py-4 border border-slate-200 rounded-2xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary font-sans transition-all shadow-sm"
-              placeholder="Buscar atleta..."
+              className="block w-full pl-10 pr-3 py-4 border border-white/10 rounded-2xl bg-white/5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary font-sans transition-all"
+              placeholder="Buscar atleta pelo nome..."
             />
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-2 mb-12 pb-6 border-b border-slate-200">
+        {/* Filters - Restaurando Estilo Escuro Original */}
+        <div className="flex flex-wrap gap-2 mb-12 pb-6 border-b border-white/5">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -71,15 +71,15 @@ export default function Athletes() {
               className={cn(
                 "px-5 py-2 font-display text-xs rounded-xl transition-all border uppercase tracking-[0.2em] font-bold",
                 activeCategory === cat 
-                  ? "bg-slate-900 text-white border-slate-900 shadow-lg" 
-                  : "bg-white text-slate-500 border-slate-200 hover:border-slate-400 hover:text-slate-900"
+                  ? "bg-primary text-dark border-primary shadow-[0_0_15px_rgba(204,255,0,0.3)]" 
+                  : "bg-white/5 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
               )}>
               {cat}
             </button>
           ))}
         </div>
 
-        {/* Athletes Grid */}
+        {/* Athletes Grid - MANTENDO CARD BRANCO */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {filteredAthletes.map((athlete: any) => {
             const team = teams.find((t: any) => String(t.id) === String(athlete.team_id || athlete.teamId));
@@ -88,9 +88,9 @@ export default function Athletes() {
             return (
               <div 
                 key={athlete.id}
-                className="group relative flex flex-col bg-white rounded-[2rem] shadow-[0_10px_30px_rgba(0,0,0,0.05)] overflow-hidden transition-all duration-500 hover:-translate-y-3 hover:shadow-[0_40px_80px_rgba(0,0,0,0.15)] aspect-[10/14] border border-slate-100"
+                className="group relative flex flex-col bg-white rounded-[2rem] shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-500 hover:-translate-y-3 hover:shadow-[0_40px_80px_rgba(0,0,0,0.8)] aspect-[10/14]"
               >
-                {/* 1. IMAGEM TOTAL (Fundo) */}
+                {/* 1. IMAGEM TOTAL */}
                 <div className="absolute inset-0 z-0">
                   {athlete.photo ? (
                     <img 
@@ -99,15 +99,14 @@ export default function Athletes() {
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <div className="w-full h-full bg-slate-50 flex items-center justify-center">
-                      <User className="w-24 h-24 text-slate-200" />
+                    <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                      <User className="w-24 h-24 text-slate-300" />
                     </div>
                   )}
-                  {/* Gradiente branco suave na base para o nome */}
                   <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-white via-white/40 to-transparent" />
                 </div>
 
-                {/* 2. INFORMAÇÕES DE GOLS (Meio do Canto Esquerdo) */}
+                {/* 2. GOLS MEIO ESQUERDA */}
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 z-20">
                    <div className="bg-slate-900/90 backdrop-blur-md px-3 py-4 rounded-r-2xl border-y border-r border-white/20 shadow-xl flex flex-col items-center gap-1 group-hover:bg-primary transition-colors group-hover:border-primary">
                       <Goal className="w-4 h-4 text-primary group-hover:text-black" />
@@ -116,10 +115,10 @@ export default function Athletes() {
                    </div>
                 </div>
 
-                {/* 3. CABEÇALHO (Categoria e Logo/Número) */}
+                {/* 3. CABEÇALHO */}
                 <div className="relative z-10 p-6 flex justify-between items-start">
                    <span className="px-3 py-1 bg-white/80 backdrop-blur-md border border-slate-100 rounded-lg text-[9px] font-display font-black text-slate-900 uppercase tracking-widest shadow-sm">
-                      {athlete.category || "LFE"}
+                      {athlete.category || "---"}
                    </span>
 
                    <div className="flex flex-col items-center">
@@ -134,12 +133,11 @@ export default function Athletes() {
                    </div>
                 </div>
 
-                {/* 4. NOME NA BASE (Alinhado na Base) */}
+                {/* 4. NOME NA BASE */}
                 <div className="relative z-10 mt-auto p-8 flex flex-col items-center bg-gradient-to-t from-white via-white/80 to-transparent">
                    <h3 className="font-display font-black text-3xl text-slate-900 text-center uppercase leading-none tracking-tighter drop-shadow-sm group-hover:text-primary transition-colors">
                      {athlete.name}
                    </h3>
-                   {/* Detalhe da barra na base */}
                    <div className="w-12 h-1.5 bg-slate-900 rounded-full mt-4 group-hover:bg-primary transition-colors" />
                 </div>
               </div>
@@ -149,8 +147,8 @@ export default function Athletes() {
 
         {filteredAthletes.length === 0 && (
           <div className="py-24 text-center">
-            <Trophy className="w-20 h-20 text-slate-200 mx-auto mb-6" />
-            <p className="text-slate-400 font-display text-xl uppercase tracking-widest">Nenhum atleta encontrado</p>
+            <Trophy className="w-20 h-20 text-gray-800 mx-auto mb-6 opacity-20" />
+            <p className="text-gray-500 font-display text-xl uppercase tracking-widest">Nenhum atleta encontrado</p>
           </div>
         )}
       </div>
