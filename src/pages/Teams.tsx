@@ -11,7 +11,7 @@ const TeamLogo = ({ teamName, logo }: { teamName: string, logo?: string }) => {
         <img src={logo} alt={teamName} className="w-full h-full object-contain p-2 bg-white" referrerPolicy="no-referrer" />
       ) : (
         <span className="font-display text-3xl text-gray-600 group-hover:text-primary transition-all duration-300 inline-block">
-          {teamName ? teamName.substring(0, 2).toUpperCase() : "??"}
+          {teamName ? String(teamName).substring(0, 2).toUpperCase() : "??"}
         </span>
       )}
     </div>

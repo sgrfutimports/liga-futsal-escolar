@@ -509,7 +509,7 @@ export default function Admin() {
       const drawRow = (sx: number, ath: any, evts: any[]) => {
         let x = sx;
         B(x, Y, cwCol.r, rH); x += cwCol.r;
-        B(x, Y, cwCol.a, rH); if(ath) T(ath.name.substring(0, 30), x + 1, Y + 4, 5); x += cwCol.a;
+        B(x, Y, cwCol.a, rH); if(ath) T(String(ath.name || "N/A").substring(0, 30), x + 1, Y + 4, 5); x += cwCol.a;
         B(x, Y, cwCol.n, rH); if(ath) T(String(ath.number||''), x + cwCol.n/2, Y + 4, 6, true, 'center'); x += cwCol.n;
         
         let amC = ath ? evts.filter(e=>e.type==='amarelo'&&String(e.playerId)===String(ath.id)).length : 0;

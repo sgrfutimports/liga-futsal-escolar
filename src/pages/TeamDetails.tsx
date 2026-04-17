@@ -72,7 +72,7 @@ export default function TeamDetails() {
     );
   }
 
-  const categoryArray = team.categories ? team.categories.split(',').map((c: string) => c.trim()) : [];
+  const categoryArray = String(team.categories || "").split(',').filter(c => c.trim()).map((c: string) => c.trim());
 
   return (
     <div className="min-h-screen bg-dark py-12">
@@ -95,7 +95,7 @@ export default function TeamDetails() {
                 <img src={team.logo} alt="Logo da Equipe" className="w-full h-full object-contain p-2 bg-white" referrerPolicy="no-referrer" />
               ) : (
                 <span className="font-display text-5xl md:text-7xl text-gray-600">
-                  {team?.name ? team.name.substring(0, 2).toUpperCase() : "??"}
+                  {team?.name ? String(team.name).substring(0, 2).toUpperCase() : "??"}
                 </span>
               )}
             </div>
@@ -208,7 +208,7 @@ export default function TeamDetails() {
 
                           <div className="flex-1 z-10 min-w-0">
                             <h3 className="font-display text-lg md:text-xl font-bold text-white group-hover:text-primary transition-colors leading-none mb-1 md:mb-1.5 uppercase tracking-tighter truncate">
-                              {player.name}
+                              {String(player.name || "Uniformado")}
                             </h3>
                             <div className="flex flex-wrap items-center gap-2 md:gap-3">
                               {player.position && (
