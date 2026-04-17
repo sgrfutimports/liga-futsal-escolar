@@ -128,7 +128,10 @@ export default function Admin() {
       }
       if (type === 'game') {
         if (payload.homeTeamId) { payload.home_team_id = String(payload.homeTeamId); delete payload.homeTeamId; }
+        else if (payload.home_team_id === '') payload.home_team_id = null;
+
         if (payload.awayTeamId) { payload.away_team_id = String(payload.awayTeamId); delete payload.awayTeamId; }
+        else if (payload.away_team_id === '') payload.away_team_id = null;
         if (payload.homeScore !== undefined) { payload.home_score = Number(payload.homeScore); delete payload.homeScore; }
         if (payload.awayScore !== undefined) { payload.away_score = Number(payload.awayScore); delete payload.awayScore; }
       }
@@ -696,7 +699,7 @@ export default function Admin() {
       ]}
       onAdd={() => { setCurrentData({}); setModalType('team'); }}
       onEdit={(team: any) => { setCurrentData(team); setModalType('team'); }}
-      onDelete={(id: number) => handleDelete(id, 'lfe_teams', teams, setTeams)}
+      onDelete={(id: any) => handleDelete(id, 'lfe_teams', teams, setTeams)}
     />
   );
 
@@ -712,7 +715,7 @@ export default function Admin() {
       ]}
       onAdd={() => { setCurrentData({}); setModalType('athlete'); }}
       onEdit={(athlete: any) => { setCurrentData(athlete); setModalType('athlete'); }}
-      onDelete={(id: number) => handleDelete(id, 'lfe_athletes', athletes, setAthletes)}
+      onDelete={(id: any) => handleDelete(id, 'lfe_athletes', athletes, setAthletes)}
     />
   );
 
@@ -1147,7 +1150,7 @@ export default function Admin() {
             ]}
             onAdd={() => { setCurrentData({ events: [] }); setModalType('game'); }}
             onEdit={(g: any) => { setCurrentData(g); setModalType('game'); }}
-            onDelete={(id: number) => handleDelete(id, 'lfe_games', games, setGames)}
+            onDelete={(id: any) => handleDelete(id, 'lfe_games', games, setGames)}
             extraActions={(g: any) => (
               <button onClick={() => { setSumulaState((p: any) => ({...p, selectedGameId: g.id})); setActiveTab('Súmulas'); }} className="p-2 text-primary hover:bg-primary/10 rounded" title="Abrir Súmula">
                 <FileText className="w-4 h-4" />
