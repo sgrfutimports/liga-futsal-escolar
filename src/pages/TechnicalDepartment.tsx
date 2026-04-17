@@ -57,13 +57,13 @@ export default function TechnicalDepartment() {
   const myAthletes = myReg?.teamId ? allAthletes.filter((a: any) => a.teamId === myReg?.teamId) : [];
   
   const filteredDocs = storedDocs.filter((doc: any) => {
-    const matchesSearch = doc.title?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = String(doc.title || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = activeCategory === "TODOS" || doc.category === activeCategory;
     return matchesSearch && matchesCategory;
   }).sort((a: any, b: any) => {
-    const dateA = a.date.split('/').reverse().join('-');
-    const dateB = b.date.split('/').reverse().join('-');
-    return new Date(dateB).getTime() - new Date(dateA).getTime();
+    const dateA = String(a.date || "").split('/').reverse().join('-');
+    const dateB = String(b.date || "").split('/').reverse().join('-');
+    return new Date(dateB).getTime() - new Date(dateA).getTime() || 0;
   });
 
   const exportRosterPDF = () => {
@@ -84,7 +84,7 @@ export default function TechnicalDepartment() {
 
     const tableData = myAthletes.map((a: any, i: number) => [
       i + 1,
-      a.name.toUpperCase(),
+      String(a.name || "Sem Nome").toUpperCase(),
       a.number,
       a.category
     ]);

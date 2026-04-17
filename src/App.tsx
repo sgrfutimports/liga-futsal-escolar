@@ -19,11 +19,14 @@ export default function App() {
     if (raw) {
       try {
         const parsed = JSON.parse(raw);
-        const filtered = parsed.filter((s: any) => 
-          !s.name?.toUpperCase().includes("BOTICÁRIO") && 
-          !s.name?.toUpperCase().includes("BOTICARIO") && 
-          !s.name?.toUpperCase().includes("PREFEITURA")
-        );
+        if (!Array.isArray(parsed)) return;
+        
+        const filtered = parsed.filter((s: any) => {
+          const name = s.name?.toUpperCase() || "";
+          return !name.includes("BOTICÁRIO") && 
+                 !name.includes("BOTICARIO") && 
+                 !name.includes("PREFEITURA");
+        });
 
         // Add missing local partners if they don't exist
         const newPartners = [
@@ -50,9 +53,12 @@ export default function App() {
     if (premium) {
       try {
         const parsed = JSON.parse(premium);
+        if (!Array.isArray(parsed)) return;
+
         const updated = parsed.map((s: any) => {
-          if (s.name?.toUpperCase().includes("FERREIRA")) return { ...s, logo: "/logos/FERREIRA_COSTA_LOGO.png" };
-          if (s.name?.toUpperCase().includes("UNICOMPRA")) return { ...s, logo: "/logos/UNICOMPRA_LOGO.jpg" };
+          const name = s.name?.toUpperCase() || "";
+          if (name.includes("FERREIRA")) return { ...s, logo: "/logos/FERREIRA_COSTA_LOGO.png" };
+          if (name.includes("UNICOMPRA")) return { ...s, logo: "/logos/UNICOMPRA_LOGO.jpg" };
           return s;
         });
         localStorage.setItem('lfe_sponsorsPremium', JSON.stringify(updated));

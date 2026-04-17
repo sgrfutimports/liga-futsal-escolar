@@ -11,7 +11,7 @@ const TeamLogo = ({ teamName, logo }: { teamName: string, logo?: string }) => {
         <img src={logo} alt={teamName} className="w-full h-full object-contain p-2 bg-white" referrerPolicy="no-referrer" />
       ) : (
         <span className="font-display text-3xl text-gray-600 group-hover:text-primary transition-all duration-300 inline-block">
-          {teamName?.substring(0, 2).toUpperCase()}
+          {teamName ? teamName.substring(0, 2).toUpperCase() : "??"}
         </span>
       )}
     </div>
@@ -25,8 +25,8 @@ export default function Teams() {
   const [activeCategory, setActiveCategory] = useState("TODOS");
 
   const teams = allTeams.filter((t: any) => {
-    const name = t.name || "";
-    const categories = t.categories || "";
+    const name = String(t.name || "");
+    const categories = String(t.categories || "");
     const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = activeCategory === "TODOS" || categories.includes(activeCategory);
     return matchesSearch && matchesCategory;
@@ -86,7 +86,7 @@ export default function Teams() {
              const teamAthletesCount = athletes.filter((a: any) => 
                String(a.teamId || a.team_id) === String(team.id)
              ).length;
-             const categoryArray = team.categories ? team.categories.split(',').map((c: string) => c.trim()) : [];
+             const categoryArray = team.categories ? String(team.categories).split(',').map((c: string) => c.trim()) : [];
 
              return (
               <Link 

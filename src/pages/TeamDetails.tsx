@@ -91,11 +91,11 @@ export default function TeamDetails() {
           
           <div className="relative z-10 flex flex-col items-center gap-8 text-center">
             <div className="w-32 h-32 md:w-48 md:h-48 bg-dark rounded-full border-4 border-dark-border flex items-center justify-center shrink-0 shadow-[0_0_30px_rgba(0,0,0,0.5)] overflow-hidden">
-              {team.logo ? (
+              {team?.logo ? (
                 <img src={team.logo} alt="Logo da Equipe" className="w-full h-full object-contain p-2 bg-white" referrerPolicy="no-referrer" />
               ) : (
                 <span className="font-display text-5xl md:text-7xl text-gray-600">
-                  {team.name.substring(0, 2).toUpperCase()}
+                  {team?.name ? team.name.substring(0, 2).toUpperCase() : "??"}
                 </span>
               )}
             </div>

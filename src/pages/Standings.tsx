@@ -11,7 +11,7 @@ const TeamLogoSmall = ({ teamId, teamName, logo, className }: { teamId: number, 
         <img src={logo} alt={teamName} className="w-full h-full object-contain p-0.5 bg-white" referrerPolicy="no-referrer" />
       ) : (
         <span className="text-[10px] text-gray-500 font-display">
-          {teamName?.substring(0, 2).toUpperCase()}
+          {teamName ? teamName.substring(0, 2).toUpperCase() : "??"}
         </span>
       )}
     </div>
