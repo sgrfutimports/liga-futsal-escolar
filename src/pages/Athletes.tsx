@@ -9,8 +9,23 @@ export default function Athletes() {
 
   const { data: allAthletes } = useSupaData('lfe_athletes', []);
   const { data: allTeams } = useSupaData('lfe_teams', []);
+  const { data: allGames } = useSupaData('lfe_games', []);
   const { data: settingsArr } = useSupaData('lfe_settings', []);
   const settings = settingsArr[0] ?? {};
+
+  // Função para calcular gols reais das súmulas em tempo real
+  const getAthleteGoals = (athleteId: string) => {
+    let total = 0;
+    allGames.forEach((game: any) => {
+      const events = Array.isArray(game.events) ? game.events : [];
+      events.forEach((event: any) => {
+        if (event.type === 'goal' && String(event.athleteId || event.atleta_id) === String(athleteId)) {
+          total++;
+        }
+      });
+    });
+    return total;
+  };
 
   const filteredAthletes = allAthletes.filter((athlete: any) => {
     const matchesSearch = athlete.name?.toLowerCase().includes(searchQuery.toLowerCase());
