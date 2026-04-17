@@ -35,7 +35,7 @@ export default function TeamDetails() {
 
   return (
     <div className="min-h-screen bg-[#020617]">
-      {/* Brand Header - Restaurando Estilo Escuro */}
+      {/* Brand Header */}
       <div className="relative h-[250px] md:h-[350px] flex items-center justify-center overflow-hidden border-b border-white/5">
         <div className="absolute inset-0">
           {team.logo && <img src={team.logo} className="w-full h-full object-cover opacity-10 blur-2xl scale-125" alt="" />}
@@ -144,22 +144,77 @@ export default function TeamDetails() {
 
           <div className="space-y-10">
              <div className="bg-[#0f172a] border border-white/5 rounded-[2.5rem] p-10 shadow-2xl sticky top-24">
-               <h2 className="text-xl font-display font-black text-white border-b border-white/5 pb-4 mb-8 uppercase tracking-widest flex items-center gap-2">
-                 <Calendar className="w-5 h-5 text-primary" /> Agenda
+               <h2 className="text-2xl font-display font-black text-white border-b border-white/5 pb-6 mb-8 uppercase tracking-widest flex items-center gap-3">
+                 <Calendar className="w-6 h-6 text-primary" /> Agenda
                </h2>
-               {upcomingGames.length > 0 ? (
-                 <div className="space-y-6">
-                   {upcomingGames.slice(0, 3).map((match: any) => (
-                      <div key={match.id} className="text-xs group">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-primary font-black uppercase tracking-widest">{match.date}</span>
-                          <span className="text-gray-500 uppercase flex items-center gap-1"><Clock className="w-3 h-3" /> {match.time || "--:--"}</span>
-                        </div>
-                        <p className="text-white font-display font-black text-sm group-hover:text-primary transition-colors">vs {match.home_team_name?.includes(team.name) ? match.away_team_name : match.home_team_name}</p>
-                      </div>
-                   ))}
+               
+               <div className="space-y-12">
+                 {/* PRÓXIMOS JOGOS */}
+                 <div>
+                   <h4 className="text-[10px] font-display font-black text-primary uppercase tracking-[0.3em] mb-6">Próximos Jogos</h4>
+                   {upcomingGames.length > 0 ? (
+                     <div className="space-y-8">
+                       {upcomingGames.sort((a:any, b:any) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(0, 3).map((match: any) => {
+                         const opponentName = String(match.home_team_name).toLowerCase().includes(String(team.name).toLowerCase()) 
+                           ? match.away_team_name 
+                           : match.home_team_name;
+                         
+                         return (
+                           <div key={match.id} className="group border-l-2 border-primary/20 pl-4 hover:border-primary transition-colors">
+                             <div className="flex justify-between items-center mb-1">
+                               <span className="text-primary font-display font-black text-sm uppercase tracking-wider">{match.date}</span>
+                               <span className="text-gray-500 text-[10px] uppercase flex items-center gap-1 font-bold">
+                                 <Clock className="w-3 h-3" /> {match.time || "--:--"}
+                               </span>
+                             </div>
+                             <p className="text-white font-display font-bold text-lg group-hover:text-primary transition-colors">
+                               <span className="text-gray-600 text-xs mr-2 italic">vs</span> {opponentName || "Adversário"}
+                             </p>
+                             <p className="text-[9px] text-gray-600 uppercase mt-1 tracking-widest">{match.location || "Local a definir"}</p>
+                           </div>
+                         );
+                       })}
+                     </div>
+                   ) : (
+                     <p className="text-gray-600 italic text-xs font-bold uppercase tracking-widest">Sem jogos agendados</p>
+                   )}
                  </div>
-               ) : <p className="text-gray-600 italic text-sm">Sem jogos marcados.</p>}
+
+                 {/* ÚLTIMOS RESULTADOS */}
+                 <div className="pt-8 border-t border-white/5">
+                   <h4 className="text-[10px] font-display font-black text-gray-400 uppercase tracking-[0.3em] mb-6 opacity-50">Últimos Resultados</h4>
+                   {allGames
+                     .filter((g: any) => {
+                       const hId = String(g.home_team_id || g.homeTeamId || '').toLowerCase().trim();
+                       const aId = String(g.away_team_id || g.awayTeamId || '').toLowerCase().trim();
+                       const tid = String(id || '').toLowerCase().trim();
+                       return (hId === tid || aId === tid) && String(g.status || '').toLowerCase() === 'finalizado';
+                     })
+                     .sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                     .slice(0, 2)
+                     .map((match: any) => {
+                        const isHome = String(match.home_team_id || match.homeTeamId).toLowerCase() === String(id).toLowerCase();
+                        const myScore = isHome ? (match.home_score ?? 0) : (match.away_score ?? 0);
+                        const oppScore = isHome ? (match.away_score ?? 0) : (match.home_score ?? 0);
+                        const resultColor = myScore > oppScore ? "text-green-500" : myScore < oppScore ? "text-red-500" : "text-yellow-500";
+                        const opponentName = isHome ? match.away_team_name : match.home_team_name;
+
+                        return (
+                          <div key={match.id} className="mb-6 last:mb-0">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-gray-500 font-display font-bold text-[10px] uppercase tracking-wider">{match.date}</span>
+                              <span className={cn("font-display font-black text-sm", resultColor)}>
+                                {myScore} - {oppScore}
+                              </span>
+                            </div>
+                            <p className="text-gray-300 font-display font-bold text-sm truncate">
+                               <span className="text-gray-600 text-[10px] mr-1 italic">vs</span> {opponentName}
+                            </p>
+                          </div>
+                        );
+                     })}
+                 </div>
+               </div>
              </div>
           </div>
         </div>
