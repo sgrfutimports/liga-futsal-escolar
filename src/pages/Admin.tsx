@@ -1247,12 +1247,12 @@ export default function Admin() {
              ))}
           </select>
           <label className={labelClass}>Equipes</label>
-          <div className=\"flex gap-4\">
+          <div className="flex gap-4">
             <select required className={inputClass} value={String(currentData.homeTeamId || currentData.home_team_id || '')} onChange={e => setCurrentData({...currentData, homeTeamId: e.target.value})}>
-              <option value=\"\">CASA</option>{teams.map(t => <option key={t.id} value={String(t.id)}>{t.name}</option>)}
+              <option value="">CASA</option>{teams.map(t => <option key={t.id} value={String(t.id)}>{t.name}</option>)}
             </select>
             <select required className={inputClass} value={String(currentData.awayTeamId || currentData.away_team_id || '')} onChange={e => setCurrentData({...currentData, awayTeamId: e.target.value})}>
-              <option value=\"\">FORA</option>{teams.map(t => <option key={t.id} value={String(t.id)}>{t.name}</option>)}
+              <option value="">FORA</option>{teams.map(t => <option key={t.id} value={String(t.id)}>{t.name}</option>)}
             </select>
           </div>
           <label className={labelClass}>Local</label>
