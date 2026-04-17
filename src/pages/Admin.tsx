@@ -5,7 +5,7 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { cn } from "@/src/lib/utils";
 import { resizeImage, defaultData, supaFetch, supaUpsert, supaInsert, supaUpdate, supaDelete } from "@/src/lib/store";
-import { supabase } from "@/src/lib/supabase";
+import { supabase, TableName } from "@/src/lib/supabase";
 
 // --- Sub-components ---
 function Modal({ isOpen, onClose, title, children }: any) {
@@ -98,7 +98,7 @@ export default function Admin() {
     setCurrentData({});
   };
 
-  const typeToTable: any = {
+  const typeToTable: Record<string, TableName> = {
     'team': 'lfe_teams',
     'athlete': 'lfe_athletes',
     'game': 'lfe_games',
@@ -155,7 +155,7 @@ export default function Admin() {
     }
   };
 
-  const handleDelete = async (id: any, table: string, collection: any[], setCollection: Function) => {
+  const handleDelete = async (id: any, table: TableName, collection: any[], setCollection: Function) => {
     if(!window.confirm("Excluir item?")) return;
     try {
       await supaDelete(table, id);

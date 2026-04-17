@@ -23,7 +23,7 @@ export default function EnviarElenco() {
     }
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     setLoading(true);
     
