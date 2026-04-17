@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Trophy, Goal, User } from "lucide-react";
+import { Search, Trophy, Goal, User, Clock } from "lucide-react";
 import { useSupaData } from "@/src/lib/store";
 import { cn } from "@/src/lib/utils";
 
@@ -25,7 +25,7 @@ export default function Athletes() {
   };
 
   const filteredAthletes = athletes.filter((athlete: any) => {
-    const nameStr = (athlete.name || "").toLowerCase();
+    const nameStr = String(athlete.name || "").toLowerCase();
     const matchesSearch = nameStr.includes(searchQuery.toLowerCase());
     const matchesCategory = activeCategory === "TODOS" || athlete.category === activeCategory;
     return matchesSearch && matchesCategory;
@@ -34,56 +34,57 @@ export default function Athletes() {
   const categories = ["TODOS", "SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"];
 
   return (
-    <div className="min-h-screen bg-[#020617] py-12">
+    <div className="min-h-screen bg-dark py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header - Restaurando Tipografia Branca Original */}
+        {/* Header - Versão Original do Início do Dia */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
-            <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-4 uppercase tracking-tighter">
-              ELITE <span className="text-primary">ATLETAS</span>
+            <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-4 uppercase">
+              NOSSOS <span className="text-primary">ATLETAS</span>
             </h1>
-            <p className="text-gray-400 text-lg max-w-2xl font-sans">
-              O banco de talentos oficial da Liga de Futsal Escolar.
+            <p className="text-gray-400 text-lg max-w-2xl">
+              Os talentos que fazem a Liga de Futsal Escolar acontecer.
             </p>
           </div>
           
-          <div className="relative w-full md:w-80">
+          <div className="relative w-full md:w-72">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-primary" />
             </div>
             <input
               type="text"
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="block w-full pl-10 pr-3 py-4 border border-white/10 rounded-2xl bg-white/5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary font-sans transition-all"
-              placeholder="Buscar atleta pelo nome..."
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="block w-full pl-10 pr-3 py-4 border border-dark-border rounded-xl leading-5 bg-dark-card text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary sm:text-sm font-sans transition-all shadow-lg"
+              placeholder="Buscar atleta por nome..."
             />
           </div>
         </div>
 
-        {/* Filters - Restaurando Estilo Escuro Original */}
-        <div className="flex flex-wrap gap-2 mb-12 pb-6 border-b border-white/5">
+        {/* Category Filters - Versão Original */}
+        <div className="flex flex-wrap gap-2 mb-10 pb-6 border-b border-dark-border/30">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                "px-5 py-2 font-display text-xs rounded-xl transition-all border uppercase tracking-[0.2em] font-bold",
+                "px-6 py-2.5 font-display text-sm rounded-full transition-all border uppercase tracking-wider",
                 activeCategory === cat 
-                  ? "bg-primary text-dark border-primary shadow-[0_0_15px_rgba(204,255,0,0.3)]" 
-                  : "bg-white/5 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
+                  ? "bg-primary text-dark border-primary shadow-[0_0_20px_rgba(204,255,0,0.2)]" 
+                  : "bg-dark-card text-gray-500 border-dark-border hover:border-gray-600 hover:text-white"
               )}>
               {cat}
             </button>
           ))}
         </div>
 
-        {/* Athletes Grid - MANTENDO CARD BRANCO */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Athletes Grid - MANTENDO CARD BRANCO PREMIUM */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {filteredAthletes.map((athlete: any) => {
             const team = teams.find((t: any) => String(t.id) === String(athlete.team_id || athlete.teamId));
             const goals = getAthleteGoals(athlete.id);
+            const safeName = String(athlete.name || "Uniformado").trim();
 
             return (
               <div 
@@ -118,7 +119,7 @@ export default function Athletes() {
                 {/* 3. CABEÇALHO */}
                 <div className="relative z-10 p-6 flex justify-between items-start">
                    <span className="px-3 py-1 bg-white/80 backdrop-blur-md border border-slate-100 rounded-lg text-[9px] font-display font-black text-slate-900 uppercase tracking-widest shadow-sm">
-                      {athlete.category || "---"}
+                      {String(athlete.category || "---").toUpperCase()}
                    </span>
 
                    <div className="flex flex-col items-center">
@@ -127,7 +128,7 @@ export default function Athletes() {
                       </span>
                       {team?.logo && (
                         <div className="w-12 h-12 bg-white rounded-full p-2 mt-2 shadow-lg border border-slate-100 overflow-hidden flex items-center justify-center transform rotate-2">
-                           <img src={team.logo} className="w-full h-full object-contain" />
+                           <img src={team.logo} alt={safeName} className="w-full h-full object-contain" />
                         </div>
                       )}
                    </div>
@@ -136,7 +137,7 @@ export default function Athletes() {
                 {/* 4. NOME NA BASE */}
                 <div className="relative z-10 mt-auto p-8 flex flex-col items-center bg-gradient-to-t from-white via-white/80 to-transparent">
                    <h3 className="font-display font-black text-3xl text-slate-900 text-center uppercase leading-none tracking-tighter drop-shadow-sm group-hover:text-primary transition-colors">
-                     {athlete.name}
+                     {safeName}
                    </h3>
                    <div className="w-12 h-1.5 bg-slate-900 rounded-full mt-4 group-hover:bg-primary transition-colors" />
                 </div>
