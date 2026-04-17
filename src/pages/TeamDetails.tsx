@@ -13,7 +13,7 @@ export default function TeamDetails() {
   const team = allTeams.find((t: any) => String(t.id) === String(id)) || {};
   const players = allAthletes.filter((a: any) => String(a.teamId || a.team_id) === String(id));
 
-  // Cálculo de Gols em Tempo Real via Súmulas
+  // Cálculo de gols dinâmico via súmulas (Sincronizado)
   const getAthleteGoals = (athleteId: string) => {
     let total = 0;
     allGames.forEach((game: any) => {
@@ -41,64 +41,37 @@ export default function TeamDetails() {
     return matchesId || matchesName;
   });
 
-  const pastGames = allTeamGames.filter((g: any) => String(g.status || '').toLowerCase() === 'finalizado');
   const upcomingGames = allTeamGames.filter((g: any) => String(g.status || '').toLowerCase() !== 'finalizado').sort((a: any, b: any) => new Date(a.date || a.game_date).getTime() - new Date(b.date || b.game_date).getTime());
 
-  const catStats = pastGames.reduce((acc: any, game: any) => {
-    const cat = game.category || "Geral";
-    if (!acc[cat]) acc[cat] = { wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0, category: cat };
-    
-    const isHome = String(game.home_team_id || game.homeTeamId) === String(id);
-    const homeScore = Number(game.home_score ?? 0);
-    const awayScore = Number(game.away_score ?? 0);
-    
-    if (isHome) {
-      acc[cat].goalsFor += homeScore;
-      acc[cat].goalsAgainst += awayScore;
-      if (homeScore > awayScore) { acc[cat].wins++; acc[cat].points += 3; }
-      else if (homeScore === awayScore) { acc[cat].draws++; acc[cat].points += 1; }
-      else acc[cat].losses++;
-    } else {
-      acc[cat].goalsFor += awayScore;
-      acc[cat].goalsAgainst += homeScore;
-      if (awayScore > homeScore) { acc[cat].wins++; acc[cat].points += 3; }
-      else if (awayScore === homeScore) { acc[cat].draws++; acc[cat].points += 1; }
-      else acc[cat].losses++;
-    }
-    return acc;
-  }, {});
-
   return (
-    <div className="min-h-screen bg-dark">
-      {/* Header Section */}
-      <div className="relative h-[300px] md:h-[400px] flex items-center justify-center overflow-hidden border-b border-dark-border">
-        <div className="absolute inset-0 z-0">
-          <img src={team.logo} className="w-full h-full object-cover opacity-10 blur-xl scale-110" alt="" />
-          <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/80 to-transparent" />
+    <div className="min-h-screen bg-[#020617]">
+      {/* Brand Header */}
+      <div className="relative h-[250px] md:h-[350px] flex items-center justify-center overflow-hidden border-b border-white/5">
+        <div className="absolute inset-0">
+          {team.logo && <img src={team.logo} className="w-full h-full object-cover opacity-10 blur-2xl scale-125" alt="" />}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/90 to-transparent" />
         </div>
         
-        <div className="relative z-10 flex flex-col items-center text-center px-4">
-          <div className="w-32 h-32 md:w-48 md:h-48 bg-white rounded-3xl p-4 md:p-6 shadow-2xl mb-6 transform hover:scale-105 transition-transform duration-500 border-4 border-white/10">
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="w-24 h-24 md:w-36 md:h-36 bg-white rounded-2xl p-4 shadow-2xl mb-4 border border-white/20">
             {team.logo ? <img src={team.logo} className="w-full h-full object-contain" /> : <Trophy className="w-full h-full text-gray-400" />}
           </div>
-          <h1 className="text-4xl md:text-6xl font-display font-black text-white uppercase tracking-tighter drop-shadow-2xl">
+          <h1 className="text-3xl md:text-5xl font-display font-black text-white uppercase tracking-tighter text-center px-4 drop-shadow-lg">
             {team.name}
           </h1>
-          <p className="text-primary font-display font-bold tracking-[0.3em] mt-2 uppercase opacity-80">{team.city || "Sede não informada"}</p>
+          <span className="text-primary font-display text-[10px] tracking-[0.5em] mt-2 uppercase opacity-60 font-bold">{team.city || "Sede Oficial LFE"}</span>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Main Content: Roster */}
-          <div className="lg:col-span-2 space-y-12">
-            <div className="flex items-center justify-between border-b-2 border-primary/20 pb-4">
-              <h2 className="text-3xl font-display font-black text-white flex items-center gap-3">
-                <Users className="w-8 h-8 text-primary" /> ELENCO OFICIAL
-              </h2>
-            </div>
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+          
+          <div className="lg:col-span-3 space-y-16">
+            <h2 className="text-3xl font-display font-black text-white flex items-center gap-4">
+              <Users className="w-8 h-8 text-primary" /> ELENCO <span className="text-primary">OFICIAL</span>
+            </h2>
 
-            <div className="space-y-12">
+            <div className="space-y-20">
               {Object.entries(
                 players.reduce((acc: any, player: any) => {
                   const cat = player.category || "Sem Categoria";
@@ -107,45 +80,82 @@ export default function TeamDetails() {
                   return acc;
                 }, {})
               ).sort().map(([category, catPlayers]: [string, any]) => (
-                <div key={category} className="space-y-6">
-                  <h3 className="text-lg font-display text-primary uppercase tracking-[4px] border-l-4 border-primary pl-4 bg-primary/5 py-2">
-                    {category} <span className="text-white/40 ml-2">[{catPlayers.length}]</span>
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div key={category} className="space-y-8">
+                  <div className="flex items-center gap-4">
+                    <h3 className="px-5 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-primary font-display font-bold uppercase tracking-widest text-[11px]">
+                      {category} <span className="text-white ml-2 opacity-30">{catPlayers.length} ATLETAS</span>
+                    </h3>
+                    <div className="h-0.5 flex-1 bg-white/5"></div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
                     {catPlayers.map((player: any) => {
                       const goals = getAthleteGoals(player.id);
-                      const nameParts = (player.name || "Uniformado").split(' ');
-                      const firstName = nameParts[0];
-                      const lastName = nameParts.slice(1).join(' ') || firstName;
+                      const teamColor = team?.color || "#ccff00";
 
                       return (
                         <div 
                           key={player.id} 
-                          className="relative bg-[#020617] border-2 rounded-[2.5rem] overflow-hidden transition-all duration-500 group cursor-pointer flex flex-col shadow-2xl hover:-translate-y-4 hover:shadow-[0_30px_60px_rgba(204,255,0,0.25)] aspect-[10/14]"
-                          style={{ borderColor: team?.color ? `${team.color}40` : 'rgba(255,255,255,0.05)' }}
+                          className="group relative flex flex-col bg-[#010a1a] rounded-[2.5rem] border-2 border-white/5 overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] aspect-[10/14]"
                         >
-                          <div className="absolute inset-x-0 top-0 h-[80%] z-10 overflow-hidden">
-                            {player.photo ? (
-                              <img src={player.photo} className="w-full h-full object-cover object-top transition-transform duration-1000 group-hover:scale-110" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-dark-card/50"><User className="w-32 h-32 text-gray-900 opacity-30" /></div>
-                            )}
-                          </div>
-                          
-                          <div className="absolute top-6 right-8 z-30 flex flex-col items-end">
-                            <span className="font-display font-black text-6xl text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] italic leading-none">{player.number}</span>
-                            <span className="bg-primary px-3 py-1 rounded-md text-dark font-display font-black text-[10px] uppercase tracking-widest mt-1 transform skew-x-[-10deg]">{player.position || "JOG"}</span>
+                          {/* 1. HEADER (Limpando o Rosto) */}
+                          <div className="p-6 flex justify-between items-start z-30">
+                            {/* CATEGORIA (Superior Esquerdo) */}
+                            <div className="px-3 py-1 bg-black/40 backdrop-blur-md rounded-lg border border-white/10 shadow-lg">
+                              <span className="text-[10px] font-display font-black text-white uppercase tracking-widest leading-none">
+                                {player.category || "LFE"}
+                              </span>
+                            </div>
+
+                            {/* LOGO E NÚMERO (Superior Direito) */}
+                            <div className="flex items-start gap-3">
+                              <div className="flex flex-col items-end">
+                                <span 
+                                  className="font-display font-black text-6xl italic leading-none drop-shadow-2xl"
+                                  style={{ color: teamColor }}
+                                >
+                                  {player.number}
+                                </span>
+                                <span className="text-[9px] font-display font-bold text-gray-500 uppercase tracking-widest mt-1">
+                                  {player.position || "JOG"}
+                                </span>
+                              </div>
+                              {team?.logo && (
+                                <div className="w-12 h-12 bg-white rounded-xl p-1.5 shadow-xl border border-white/10">
+                                  <img src={team.logo} className="w-full h-full object-contain" />
+                                </div>
+                              )}
+                            </div>
                           </div>
 
-                          <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black via-black/95 to-transparent z-20 flex flex-col justify-end p-8 pt-0">
-                            <div className="flex flex-col items-center text-center">
-                              <span className="text-primary font-display font-black italic text-lg uppercase tracking-[0.25em] opacity-90 mb-[-8px]">{firstName}</span>
-                              <h3 className="font-display font-black italic text-3xl md:text-4xl text-white uppercase leading-none tracking-tighter drop-shadow-2xl">{lastName}</h3>
-                            </div>
-                            <div className="w-full h-1 mt-6 mb-4 rounded-full" style={{ backgroundColor: team?.color || 'var(--color-primary)', boxShadow: `0 0 15px ${team?.color || 'rgba(204,255,0,0.6)'}` }} />
-                            <div className="flex items-center justify-center gap-2 bg-white/5 py-2 rounded-xl border border-white/10 backdrop-blur-md">
-                              <Goal className="w-4 h-4 text-primary" />
-                              <span className="font-display text-[10px] text-white uppercase font-bold tracking-widest leading-none">Total Gols <span className="text-primary text-sm ml-1">{goals}</span></span>
+                          {/* 2. PLAYER PHOTO (Área Protegida) */}
+                          <div className="absolute inset-0 z-10 p-2 pt-24 pb-32">
+                            {player.photo ? (
+                              <img 
+                                src={player.photo} 
+                                className="w-full h-full object-cover object-top rounded-3xl"
+                                referrerPolicy="no-referrer"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-slate-900/50 rounded-3xl flex items-center justify-center">
+                                <User className="w-32 h-32 text-white/5" />
+                              </div>
+                            )}
+                            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#010a1a] to-transparent rounded-b-3xl" />
+                          </div>
+
+                          {/* 3. BASE (Nome e Stats) */}
+                          <div className="mt-auto p-6 z-20 flex flex-col items-center bg-gradient-to-t from-[#010a1a] via-[#010a1a] to-transparent">
+                            <h3 className="font-display font-black text-2xl text-white text-center uppercase leading-none tracking-tighter mb-4 px-2 group-hover:text-primary transition-colors">
+                              {player.name}
+                            </h3>
+                            
+                            <div className="w-full flex items-center justify-center gap-4 bg-white/5 backdrop-blur-sm p-3 rounded-2xl border border-white/10">
+                              <div className="flex items-center gap-2">
+                                <Goal className="w-4 h-4 text-primary" />
+                                <span className="text-[10px] font-display font-black text-gray-400 uppercase tracking-[0.2em] leading-none">Gols Oficiais</span>
+                              </div>
+                              <span className="text-xl font-display font-black text-white leading-none">{goals}</span>
                             </div>
                           </div>
                         </div>
@@ -157,51 +167,36 @@ export default function TeamDetails() {
             </div>
           </div>
 
-          {/* Right Column: Sidebar Match Stats */}
-          <div className="space-y-12">
-            <div className="bg-dark-card border border-dark-border rounded-3xl p-8 space-y-8">
-               <h2 className="text-2xl font-display font-black text-white flex items-center gap-3 border-b border-dark-border pb-4">
-                 <Trophy className="w-6 h-6 text-primary" /> DESEMPENHO
+          {/* Sidebar */}
+          <div className="space-y-10">
+            <div className="bg-[#0f172a] border border-white/5 rounded-3xl p-8 sticky top-24">
+               <h2 className="text-xl font-display font-black text-white flex items-center gap-3 border-b border-white/5 pb-4 mb-6 uppercase tracking-widest">
+                 Destaques
                </h2>
-               {Object.values(catStats).length > 0 ? Object.values(catStats).map((stat: any) => (
-                 <div key={stat.category} className="space-y-4">
-                    <span className="text-[10px] font-display text-primary tracking-[4px] uppercase">{stat.category}</span>
-                    <div className="grid grid-cols-3 gap-3">
-                       <div className="bg-dark/50 border border-dark-border p-3 rounded-2xl text-center">
-                          <span className="block text-[8px] text-gray-500 uppercase tracking-widest mb-1">PTS</span>
-                          <span className="text-2xl font-display font-black text-white">{stat.points}</span>
-                       </div>
-                       <div className="bg-dark/50 border border-dark-border p-3 rounded-2xl text-center">
-                          <span className="block text-[8px] text-gray-500 uppercase tracking-widest mb-1">VITS</span>
-                          <span className="text-2xl font-display font-black text-white">{stat.wins}</span>
-                       </div>
-                       <div className="bg-dark/50 border border-dark-border p-3 rounded-2xl text-center">
-                          <span className="block text-[8px] text-gray-500 uppercase tracking-widest mb-1">GOLS</span>
-                          <span className="text-2xl font-display font-black text-white">{stat.goalsFor}</span>
-                       </div>
-                    </div>
+               <div className="space-y-6">
+                 <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20">
+                   <span className="text-[9px] text-primary uppercase font-display font-bold">Total do Elenco</span>
+                   <p className="text-2xl font-display text-white mt-1">{players.length} Atletas</p>
                  </div>
-               )) : <p className="text-gray-500 font-sans italic">Sem estatísticas para esta temporada.</p>}
-            </div>
-
-            <div className="space-y-6">
-              <h2 className="text-2xl font-display font-black text-white flex items-center gap-3 border-b border-dark-border pb-4">
-                <Calendar className="w-6 h-6 text-primary" /> PRÓXIMOS JOGOS
-              </h2>
-              {upcomingGames.length > 0 ? upcomingGames.slice(0, 3).map((match: any) => (
-                <div key={match.id} className="bg-dark-card border border-primary/20 rounded-2xl p-6 hover:border-primary transition-all">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="text-[10px] font-display text-primary-dark font-black tracking-widest bg-primary px-2 py-1 rounded uppercase">{match.date}</span>
-                    <div className="flex flex-col items-end">
-                      <span className="text-[10px] text-gray-500 font-display flex items-center gap-1 uppercase"><Clock className="w-3 h-3" /> {match.time || "À Confirmar"}</span>
+               </div>
+               
+               <h2 className="text-xl font-display font-black text-white flex items-center gap-3 border-b border-white/5 pb-4 mb-6 mt-10 uppercase tracking-widest">
+                 Próximos
+               </h2>
+               <div className="space-y-4">
+                 {upcomingGames.length > 0 ? upcomingGames.slice(0, 2).map((match: any) => (
+                    <div key={match.id} className="text-xs group">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-primary font-bold uppercase">{match.date}</span>
+                        <span className="text-gray-500 uppercase flex items-center gap-1"><Clock className="w-3 h-3" /> {match.time || "--:--"}</span>
+                      </div>
+                      <p className="text-white font-display font-bold group-hover:text-primary transition-colors">vs {(match.home_team_name?.includes(team.name) ? match.away_team_name : match.home_team_name) || "Oponente"}</p>
                     </div>
-                  </div>
-                  <p className="text-white font-display font-bold text-sm line-clamp-1 mb-2">vs {String(match.home_team_id || match.homeTeamId) === String(id) ? (match.away_team_name || "Oponente") : (match.home_team_name || "Oponente")}</p>
-                  <p className="text-[10px] text-gray-400 font-sans uppercase flex items-center gap-1"><MapPin className="w-3 h-3" /> {match.location || "Campo Oficial"}</p>
-                </div>
-              )) : <p className="text-gray-500 italic p-4 border border-dashed border-dark-border rounded-xl">Sem confrontos agendados.</p>}
+                 )) : <p className="text-gray-600 italic text-sm">Sem jogos agendados.</p>}
+               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
