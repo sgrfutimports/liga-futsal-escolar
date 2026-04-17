@@ -25,8 +25,8 @@ export default function Athletes() {
   };
 
   const filteredAthletes = athletes.filter((athlete: any) => {
-    const nameStr = athlete.name || "";
-    const matchesSearch = nameStr.toLowerCase().includes(searchQuery.toLowerCase());
+    const nameStr = (athlete.name || "").toLowerCase();
+    const matchesSearch = nameStr.includes(searchQuery.toLowerCase());
     const matchesCategory = activeCategory === "TODOS" || athlete.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
@@ -34,17 +34,17 @@ export default function Athletes() {
   const categories = ["TODOS", "SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"];
 
   return (
-    <div className="min-h-screen bg-[#020617] py-12">
+    <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
-            <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-4 uppercase tracking-tighter">
+            <h1 className="text-5xl md:text-6xl font-display font-bold text-slate-900 mb-4 uppercase tracking-tighter">
               ELITE <span className="text-primary">ATLETAS</span>
             </h1>
-            <p className="text-gray-400 text-lg max-w-2xl font-sans">
-              Os rostos e os talentos que brilham nas quadras da LFE.
+            <p className="text-slate-500 text-lg max-w-2xl font-sans">
+              O banco de talentos oficial da Liga de Futsal Escolar.
             </p>
           </div>
           
@@ -56,23 +56,23 @@ export default function Athletes() {
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="block w-full pl-10 pr-3 py-4 border border-white/10 rounded-2xl bg-white/5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary font-sans transition-all"
-              placeholder="Buscar atleta pelo nome..."
+              className="block w-full pl-10 pr-3 py-4 border border-slate-200 rounded-2xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary font-sans transition-all shadow-sm"
+              placeholder="Buscar atleta..."
             />
           </div>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-2 mb-12 pb-6 border-b border-white/5">
+        <div className="flex flex-wrap gap-2 mb-12 pb-6 border-b border-slate-200">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                "px-5 py-2 font-display text-xs rounded-xl transition-all border uppercase tracking-[0.2em]",
+                "px-5 py-2 font-display text-xs rounded-xl transition-all border uppercase tracking-[0.2em] font-bold",
                 activeCategory === cat 
-                  ? "bg-primary text-dark border-primary shadow-[0_0_15px_rgba(204,255,0,0.3)]" 
-                  : "bg-white/5 text-gray-500 border-white/10 hover:border-white/30 hover:text-white"
+                  ? "bg-slate-900 text-white border-slate-900 shadow-lg" 
+                  : "bg-white text-slate-500 border-slate-200 hover:border-slate-400 hover:text-slate-900"
               )}>
               {cat}
             </button>
@@ -80,92 +80,67 @@ export default function Athletes() {
         </div>
 
         {/* Athletes Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {filteredAthletes.map((athlete: any) => {
             const team = teams.find((t: any) => String(t.id) === String(athlete.team_id || athlete.teamId));
             const goals = getAthleteGoals(athlete.id);
-            const teamColor = team?.color || "#ccff00";
-            
-            const nameParts = (athlete.name || "Atleta").trim().split(" ");
-            const firstName = nameParts[0];
-            const lastName = nameParts.slice(1).join(" ") || firstName;
 
             return (
               <div 
                 key={athlete.id}
-                className="group relative flex flex-col bg-[#011429] rounded-[2rem] border border-white/10 overflow-hidden transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_60px_90px_-20px_rgba(0,0,0,1)] aspect-[10/14]"
+                className="group relative flex flex-col bg-white rounded-[2rem] shadow-[0_10px_30px_rgba(0,0,0,0.05)] overflow-hidden transition-all duration-500 hover:-translate-y-3 hover:shadow-[0_40px_80px_rgba(0,0,0,0.15)] aspect-[10/14] border border-slate-100"
               >
-                {/* 1. BACKGROUND (Technical Grid) */}
-                <div className="absolute inset-0 z-0 opacity-[0.25]" style={{ 
-                  backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.1) 1px, transparent 0)`,
-                  backgroundSize: '30px 30px'
-                }}></div>
-                <div className="absolute inset-0 z-0 bg-gradient-to-t from-[#011429] via-transparent to-transparent" />
-
-                {/* 2. ATHLETE PHOTO (Isolated) */}
-                <div className="absolute inset-0 z-10 flex items-end justify-center">
+                {/* 1. IMAGEM TOTAL (Fundo) */}
+                <div className="absolute inset-0 z-0">
                   {athlete.photo ? (
                     <img 
                       src={athlete.photo} 
-                      className="w-[95%] h-[95%] object-contain object-bottom transition-transform duration-1000 group-hover:scale-105"
+                      className="w-full h-full object-cover object-top transition-transform duration-1000 group-hover:scale-110"
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <User className="w-56 h-56 text-white/5" />
+                    <div className="w-full h-full bg-slate-50 flex items-center justify-center">
+                      <User className="w-24 h-24 text-slate-200" />
+                    </div>
                   )}
-                  {/* Bottom fade to integrate name */}
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#011429] via-[#011429]/40 to-transparent pointer-events-none" />
+                  {/* Gradiente branco suave na base para o nome */}
+                  <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-white via-white/40 to-transparent" />
                 </div>
 
-                {/* 3. INFO OVERLAYS (Gvardiol Style) */}
-                <div className="relative z-20 h-full flex flex-col p-6">
-                  {/* TOP: Category & Number/Logo */}
-                  <div className="flex justify-between items-start">
-                    <span className="text-[12px] font-display font-black text-white/30 uppercase tracking-[0.4em] pt-2">
-                       {athlete.category || "LFE"}
-                    </span>
-                    
-                    <div className="flex flex-col items-center">
-                      <span className="font-display font-black text-7xl leading-none italic tracking-tighter text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.8)]">
-                         {athlete.number}
+                {/* 2. INFORMAÇÕES DE GOLS (Meio do Canto Esquerdo) */}
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 z-20">
+                   <div className="bg-slate-900/90 backdrop-blur-md px-3 py-4 rounded-r-2xl border-y border-r border-white/20 shadow-xl flex flex-col items-center gap-1 group-hover:bg-primary transition-colors group-hover:border-primary">
+                      <Goal className="w-4 h-4 text-primary group-hover:text-black" />
+                      <span className="text-[9px] font-display font-black text-white/40 uppercase tracking-widest group-hover:text-black/40">Gols</span>
+                      <span className="text-xl font-display font-black text-white group-hover:text-black leading-none">{goals}</span>
+                   </div>
+                </div>
+
+                {/* 3. CABEÇALHO (Categoria e Logo/Número) */}
+                <div className="relative z-10 p-6 flex justify-between items-start">
+                   <span className="px-3 py-1 bg-white/80 backdrop-blur-md border border-slate-100 rounded-lg text-[9px] font-display font-black text-slate-900 uppercase tracking-widest shadow-sm">
+                      {athlete.category || "LFE"}
+                   </span>
+
+                   <div className="flex flex-col items-center">
+                      <span className="font-display font-black text-7xl italic leading-none tracking-tighter text-slate-900 drop-shadow-sm">
+                        {athlete.number}
                       </span>
                       {team?.logo && (
-                        <div className="w-12 h-12 bg-white rounded-full p-2 mt-2 border-2 border-white/10 shadow-2xl flex items-center justify-center overflow-hidden">
+                        <div className="w-12 h-12 bg-white rounded-full p-2 mt-2 shadow-lg border border-slate-100 overflow-hidden flex items-center justify-center transform rotate-2">
                            <img src={team.logo} className="w-full h-full object-contain" />
                         </div>
                       )}
-                    </div>
-                  </div>
+                   </div>
+                </div>
 
-                  {/* BOTTOM: Name & Stats (Fixed at the base) */}
-                  <div className="mt-auto flex flex-col items-center pb-2">
-                    {/* Name block - Pushed lower */}
-                    <div className="flex flex-col items-center text-center -mb-2">
-                      <span className="text-white font-display font-black text-sm uppercase tracking-[0.5em] mb-[-6px] opacity-70">
-                        {firstName}
-                      </span>
-                      <h3 className="relative font-display font-black italic text-5xl text-white uppercase leading-none tracking-tighter">
-                        <span className="absolute -top-[1.5px] -left-[1.5px] text-primary/40 blur-[1px]">{lastName}</span>
-                        <span className="relative z-10 drop-shadow-[0_8px_8px_rgba(0,0,0,0.8)]">{lastName}</span>
-                      </h3>
-                    </div>
-
-                    {/* Accent Bar */}
-                    <div className="w-12 h-1.5 rounded-full bg-primary mt-6 mb-10 shadow-[0_0_20px_rgba(204,255,0,0.8)]" />
-
-                    {/* Footer Stats */}
-                    <div className="w-full flex justify-center gap-8 bg-black/40 backdrop-blur-xl p-4 rounded-2xl border border-white/5">
-                       <div className="flex flex-col items-center">
-                          <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest leading-none mb-2">Gols</span>
-                          <span className="text-xl font-display font-black text-white leading-none">{goals}</span>
-                       </div>
-                       <div className="w-[1px] h-10 bg-white/10" />
-                       <div className="flex flex-col items-center">
-                          <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest leading-none mb-2">Cidade</span>
-                          <span className="text-xs font-display font-bold text-white uppercase leading-none">{athlete.city || "LFE"}</span>
-                       </div>
-                    </div>
-                  </div>
+                {/* 4. NOME NA BASE (Alinhado na Base) */}
+                <div className="relative z-10 mt-auto p-8 flex flex-col items-center bg-gradient-to-t from-white via-white/80 to-transparent">
+                   <h3 className="font-display font-black text-3xl text-slate-900 text-center uppercase leading-none tracking-tighter drop-shadow-sm group-hover:text-primary transition-colors">
+                     {athlete.name}
+                   </h3>
+                   {/* Detalhe da barra na base */}
+                   <div className="w-12 h-1.5 bg-slate-900 rounded-full mt-4 group-hover:bg-primary transition-colors" />
                 </div>
               </div>
             );
@@ -174,8 +149,8 @@ export default function Athletes() {
 
         {filteredAthletes.length === 0 && (
           <div className="py-24 text-center">
-            <Trophy className="w-20 h-20 text-gray-800 mx-auto mb-6 opacity-20" />
-            <p className="text-gray-500 font-display text-xl uppercase tracking-widest">Nenhum atleta encontrado</p>
+            <Trophy className="w-20 h-20 text-slate-200 mx-auto mb-6" />
+            <p className="text-slate-400 font-display text-xl uppercase tracking-widest">Nenhum atleta encontrado</p>
           </div>
         )}
       </div>
