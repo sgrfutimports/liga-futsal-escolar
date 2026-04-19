@@ -88,8 +88,10 @@ export default function App() {
           <Route path="chefes-login" element={<ChefesLogin />} />
           <Route path="inscricao" element={<Registration />} />
           <Route path="enviar-elenco" element={<EnviarElenco />} />
-          <Route path="admin" element={<Admin />} />
         </Route>
+        
+        {/* Standalone Admin Route */}
+        <Route path="admin" element={<Admin />} />
       </Routes>
     </BrowserRouter>
   );
