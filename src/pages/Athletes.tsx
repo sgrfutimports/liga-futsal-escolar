@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Search, Trophy, Goal, User, Clock } from "lucide-react";
 import { useSupaData } from "@/src/lib/store";
 import { cn } from "@/src/lib/utils";
+import PlayerCard from "@/src/components/PlayerCard";
 
 export default function Athletes() {
   const { data: athletes } = useSupaData('lfe_athletes', []);
@@ -10,18 +11,31 @@ export default function Athletes() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("TODOS");
 
-  // Cálculo de gols dinâmico via súmulas
-  const getAthleteGoals = (athleteId: string) => {
-    let total = 0;
+  const getAthleteStats = (athleteId: string, teamId: string) => {
+    let goals = 0;
+    let assists = 0;
+    let totalGames = 0;
+
     games.forEach((game: any) => {
-      const events = Array.isArray(game.events) ? game.events : [];
-      events.forEach((event: any) => {
-        if (event.type === 'goal' && String(event.athleteId || event.atleta_id) === String(athleteId)) {
-          total++;
+      if (game.status?.toLowerCase() === 'finalizado') {
+        const isHome = String(game.home_team_id || game.homeTeamId) === String(teamId);
+        const isAway = String(game.away_team_id || game.awayTeamId) === String(teamId);
+        
+        if (isHome || isAway) {
+          totalGames++;
+          const events = Array.isArray(game.events) ? game.events : [];
+          events.forEach((event: any) => {
+            const evAthleteId = String(event.athleteId || event.atleta_id);
+            if (evAthleteId === String(athleteId)) {
+              if (event.type === 'goal') goals++;
+              if (event.type === 'assist') assists++;
+            }
+          });
         }
-      });
+      }
     });
-    return total;
+
+    return { goals, assists, games: totalGames };
   };
 
   const filteredAthletes = athletes.filter((athlete: any) => {
@@ -37,14 +51,14 @@ export default function Athletes() {
     <div className="min-h-screen bg-dark py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header - Versão Original do Início do Dia */}
+        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
             <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-4 uppercase">
               NOSSOS <span className="text-primary">ATLETAS</span>
             </h1>
-            <p className="text-gray-400 text-lg max-w-2xl">
-              Os talentos que fazem a Liga de Futsal Escolar acontecer.
+            <p className="text-gray-300 text-lg max-w-2xl">
+              Confira as estatísticas detalhadas e o card oficial dos talentos da Liga.
             </p>
           </div>
           
@@ -62,7 +76,7 @@ export default function Athletes() {
           </div>
         </div>
 
-        {/* Category Filters - Versão Original */}
+        {/* Category Filters */}
         <div className="flex flex-wrap gap-2 mb-10 pb-6 border-b border-dark-border/30">
           {categories.map((cat) => (
             <button
@@ -79,69 +93,19 @@ export default function Athletes() {
           ))}
         </div>
 
-        {/* Athletes Grid - MANTENDO CARD BRANCO PREMIUM */}
+        {/* Athletes Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {filteredAthletes.map((athlete: any) => {
             const team = teams.find((t: any) => String(t.id) === String(athlete.team_id || athlete.teamId));
-            const goals = getAthleteGoals(athlete.id);
-            const safeName = String(athlete.name || "Uniformado").trim();
+            const playerStats = getAthleteStats(athlete.id, athlete.team_id || athlete.teamId);
 
             return (
-              <div 
+              <PlayerCard 
                 key={athlete.id}
-                className="group relative flex flex-col bg-white rounded-[2rem] shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-500 hover:-translate-y-3 hover:shadow-[0_40px_80px_rgba(0,0,0,0.8)] aspect-[10/14]"
-              >
-                {/* 1. IMAGEM TOTAL */}
-                <div className="absolute inset-0 z-0">
-                  {athlete.photo ? (
-                    <img 
-                      src={athlete.photo} 
-                      className="w-full h-full object-cover object-top transition-transform duration-1000 group-hover:scale-110"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-                      <User className="w-24 h-24 text-slate-300" />
-                    </div>
-                  )}
-                  <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-white via-white/40 to-transparent" />
-                </div>
-
-                {/* 2. GOLS MEIO ESQUERDA */}
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 z-20">
-                   <div className="bg-slate-900/90 backdrop-blur-md px-3 py-4 rounded-r-2xl border-y border-r border-white/20 shadow-xl flex flex-col items-center gap-1 group-hover:bg-primary transition-colors group-hover:border-primary">
-                      <Goal className="w-4 h-4 text-primary group-hover:text-black" />
-                      <span className="text-[9px] font-display font-black text-white/40 uppercase tracking-widest group-hover:text-black/40">Gols</span>
-                      <span className="text-xl font-display font-black text-white group-hover:text-black leading-none">{goals}</span>
-                   </div>
-                </div>
-
-                {/* 3. CABEÇALHO */}
-                <div className="relative z-10 p-6 flex justify-between items-start">
-                   <span className="px-3 py-1 bg-white/80 backdrop-blur-md border border-slate-100 rounded-lg text-[9px] font-display font-black text-slate-900 uppercase tracking-widest shadow-sm">
-                      {String(athlete.category || "---").toUpperCase()}
-                   </span>
-
-                   <div className="flex flex-col items-center">
-                      <span className="font-display font-black text-7xl italic leading-none tracking-tighter text-slate-900 drop-shadow-sm">
-                        {athlete.number}
-                      </span>
-                      {team?.logo && (
-                        <div className="w-12 h-12 bg-white rounded-full p-2 mt-2 shadow-lg border border-slate-100 overflow-hidden flex items-center justify-center transform rotate-2">
-                           <img src={team.logo} alt={safeName} className="w-full h-full object-contain" />
-                        </div>
-                      )}
-                   </div>
-                </div>
-
-                {/* 4. NOME NA BASE */}
-                <div className="relative z-10 mt-auto p-8 flex flex-col items-center bg-gradient-to-t from-white via-white/80 to-transparent">
-                   <h3 className="font-display font-black text-3xl text-slate-900 text-center uppercase leading-none tracking-tighter drop-shadow-sm group-hover:text-primary transition-colors">
-                     {safeName}
-                   </h3>
-                   <div className="w-12 h-1.5 bg-slate-900 rounded-full mt-4 group-hover:bg-primary transition-colors" />
-                </div>
-              </div>
+                player={athlete}
+                teamLogo={team?.logo}
+                stats={playerStats}
+              />
             );
           })}
         </div>

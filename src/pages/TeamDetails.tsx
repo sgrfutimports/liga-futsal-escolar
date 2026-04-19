@@ -3,6 +3,7 @@ import { Users, Trophy, Goal, Calendar, Clock, User, MapPin, ChevronRight, BarCh
 import { useParams, Link } from "react-router";
 import { useSupaData } from "@/src/lib/store";
 import { cn } from "@/src/lib/utils";
+import PlayerCard from "@/src/components/PlayerCard";
 
 export default function TeamDetails() {
   const { id } = useParams();
@@ -14,17 +15,29 @@ export default function TeamDetails() {
   const team = allTeams.find((t: any) => String(t.id) === String(id)) || {};
   const players = allAthletes.filter((a: any) => String(a.teamId || a.team_id) === String(id));
 
-  const getAthleteGoals = (athleteId: string) => {
-    let total = 0;
+  const getAthleteStats = (athleteId: string, playerTeamId: string) => {
+    let goals = 0;
+    let assists = 0;
+    let totalGamesCount = 0;
+
     allGames.forEach((game: any) => {
-      const events = Array.isArray(game.events) ? game.events : [];
-      events.forEach((event: any) => {
-        if (event.type === 'goal' && String(event.athleteId || event.atleta_id) === String(athleteId)) {
-          total++;
+      if (game.status?.toLowerCase() === 'finalizado') {
+        const isHome = String(game.home_team_id || game.homeTeamId) === String(playerTeamId);
+        const isAway = String(game.away_team_id || game.awayTeamId) === String(playerTeamId);
+        
+        if (isHome || isAway) {
+          totalGamesCount++;
+          const events = Array.isArray(game.events) ? game.events : [];
+          events.forEach((event: any) => {
+            if (String(event.athleteId || event.atleta_id) === String(athleteId)) {
+              if (event.type === 'goal') goals++;
+              if (event.type === 'assist') assists++;
+            }
+          });
         }
-      });
+      }
     });
-    return total;
+    return { goals, assists, games: totalGamesCount };
   };
 
   const teamGames = allGames.filter((g: any) => {
@@ -64,7 +77,7 @@ export default function TeamDetails() {
   });
 
   const topScorers = players
-    .map(p => ({ ...p, goals: getAthleteGoals(p.id) }))
+    .map(p => ({ ...p, goals: getAthleteStats(p.id, p.team_id || p.teamId).goals }))
     .filter(p => p.goals > 0)
     .sort((a, b) => b.goals - a.goals)
     .slice(0, 3);
@@ -161,49 +174,14 @@ export default function TeamDetails() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                       {catPlayers.map((player: any) => {
-                        const goals = getAthleteGoals(player.id);
+                        const playerStats = getAthleteStats(player.id, player.team_id || player.teamId);
                         return (
-                          <div 
+                          <PlayerCard 
                             key={player.id} 
-                            className="group relative bg-[#0f172a] rounded-[2rem] border border-white/5 overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
-                          >
-                            {/* Athlete Photo */}
-                            <div className="aspect-[4/5] relative overflow-hidden bg-slate-800">
-                              {player.photo ? (
-                                <img src={player.photo} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={player.name} />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center opacity-20">
-                                  <User className="w-24 h-24" />
-                                </div>
-                              )}
-                              <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent opacity-60" />
-                              
-                              {/* Overlay Stats */}
-                              <div className="absolute top-4 right-4 flex flex-col items-center">
-                                <span className="text-5xl font-display font-black italic text-white/10 group-hover:text-primary/20 transition-colors leading-none">
-                                  {player.number}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Info */}
-                            <div className="p-6">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-[10px] font-display font-bold text-primary uppercase tracking-widest">
-                                  {player.position || "ATLETA"}
-                                </span>
-                                {goals > 0 && (
-                                  <div className="flex items-center gap-1.5 bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
-                                    <Goal className="w-3 h-3 text-primary" />
-                                    <span className="text-[10px] font-display font-black text-primary">{goals} GOLS</span>
-                                  </div>
-                                )}
-                              </div>
-                              <h4 className="text-xl font-display font-black text-white uppercase tracking-tight group-hover:text-primary transition-colors line-clamp-1">
-                                {player.name}
-                              </h4>
-                            </div>
-                          </div>
+                            player={player}
+                            teamLogo={team.logo}
+                            stats={playerStats}
+                          />
                         );
                       })}
                     </div>
