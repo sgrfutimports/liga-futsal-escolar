@@ -176,12 +176,57 @@ export default function TeamDetails() {
                       {catPlayers.map((player: any) => {
                         const playerStats = getAthleteStats(player.id, player.team_id || player.teamId);
                         return (
-                          <PlayerCard 
+                          <div 
                             key={player.id} 
-                            player={player}
-                            teamLogo={team.logo}
-                            stats={playerStats}
-                          />
+                            className="group relative bg-[#0f172a] rounded-[2rem] border border-white/5 overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
+                          >
+                            {/* Athlete Photo */}
+                            <div className="aspect-[4/5] relative overflow-hidden bg-slate-800">
+                              {player.photo ? (
+                                <img src={player.photo} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={player.name} />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center opacity-20">
+                                  <User className="w-24 h-24" />
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent opacity-60" />
+                              
+                              {/* Overlay Number */}
+                              <div className="absolute top-4 right-4 flex flex-col items-center">
+                                <span className="text-5xl font-display font-black italic text-white/10 group-hover:text-primary/20 transition-colors leading-none">
+                                  {player.number}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Info & Stats */}
+                            <div className="p-6">
+                              <h4 className="text-xl font-display font-black text-white uppercase tracking-tight group-hover:text-primary transition-colors line-clamp-1 mb-4">
+                                {player.name}
+                              </h4>
+                              
+                              <div className="grid grid-cols-3 gap-2">
+                                <div className="flex flex-col items-center p-2 bg-white/5 rounded-xl border border-white/5">
+                                  <span className="text-[7px] text-gray-500 uppercase font-black tracking-widest">Gols</span>
+                                  <span className="text-sm font-display font-black text-white">{playerStats.goals}</span>
+                                </div>
+                                <div className="flex flex-col items-center p-2 bg-white/5 rounded-xl border border-white/5">
+                                  <span className="text-[7px] text-gray-500 uppercase font-black tracking-widest">Ast</span>
+                                  <span className="text-sm font-display font-black text-white">{playerStats.assists}</span>
+                                </div>
+                                <div className="flex flex-col items-center p-2 bg-white/5 rounded-xl border border-white/5">
+                                  <span className="text-[7px] text-gray-500 uppercase font-black tracking-widest">Jog</span>
+                                  <span className="text-sm font-display font-black text-white">{playerStats.games}</span>
+                                </div>
+                              </div>
+                              
+                              <div className="mt-4 pt-4 border-t border-white/5">
+                                <span className="text-[10px] font-display font-bold text-primary uppercase tracking-widest">
+                                  {player.position || "ATLETA"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
                         );
                       })}
                     </div>
