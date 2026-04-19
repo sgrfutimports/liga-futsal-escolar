@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase, TableName } from './supabase';
 import { mockTeams, mockAthletes, mockGames, mockGallery, mockRegistrations, mockTechnicalDocs } from './mockData';
 
