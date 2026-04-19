@@ -18,6 +18,8 @@ import News from "./pages/News";
 import NewsDetail from "./pages/NewsDetail";
 import AdminLogin from "./pages/AdminLogin";
 import ResetPassword from "./pages/ResetPassword";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 
 export default function App() {
   useEffect(() => {
@@ -90,6 +92,8 @@ export default function App() {
           <Route path="chefes-login" element={<ChefesLogin />} />
           <Route path="inscricao" element={<Registration />} />
           <Route path="enviar-elenco" element={<EnviarElenco />} />
+          <Route path="privacidade" element={<Privacy />} />
+          <Route path="termos" element={<Terms />} />
         </Route>
         
         {/* Standalone Admin Route */}

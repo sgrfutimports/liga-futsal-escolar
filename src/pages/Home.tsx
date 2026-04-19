@@ -29,7 +29,7 @@ export default function Home() {
     },
     {
       id: "default-2",
-      image: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?q=80&w=1920&auto=format&fit=crop",
+      image: "/banner-futsal.png",
       title: "INSCRIÇÕES ABERTAS",
       subtitle: "Temporada 2026",
       description: "Garanta a vaga da sua escola na maior competição do ano. Vagas limitadas por categoria.",
