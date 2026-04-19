@@ -20,6 +20,11 @@ export default function Admin() {
   const { data: athletes, refresh: refreshAthletes } = useSupaData('lfe_athletes', []);
   const { data: games, refresh: refreshGames } = useSupaData('lfe_games', []);
   const { data: news, refresh: refreshNews } = useSupaData('lfe_news', []);
+  const { data: registrations, refresh: refreshRegistrations } = useSupaData('lfe_registrations', []);
+  const { data: gallery, refresh: refreshGallery } = useSupaData('lfe_gallery', []);
+  const { data: sponsors, refresh: refreshSponsors } = useSupaData('lfe_sponsors', []);
+  const { data: settingsArr, refresh: refreshSettings } = useSupaData('lfe_settings', []);
+  const settings = settingsArr[0] || {};
 
   // Auth Check
   useEffect(() => {
@@ -69,13 +74,18 @@ export default function Admin() {
            {sidebarOpen && <span className="font-display font-black text-xl uppercase tracking-tighter">Admin <span className="text-primary">LFE</span></span>}
         </div>
 
-        <nav className="flex-1 py-8 px-4 space-y-2">
+        <nav className="flex-1 py-8 px-4 space-y-2 overflow-y-auto max-h-[calc(100vh-250px)] scrollbar-hide">
            {[
              { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
              { id: 'times', label: 'Times', icon: Trophy },
              { id: 'atletas', label: 'Atletas', icon: Users },
+             { id: 'inscricoes', label: 'Inscrições', icon: UserCheck },
              { id: 'jogos', label: 'Jogos', icon: Clock },
              { id: 'noticias', label: 'Notícias', icon: Newspaper },
+             { id: 'galeria', label: 'Galeria', icon: Home },
+             { id: 'sponsors', label: 'Patrocinadores', icon: Shield },
+             { id: 'push', label: 'Notificações', icon: Bell },
+             { id: 'config', label: 'Configurações', icon: Settings },
            ].map((item) => (
              <button
                key={item.id}
@@ -136,14 +146,19 @@ export default function Admin() {
                       {activeTab === 'dashboard' && "Visão Geral"}
                       {activeTab === 'times' && "Gestão de Equipes"}
                       {activeTab === 'atletas' && "Banco de Atletas"}
+                      {activeTab === 'inscricoes' && "Novas Inscrições"}
                       {activeTab === 'jogos' && "Calendário & Resultados"}
                       {activeTab === 'noticias' && "Editor de Conteúdo"}
+                      {activeTab === 'galeria' && "Galeria de Fotos"}
+                      {activeTab === 'sponsors' && "Patrocinadores"}
+                      {activeTab === 'push' && "Central de Alertas"}
+                      {activeTab === 'config' && "Configurações da Liga"}
                     </h2>
                     <p className="text-gray-500 mt-2 font-sans">
-                      Gerencie as informações da Liga de Futsal Escolar do Agreste Meridional.
+                      {activeTab === 'config' ? "Personalize a identidade visual e regras da competição." : "Gerencie as informações da Liga de Futsal Escolar."}
                     </p>
                  </div>
-                 {activeTab !== 'dashboard' && (
+                 {['times', 'atletas', 'jogos', 'noticias', 'galeria', 'sponsors'].includes(activeTab) && (
                    <button className="bg-primary hover:bg-primary-hover text-black px-6 py-3 rounded-xl font-display text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-transform hover:scale-105">
                      <Plus className="w-4 h-4" /> Novo Registro
                    </button>
@@ -154,8 +169,13 @@ export default function Admin() {
               {activeTab === 'dashboard' && <AdminDashboard stats={{ teams, athletes, games, news }} />}
               {activeTab === 'times' && <AdminListTable data={teams} type="teams" />}
               {activeTab === 'atletas' && <AdminListTable data={athletes} type="athletes" />}
+              {activeTab === 'inscricoes' && <AdminListTable data={registrations} type="registrations" />}
               {activeTab === 'jogos' && <AdminListTable data={games} type="games" />}
               {activeTab === 'noticias' && <AdminListTable data={news} type="news" />}
+              {activeTab === 'galeria' && <AdminListTable data={gallery} type="gallery" />}
+              {activeTab === 'sponsors' && <AdminListTable data={sponsors} type="sponsors" />}
+              {activeTab === 'push' && <AdminPushPanel />}
+              {activeTab === 'config' && <AdminSettingsPanel settings={settings} />}
 
            </div>
         </div>
@@ -280,6 +300,78 @@ function AdminListTable({ data, type }: { data: any[], type: string }) {
            </div>
          )}
       </div>
+    </div>
+  );
+}
+
+function AdminSettingsPanel({ settings }: { settings: any }) {
+  const [formData, setFormData] = useState(settings);
+
+  const handleSave = async () => {
+    const { error } = await supabase.from('lfe_settings').upsert({
+      id: settings.id || undefined,
+      ...formData
+    });
+    
+    if (error) alert("Erro ao salvar: " + error.message);
+    else alert("Configurações atualizadas!");
+  };
+
+  return (
+    <div className="bg-[#0f172a] border border-white/5 rounded-[2.5rem] p-8 md:p-12 space-y-8 animate-in fade-in zoom-in duration-300">
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-white">
+          <div className="space-y-2">
+             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest ml-2">Ano da Edição</label>
+             <input type="text" value={formData.year || ""} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-4 outline-none focus:border-primary transition-colors" />
+          </div>
+          <div className="space-y-2">
+             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest ml-2">Vídeo Institucional (URL)</label>
+             <input type="text" value={formData.video_url || ""} onChange={e => setFormData({...formData, video_url: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-4 outline-none focus:border-primary transition-colors" />
+          </div>
+          <div className="md:col-span-2 space-y-2">
+             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest ml-2">Categorias Ativas (Separadas por vírgula)</label>
+             <input type="text" value={formData.categories || ""} onChange={e => setFormData({...formData, categories: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-4 outline-none focus:border-primary transition-colors" />
+             <p className="text-[9px] text-gray-600 mt-2 ml-2 italic">Ex: SUB-11, SUB-12, SUB-13... Isso altera os filtros em todo o site.</p>
+          </div>
+       </div>
+       <button onClick={handleSave} className="bg-primary text-black px-10 py-5 rounded-2xl font-display font-black uppercase tracking-widest flex items-center gap-3 hover:scale-105 transition-transform">
+          <Save className="w-5 h-5" /> Salvar Alterações
+       </button>
+    </div>
+  );
+}
+
+function AdminPushPanel() {
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const sendNotification = async () => {
+    setLoading(true);
+    // Aqui no futuro você integraria com um serviço de push (Firebase ou Edge Function)
+    alert("Simulação: Notificação '" + title + "' pronta para envio via Supabase Edge Function.");
+    setLoading(false);
+  };
+
+  return (
+    <div className="bg-gradient-to-br from-[#0f172a] to-primary/5 border border-white/5 rounded-[2.5rem] p-12 space-y-8 animate-in slide-in-from-right-4 duration-500">
+       <div className="max-w-xl space-y-6">
+          <div className="space-y-4">
+             <h3 className="text-2xl font-display font-black text-white uppercase italic">Comunicado Geral</h3>
+             <p className="text-gray-500 text-sm leading-relaxed">
+               As mensagens enviadas aqui aparecerão instantaneamente nos celulares e computadores de todos que ativaram o sininho no portal.
+             </p>
+          </div>
+          
+          <div className="space-y-4">
+             <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Título da Notificação (ex: GOL!)" className="w-full bg-[#020617] border border-white/10 rounded-2xl p-4 outline-none focus:border-primary transition-colors text-white" />
+             <textarea value={body} onChange={e => setBody(e.target.value)} placeholder="Mensagem curta e clara..." rows={4} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-4 outline-none focus:border-primary transition-colors text-white" />
+          </div>
+          
+          <button onClick={sendNotification} disabled={loading} className="w-full md:w-auto bg-white text-black px-10 py-5 rounded-2xl font-display font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-primary transition-colors">
+             <Bell className="w-5 h-5" /> {loading ? "Enviando..." : "Disparar Alerta"}
+          </button>
+       </div>
     </div>
   );
 }
