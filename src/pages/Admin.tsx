@@ -25,14 +25,7 @@ export default function Admin() {
   useEffect(() => {
     const auth = localStorage.getItem('lfe_admin_authenticated');
     if (auth !== 'true') {
-      const pass = prompt("Acesso Restrito. Digite a senha administrativa:");
-      if (pass === "adminlfe2026") {
-        localStorage.setItem('lfe_admin_authenticated', 'true');
-        setIsLogged(true);
-      } else {
-        alert("Senha incorreta!");
-        navigate("/");
-      }
+      navigate("/admin/login");
     } else {
       setIsLogged(true);
     }

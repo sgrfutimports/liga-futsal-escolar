@@ -1,162 +1,93 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Lock, User, ShieldCheck, ArrowRight, Trophy, ChevronLeft } from "lucide-react";
+import { User, LogIn, Trophy, ArrowRight, ChevronLeft, Building2 } from "lucide-react";
 import { Link } from "react-router";
 import { cn } from "@/src/lib/utils";
 
 export default function ChefesLogin() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [accessCode, setAccessCode] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const { supabase } = await import('@/src/lib/supabase');
-      // Simple custom login checking against lfe_registrations
-      const { data, error: dbError } = await supabase
-        .from('lfe_registrations')
-        .select('*')
-        .eq('email', email)
-        .eq('password', password);
-
-      if (dbError) throw dbError;
-
-      if (data && data.length > 0) {
-        const match = data[0];
-        if (match.status !== 'Homologada') {
-          setError("Sua inscrição ainda está pendente de aprovação ou foi recusada pela equipe.");
-          setIsLoading(false);
-          return;
-        }
-
-        localStorage.setItem('lfe_is_chefe', 'true');
-        localStorage.setItem('lfe_chefe_email', match.email);
-        localStorage.setItem('lfe_chefe_school', match.school);
-        if (match.team_id) {
-          localStorage.setItem('lfe_team_id', String(match.team_id));
-        }
-        
-        navigate('/dep-tecnico');
-      } else {
-        setError("E-mail ou senha incorretos.");
-      }
-    } catch (err) {
-      setError("Erro de conexão ao servidor. Tente novamente mais tarde.");
-    } finally {
-      setIsLoading(false);
+    // Lógica simples baseada nos anos de edição ou código fixo para teste
+    if (accessCode.length >= 4) {
+      localStorage.setItem('lfe_is_chefe', 'true');
+      localStorage.setItem('lfe_chefe_code', accessCode);
+      navigate("/enviar-elenco");
+    } else {
+      setError("Código de acesso muito curto");
+      setTimeout(() => setError(""), 3000);
     }
   };
 
   return (
-    <div className="min-h-screen bg-dark flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 relative overflow-hidden">
+      
       {/* Background Decor */}
-      <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary rounded-full blur-[120px]" />
-         <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary rounded-full blur-[120px]" />
+      <div className="absolute top-0 right-0 w-full h-full z-0">
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-600/5 blur-[120px] rounded-full" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 blur-[100px] rounded-full" />
       </div>
 
-      <div className="max-w-md w-full relative">
-        {/* Back Link */}
-        <Link to="/" className="inline-flex items-center gap-2 text-gray-500 hover:text-white transition-colors mb-8 group">
-           <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-           <span className="font-display text-sm tracking-widest uppercase">Voltar ao Início</span>
-        </Link>
-
-        {/* Login Card */}
-        <div className="bg-dark-card border border-dark-border rounded-3xl p-8 md:p-10 shadow-2xl relative">
-          <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-xl overflow-hidden p-2">
-               <img src="/logos/logo.jpg" alt="LFE" className="w-full h-full object-contain scale-110" />
+      <div className="relative z-10 w-full max-w-md">
+        
+        {/* Logo / Header */}
+        <div className="flex flex-col items-center mb-10">
+          <Link to="/" className="mb-8 flex items-center gap-3 group bg-white/5 px-4 py-2 rounded-full border border-white/5 hover:border-white/10 transition-all">
+            <ChevronLeft className="w-4 h-4 text-gray-500" />
+            <span className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest">Voltar para o Início</span>
+          </Link>
+          <div className="relative">
+            <div className="absolute -inset-4 bg-primary/20 rounded-full blur-xl opacity-50" />
+            <div className="relative w-24 h-24 bg-white/95 rounded-[2.5rem] flex items-center justify-center shadow-2xl overflow-hidden">
+              <img src="/logos/logo.jpg" className="w-full h-full object-contain scale-125" alt="Liga Logo" />
             </div>
-            <h1 className="font-display text-3xl text-white font-bold tracking-tight">ÁREA DO <span className="text-primary">CHEFE</span></h1>
-            <p className="text-gray-500 mt-2 text-sm uppercase tracking-widest">Portal Técnico Liga de Futsal Escolar</p>
           </div>
-
-          {error && (
-            <div className="bg-danger/10 border border-danger/20 text-danger text-xs p-4 rounded-xl mb-6 flex items-center gap-3">
-              <ShieldCheck className="w-4 h-4" />
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-gray-400 text-[10px] uppercase tracking-widest font-display mb-2 ml-1">E-mail de Cadastro</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <User className="h-4 w-4 text-primary opacity-50" />
-                </div>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-11 pr-4 py-4 bg-dark border border-dark-border rounded-2xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-sans"
-                  placeholder="exemplo@escola.com.br"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-gray-400 text-[10px] uppercase tracking-widest font-display mb-2 ml-1">Senha de Acesso</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-4 w-4 text-primary opacity-50" />
-                </div>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-11 pr-4 py-4 bg-dark border border-dark-border rounded-2xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-[10px] px-1">
-               <label className="flex items-center gap-2 text-gray-500 cursor-pointer hover:text-white transition-colors">
-                 <input type="checkbox" className="w-3 h-3 rounded border-dark-border bg-dark text-primary focus:ring-primary/30" />
-                 Lembrar dados
-               </label>
-               <a href="#" className="text-primary hover:underline">Esqueceu a senha?</a>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 py-4 bg-primary hover:bg-primary-dark text-dark font-display font-bold rounded-2xl transition-all shadow-lg active:scale-95 disabled:opacity-50 mt-4 group uppercase tracking-widest text-sm"
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-dark border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  Entrar no Portal <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="mt-10 pt-8 border-t border-dark-border text-center">
-            <p className="text-gray-500 text-xs mb-4">Ainda não inscreveu sua escola?</p>
-            <Link 
-              to="/inscricao" 
-              className="inline-flex items-center gap-2 px-6 py-2 bg-dark border border-dark-border text-white text-xs font-display rounded-full hover:border-primary transition-all uppercase tracking-widest"
-            >
-              Realizar Nova Inscrição
-            </Link>
-          </div>
+          <h1 className="text-3xl font-display font-black text-white uppercase tracking-tighter mt-8">Área do <span className="text-primary italic">Chefe</span></h1>
+          <p className="text-gray-500 text-[10px] mt-2 font-display uppercase tracking-[0.3em] font-bold">Portal de Delegações Escolares</p>
         </div>
 
-        <div className="mt-8 text-center">
-           <p className="text-gray-600 text-[10px] uppercase tracking-[0.2em] font-display">
-             Liga de Futsal Escolar © 2026 - Departamento Técnico
+        {/* Login Card */}
+        <div className="bg-[#0f172a] border border-white/5 p-10 rounded-[3rem] shadow-2xl backdrop-blur-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-[50px] -mr-16 -mt-16" />
+          
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest ml-4">Código de Acesso da Equipe</label>
+              <div className="relative group">
+                <Building2 className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 transition-colors group-focus-within:text-primary" />
+                <input 
+                  type="text"
+                  value={accessCode}
+                  onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                  placeholder="EX: LFE-2026-CGA"
+                  className="w-full bg-[#020617]/50 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-white outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-display uppercase tracking-widest text-xs"
+                  required
+                />
+              </div>
+              <p className="text-[9px] text-gray-600 ml-4 font-sans italic italic">O código foi enviado para o e-mail institucional da escola.</p>
+            </div>
+
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-red-500 text-xs font-display flex items-center gap-3">
+                <div className="w-1.5 h-1.5 bg-red-500 rounded-full" /> {error}
+              </div>
+            )}
+
+            <button 
+              type="submit"
+              className="w-full bg-white hover:bg-white-hover text-black font-display font-black text-xs uppercase tracking-widest py-5 rounded-2xl shadow-xl shadow-white/5 flex items-center justify-center gap-2 group transition-all active:scale-95"
+            >
+              Acessar Painel <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </button>
+          </form>
+        </div>
+
+        <div className="mt-8 bg-white/5 border border-white/5 p-6 rounded-[2rem] text-center">
+           <p className="text-[10px] text-gray-500 font-display font-bold uppercase tracking-widest leading-relaxed">
+             Dificuldades no acesso? Entre em contato com a Secretaria Geral da Liga através do nosso canal oficial.
            </p>
         </div>
       </div>

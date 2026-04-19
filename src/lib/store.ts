@@ -116,7 +116,7 @@ export function useSupaData<T = any>(
     const result = await supaFetch(table);
     setData(result && result.length > 0 ? (result as T[]) : fallback);
     setLoading(false);
-  }, [table, fallback]);
+  }, [table]); // fallback removed from deps to avoid infinite loops with array literals
 
   useEffect(() => {
     refresh();

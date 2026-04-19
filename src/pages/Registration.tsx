@@ -359,7 +359,8 @@ export default function Registration() {
                 Categorias Disputadas
               </h3>
               <div id="categories" className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {["SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"].map((cat) => {
+                {(settings.categories ? String(settings.categories).split(',') : ["SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"]).map((catRaw) => {
+                  const cat = catRaw.trim();
                   const isSelected = formData.categories.includes(cat);
                   return (
                     <label key={cat} className={cn(
@@ -400,15 +401,16 @@ export default function Registration() {
                   </label>
                 </div>
 
-                {athleteSubmissionType === "now" && formData.categories.map(cat => {
-                  const catAthletes = formData.athletes.filter(a => a.category === cat);
+                {athleteSubmissionType === "now" && (settings.categories ? String(settings.categories).split(',') : ["SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"]).map(cat => {
+                  const catAthletes = formData.athletes.filter(a => a.category === cat.trim());
+                  const displayCat = cat.trim();
                   
                   return (
-                    <div key={cat} className="bg-dark border border-dark-border rounded-xl p-5 md:p-6 shadow-inner relative overflow-hidden">
+                    <div key={displayCat} className="bg-dark border border-dark-border rounded-xl p-5 md:p-6 shadow-inner relative overflow-hidden">
                       <div className="absolute top-0 right-0 bg-dark-border px-4 py-1 font-display text-xs text-gray-400 rounded-bl-xl origin-top-right">
                         Categoria
                       </div>
-                      <h4 className="font-display text-primary text-2xl uppercase mb-6">{cat}</h4>
+                      <h4 className="font-display text-primary text-2xl uppercase mb-6">{displayCat}</h4>
                       
                       {catAthletes.length > 0 ? (
                         <div className="space-y-3 mb-4">
@@ -431,11 +433,11 @@ export default function Registration() {
                         </div>
                       ) : (
                         <div className="text-center py-6 text-gray-500 font-sans text-sm italic border border-dashed border-dark-border rounded-lg mb-4">
-                          Nenhum atleta cadastrado no {cat} ainda.
+                          Nenhum atleta cadastrado no {displayCat} ainda.
                         </div>
                       )}
                       
-                      <button type="button" onClick={() => addAthlete(cat)} className="flex items-center gap-2 px-4 py-2 bg-dark-card border border-dark-border text-primary font-display text-sm rounded hover:bg-primary/10 transition-colors">
+                      <button type="button" onClick={() => addAthlete(displayCat)} className="flex items-center gap-2 px-4 py-2 bg-dark-card border border-dark-border text-primary font-display text-sm rounded hover:bg-primary/10 transition-colors">
                         <Plus className="w-4 h-4" /> ADICIONAR ATLETA
                       </button>
                     </div>

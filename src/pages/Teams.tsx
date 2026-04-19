@@ -28,6 +28,9 @@ const TeamLogo = ({ teamName, logo }: { teamName: string, logo?: string }) => {
 export default function Teams() {
   const { data: allTeams } = useSupaData('lfe_teams', []);
   const { data: athletes } = useSupaData('lfe_athletes', []);
+  const { data: settingsArr } = useSupaData('lfe_settings', []);
+  const settings = settingsArr[0] || {};
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("TODOS");
 
@@ -39,7 +42,7 @@ export default function Teams() {
     return matchesSearch && matchesCategory;
   });
 
-  const categoriesSet = ["TODOS", "SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"];
+  const categoriesSet = ["TODOS", ...(settings.categories ? String(settings.categories).split(',').map((c: string) => c.trim()) : ["SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"])];
 
   return (
     <div className="min-h-screen bg-dark py-12">

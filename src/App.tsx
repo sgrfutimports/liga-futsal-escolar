@@ -16,6 +16,7 @@ import Games from "./pages/Games";
 import GameDetails from "./pages/GameDetails";
 import News from "./pages/News";
 import NewsDetail from "./pages/NewsDetail";
+import AdminLogin from "./pages/AdminLogin";
 
 export default function App() {
   useEffect(() => {
@@ -91,6 +92,7 @@ export default function App() {
         </Route>
         
         {/* Standalone Admin Route */}
+        <Route path="admin/login" element={<AdminLogin />} />
         <Route path="admin" element={<Admin />} />
       </Routes>
     </BrowserRouter>

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Camera, Maximize2, X } from "lucide-react";
-
-import { getStoredData } from "@/src/lib/store";
+import { useSupaData } from "@/src/lib/store";
 
 const demoMedia = [
   { id: 1, type: 'image', url: '/gallery/galeria_1.jpg', title: 'Disputa Intensa em Quadra' },
@@ -14,9 +13,9 @@ const demoMedia = [
 export default function Gallery() {
   const [selectedMediaIndex, setSelectedMediaIndex] = useState<number | null>(null);
 
-  // Sync with Admin panel data, fallback to demo if it's completely empty or new
-  const storedGallery = getStoredData('gallery') || [];
-  const galleryItems = storedGallery.length > 0 ? storedGallery : demoMedia;
+  // Load dynamic data from Supabase
+  const { data: serverGallery } = useSupaData('lfe_gallery', []);
+  const galleryItems = serverGallery.length > 0 ? serverGallery : demoMedia;
 
   const handleNext = (e?: any) => {
     e?.stopPropagation();
@@ -53,7 +52,7 @@ export default function Gallery() {
                 className="group relative bg-dark-card rounded-xl overflow-hidden cursor-pointer border border-dark-border hover:border-primary transition-all aspect-[4/3] shadow-lg"
               >
                 <img 
-                  src={item.url} 
+                  src={item.url || item.image || item.photo} 
                   alt={item.title} 
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
@@ -106,7 +105,7 @@ export default function Gallery() {
           <div className="relative max-w-7xl max-h-full w-full h-full flex flex-col items-center justify-center pointer-events-none" onClick={e => e.stopPropagation()}>
              <div className="relative group pointer-events-auto">
                <img 
-                 src={selectedMedia.url} 
+                 src={selectedMedia.url || selectedMedia.image || selectedMedia.photo} 
                  className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300" 
                  key={selectedMedia.id}
                  alt={selectedMedia.title} 

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { FileText, Download, Notebook as Folder, Search, Filter, Calendar, ExternalLink, LogOut, User as UserIcon, Users } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { getStoredData } from "@/src/lib/store";
+import { useSupaData } from "@/src/lib/store";
 import { cn } from "@/src/lib/utils";
 
 const categories = [
@@ -48,13 +48,13 @@ export default function TechnicalDepartment() {
     navigate('/chefes-login');
   };
 
-  const storedDocs = getStoredData('technical_documents') || [];
-  const registrations = getStoredData('registrations') || [];
-  const allAthletes = getStoredData('athletes') || [];
+  const { data: storedDocs } = useSupaData('lfe_technical_documents', []);
+  const { data: registrations } = useSupaData('lfe_registrations', []);
+  const { data: allAthletes } = useSupaData('lfe_athletes', []);
 
   // Find school team and athletes
   const myReg = registrations.find((r: any) => r.email?.toLowerCase() === session?.email?.toLowerCase());
-  const myAthletes = myReg?.teamId ? allAthletes.filter((a: any) => a.teamId === myReg?.teamId) : [];
+  const myAthletes = myReg?.teamId || myReg?.team_id ? allAthletes.filter((a: any) => String(a.team_id || a.teamId) === String(myReg?.teamId || myReg?.team_id)) : [];
   
   const filteredDocs = storedDocs.filter((doc: any) => {
     const matchesSearch = String(doc.title || "").toLowerCase().includes(searchQuery.toLowerCase());
