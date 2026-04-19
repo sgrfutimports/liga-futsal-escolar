@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   LayoutDashboard, Users, Trophy, Newspaper, 
   Settings, LogOut, Search, Plus, Trash2, 
