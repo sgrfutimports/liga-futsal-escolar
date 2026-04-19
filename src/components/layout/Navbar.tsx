@@ -4,7 +4,6 @@ import { Menu, X, Trophy, LogOut, User } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import NotificationBell from "./NotificationBell";
-import ThemeToggle from "./ThemeToggle";
 
 const navLinks = [
   { name: "Início", path: "/" },
@@ -65,8 +64,7 @@ export default function Navbar() {
 
           {/* Wrapper for Search/Notify and Nav */}
           <div className="hidden md:flex items-center space-x-8">
-            <div className="flex items-center space-x-4 mr-6 border-r border-dark-border pr-6">
-               <ThemeToggle />
+            <div className="flex items-center space-x-6 mr-6 border-r border-dark-border pr-6 font-display font-medium">
                <NotificationBell />
             </div>
             
@@ -122,7 +120,6 @@ export default function Navbar() {
 
           {/* Mobile Actions */}
           <div className="flex md:hidden items-center gap-4">
-            <ThemeToggle />
             <NotificationBell />
             <button
               onClick={() => setIsOpen(!isOpen)}
