@@ -31,8 +31,8 @@ export default function Standings() {
   const [activeCategory, setActiveCategory] = useState("SUB-17");
   const [activeTab, setActiveTab] = useState("CLASSIFICACAO");
 
-  const { data: teams } = useSupaData('lfe_teams', []);
-  const { data: games } = useSupaData('lfe_games', []);
+  const { data: teams } = useSupaData('lfe_teams', [], true);
+  const { data: games } = useSupaData('lfe_games', [], true);
   const { data: athletes } = useSupaData('lfe_athletes', []);
 
   // Filter games by active category

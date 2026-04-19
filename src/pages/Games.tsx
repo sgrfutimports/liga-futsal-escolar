@@ -5,7 +5,7 @@ import { useSupaData } from "@/src/lib/store";
 import { cn } from "@/src/lib/utils";
 
 export default function Games() {
-  const { data: allGames } = useSupaData('lfe_games', []);
+  const { data: allGames } = useSupaData('lfe_games', [], true);
   const { data: teams } = useSupaData('lfe_teams', []);
   
   const [activeStatus, setActiveStatus] = useState("TODOS");

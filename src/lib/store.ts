@@ -106,26 +106,39 @@ export async function supaDelete(table: TableName, id: any): Promise<void> {
  */
 export function useSupaData<T = any>(
   table: TableName,
-  fallback: T[] = []
+  fallback: T[] = [],
+  realtime = false
 ): { data: T[]; loading: boolean; refresh: () => void } {
   const [data, setData] = useState<T[]>(fallback);
   const [loading, setLoading] = useState(true);
-  const [tick, setTick] = useState(0);
+
+  const refresh = useCallback(async () => {
+    const result = await supaFetch(table);
+    setData(result && result.length > 0 ? (result as T[]) : fallback);
+    setLoading(false);
+  }, [table, fallback]);
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    supaFetch(table).then((result) => {
-      if (!cancelled) {
-        setData(result && result.length > 0 ? (result as T[]) : fallback);
-        setLoading(false);
-      }
-    });
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [table, tick]);
+    refresh();
 
-  const refresh = () => setTick((t) => t + 1);
+    if (realtime) {
+      const channel = supabase
+        .channel(`public:${table}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: table },
+          () => {
+            refresh();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [refresh, realtime, table]);
+
   return { data, loading, refresh };
 }
 
