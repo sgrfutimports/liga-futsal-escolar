@@ -1,8 +1,15 @@
 import React from "react";
+import { useSupaData } from "@/src/lib/store";
 
 export default function WhatsAppButton() {
-  const phoneNumber = "558199999999"; // Exemplo para Garanhuns/PE
-  const message = "Olá! Gostaria de tirar dúvidas sobre as inscrições da Liga de Futsal Escolar.";
+  const { data: settingsArr } = useSupaData('lfe_settings', []);
+  const settings = settingsArr[0] || {};
+  
+  // Dynamic phone number from settings
+  const rawNumber = settings.whatsapp_number || "558199999999";
+  const phoneNumber = rawNumber.startsWith('55') ? rawNumber : `55${rawNumber}`;
+  
+  const message = `Olá! Gostaria de tirar dúvidas sobre as inscrições da ${settings.league_name || "Liga de Futsal Escolar"}.`;
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
   return (

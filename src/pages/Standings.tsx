@@ -25,11 +25,24 @@ const TeamLogoSmall = ({ teamId, teamName, logo, className }: { teamId: number, 
   );
 };
 
-const categories = ["SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"];
-
 export default function Standings() {
-  const [activeCategory, setActiveCategory] = useState("SUB-17");
+  const { data: settingsArr } = useSupaData('lfe_settings', []);
+  const settings = settingsArr[0] || {};
+  
+  // Parse dynamic categories from settings or use fallback
+  const categories = settings.categories 
+    ? settings.categories.split(',').map((c: string) => c.trim())
+    : ["SUB-11", "SUB-13", "SUB-15", "SUB-17"];
+
+  const [activeCategory, setActiveCategory] = useState("");
   const [activeTab, setActiveTab] = useState("CLASSIFICACAO");
+
+  // Set initial category once settings are loaded
+  useEffect(() => {
+    if (categories.length > 0 && !activeCategory) {
+      setActiveCategory(categories[0]);
+    }
+  }, [categories, activeCategory]);
 
   const { data: teams } = useSupaData('lfe_teams', [], true);
   const { data: games } = useSupaData('lfe_games', [], true);

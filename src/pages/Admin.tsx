@@ -390,29 +390,57 @@ function AdminListTable({ data, type, onEdit, onDelete }: { data: any[], type: s
 
 function AdminSettingsPanel({ settings, onSave }: { settings: any, onSave: () => void }) {
   const [formData, setFormData] = useState(settings || {});
+
   const handleSave = async () => {
     const { error } = await supabase.from('lfe_settings').upsert({ id: settings?.id || undefined, ...formData });
     if (error) alert("Erro ao salvar: " + error.message);
-    else { alert("Configurações atualizadas!"); onSave(); }
+    else { alert("Configurações atualizadas com sucesso!"); onSave(); }
   };
+
   return (
-    <div className="bg-[#0f172a] border border-white/5 rounded-[2.5rem] p-8 md:p-12 space-y-8 animate-in fade-in duration-300">
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-white">
+    <div className="bg-[#0f172a] border border-white/5 rounded-[2.5rem] p-8 md:p-12 space-y-10 animate-in fade-in duration-300">
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-white">
           <div className="space-y-4">
-             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-2">Ano Edição Corrente</label>
-             <input type="text" value={formData.year || ""} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all font-display text-lg" placeholder="EX: 2026" />
+             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">Nome Oficial da Liga</label>
+             <input type="text" value={formData.league_name || ""} onChange={e => setFormData({...formData, league_name: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="Ex: Liga de Futsal Escolar" />
           </div>
           <div className="space-y-4">
-             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-2">Vídeo Banner Home (URL)</label>
-             <input type="text" value={formData.video_url || ""} onChange={e => setFormData({...formData, video_url: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all font-sans text-sm" placeholder="https://youtube.com/..." />
+             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">URL da Logo (PNG/JPG)</label>
+             <input type="text" value={formData.league_logo || ""} onChange={e => setFormData({...formData, league_logo: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="https://..." />
           </div>
+          <div className="space-y-4">
+             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">Ano da Edição</label>
+             <input type="text" value={formData.year || ""} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm font-display tracking-widest text-primary" placeholder="2026" />
+          </div>
+          
+          <div className="space-y-4">
+             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">Instagram (Link Completo)</label>
+             <input type="text" value={formData.instagram_url || ""} onChange={e => setFormData({...formData, instagram_url: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="https://instagram.com/..." />
+          </div>
+          <div className="space-y-4">
+             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">WhatsApp (Apenas Números)</label>
+             <input type="text" value={formData.whatsapp_number || ""} onChange={e => setFormData({...formData, whatsapp_number: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="11999999999" />
+          </div>
+          <div className="space-y-4">
+             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">E-mail de Contato</label>
+             <input type="email" value={formData.contact_email || ""} onChange={e => setFormData({...formData, contact_email: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="contato@liga.com" />
+          </div>
+
           <div className="md:col-span-2 space-y-4">
-             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-2">Categorias Oficiais da Liga (Separadas por vírgula)</label>
-             <textarea value={formData.categories || ""} onChange={e => setFormData({...formData, categories: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all font-display text-xl" rows={3} placeholder="SUB-11, SUB-12, SUB-13..." />
-             <div className="flex items-center gap-2 text-[10px] text-gray-500 uppercase tracking-widest bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20"><AlertCircle className="w-4 h-4 text-yellow-500" /> Cuidado: Isso altera as inscrições e os filtros de todo o site instantaneamente.</div>
+             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">Endereço / Sede</label>
+             <input type="text" value={formData.contact_address || ""} onChange={e => setFormData({...formData, contact_address: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="Av. Principal, 123 - Centro" />
+          </div>
+          <div className="md:col-span-1 space-y-4">
+             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">Vídeo Banner (URL)</label>
+             <input type="text" value={formData.video_url || ""} onChange={e => setFormData({...formData, video_url: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" />
+          </div>
+
+          <div className="md:col-span-3 space-y-4">
+             <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">Categorias Ativas (Separadas por vírgula)</label>
+             <textarea value={formData.categories || ""} onChange={e => setFormData({...formData, categories: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-6 outline-none focus:border-primary transition-all font-display text-xl" rows={3} placeholder="SUB-11, SUB-12, SUB-13..." />
           </div>
        </div>
-       <button onClick={handleSave} className="bg-primary hover:bg-white text-black px-12 py-6 rounded-2xl font-display font-black uppercase tracking-[0.2em] flex items-center gap-4 transition-all shadow-xl shadow-primary/10 active:scale-95"><Save className="w-6 h-6" /> Aplicar Configurações</button>
+       <button onClick={handleSave} className="bg-primary hover:bg-white text-black px-12 py-6 rounded-2xl font-display font-black uppercase tracking-[0.2em] flex items-center gap-4 transition-all shadow-xl shadow-primary/10 active:scale-95"><Save className="w-6 h-6" /> Aplicar Identidade Visual</button>
     </div>
   );
 }

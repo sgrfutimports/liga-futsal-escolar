@@ -47,15 +47,15 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-3 group">
             <div className="relative w-16 h-16 bg-white rounded-full flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.15)]">
               <img 
-                src="/logos/logo.jpg" 
-                alt="Liga de Futsal Escolar" 
+                src={settings.league_logo || "/logos/logo.jpg"} 
+                alt={settings.league_name || "Liga de Futsal Escolar"} 
                 className="w-full h-full object-contain scale-[1.2]"
               />
               <Trophy className="w-6 h-6 text-dark absolute inset-0 m-auto opacity-0 group-data-[error=true]:opacity-100" />
             </div>
             <div className="flex flex-col leading-none">
               <span className="font-display text-2xl font-bold tracking-tight text-white group-hover:text-primary transition-colors">
-                LIGA
+                {settings.league_name || "LIGA"}
               </span>
               <span className="text-[10px] font-sans font-medium text-gray-400 tracking-[0.2em] uppercase">
                 Futsal Escolar

@@ -2,6 +2,9 @@ import { Link } from "react-router";
 import { Instagram, MapPin, Mail, Trophy } from "lucide-react";
 
 export default function Footer() {
+  const { data: settingsArr } = useSupaData('lfe_settings', []);
+  const settings = settingsArr[0] || {};
+
   return (
     <footer className="bg-surface border-t border-border pt-16 pb-8 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -11,14 +14,14 @@ export default function Footer() {
             <Link to="/" className="flex items-center gap-3 mb-4 group">
               <div className="relative w-16 h-16 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.05)] border border-border">
                 <img 
-                  src="/logos/logo.jpg" 
-                  alt="Liga de Futsal Escolar" 
+                  src={settings.league_logo || "/logos/logo.jpg"} 
+                  alt={settings.league_name || "LFE"} 
                   className="w-full h-full object-contain scale-[1.2]"
                 />
               </div>
               <div className="flex flex-col leading-none">
                 <span className="font-display text-xl font-bold tracking-tight text-text group-hover:text-primary transition-colors uppercase">
-                  LIGA
+                  {settings.league_name || "LIGA"}
                 </span>
                 <span className="text-[8px] font-sans font-medium text-text-muted tracking-[0.2em] uppercase">
                   Futsal Escolar
@@ -30,7 +33,7 @@ export default function Footer() {
             </p>
             <div className="flex gap-4">
               <a 
-                href="https://www.instagram.com/ligadefutsalescolar/" 
+                href={settings.instagram_url || "https://www.instagram.com/ligadefutsalescolar/"} 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-white transition-all hover:scale-110 shadow-lg active:scale-95"
@@ -60,12 +63,18 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-text-muted text-sm">
                 <MapPin className="w-5 h-5 text-primary shrink-0" />
-                <span>Garanhuns, PE<br/>Sede Administrativa</span>
+                <span>{settings.contact_address || "Garanhuns, PE"}</span>
               </li>
               <li className="flex items-center gap-3 text-text-muted text-sm">
                 <Mail className="w-5 h-5 text-primary shrink-0" />
-                <span>contato@ligafutsalescolar.com</span>
+                <span>{settings.contact_email || "contato@ligafutsalescolar.com"}</span>
               </li>
+              {settings.whatsapp_number && (
+                <li className="flex items-center gap-3 text-text-muted text-sm border-t border-border mt-3 pt-3">
+                  <Phone className="w-4 h-4 text-primary shrink-0" />
+                  <span>WhatsApp: {settings.whatsapp_number}</span>
+                </li>
+              )}
             </ul>
           </div>
 
@@ -73,13 +82,15 @@ export default function Footer() {
 
         <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-text-muted text-sm">
-            © {new Date().getFullYear()} Liga de Futsal Escolar. Todos os direitos reservados.
+            © {new Date().getFullYear()} {settings.league_name || "Liga de Futsal Escolar"}. Todos os direitos reservados.
           </p>
           <div className="flex gap-6 text-[10px] font-display font-black uppercase tracking-widest text-text-muted">
             <Link to="/termos" className="hover:text-primary transition-colors">Termos de Uso</Link>
             <Link to="/privacidade" className="hover:text-primary transition-colors">Privacidade</Link>
           </div>
         </div>
+      </div>
+    </footer>
       </div>
     </footer>
   );
