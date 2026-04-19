@@ -86,7 +86,6 @@ export default function TeamDetails() {
     <div className="min-h-screen bg-[#020617] text-white font-sans">
       {/* 1. Header Premium / Banner */}
       <div className="relative h-[300px] md:h-[450px] w-full overflow-hidden">
-        {/* Background Image/Overlay */}
         <div className="absolute inset-0 z-0">
           {team.logo ? (
             <img src={team.logo} className="w-full h-full object-cover opacity-20 blur-3xl scale-150" alt="" />
@@ -96,7 +95,6 @@ export default function TeamDetails() {
           <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/50 to-transparent" />
         </div>
 
-        {/* Brand Information */}
         <div className="relative z-10 h-full max-w-7xl mx-auto px-4 flex flex-col items-center justify-center text-center">
           <div className="relative group">
             <div className="absolute -inset-4 bg-primary/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -150,7 +148,6 @@ export default function TeamDetails() {
 
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="min-h-[400px]">
-          {/* TAB: ELENCO */}
           {activeTab === 'elenco' && (
             <div className="space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {players.length > 0 ? (
@@ -183,8 +180,6 @@ export default function TeamDetails() {
                             stats={playerStats}
                           />
                         );
-
-                        );
                       })}
                     </div>
                   </div>
@@ -199,11 +194,9 @@ export default function TeamDetails() {
             </div>
           )}
 
-          {/* TAB: JOGOS */}
           {activeTab === 'jogos' && (
             <div className="space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                {/* Upcoming */}
                 <div className="space-y-8">
                   <h3 className="text-2xl font-display font-black text-white flex items-center gap-3">
                     <Calendar className="w-6 h-6 text-primary" /> PRÓXIMOS CONFRONTOS
@@ -246,7 +239,6 @@ export default function TeamDetails() {
                   </div>
                 </div>
 
-                {/* Past Results */}
                 <div className="space-y-8">
                   <h3 className="text-2xl font-display font-black text-white flex items-center gap-3">
                     <Trophy className="w-6 h-6 text-primary" /> RESULTADOS RECENTES
@@ -304,7 +296,6 @@ export default function TeamDetails() {
             </div>
           )}
 
-          {/* TAB: ESTATÍSTICAS */}
           {activeTab === 'estatisticas' && (
             <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -322,7 +313,6 @@ export default function TeamDetails() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                {/* Performance Chart Simulation (Cards) */}
                 <div className="lg:col-span-2 space-y-8">
                   <h3 className="text-2xl font-display font-black text-white uppercase tracking-tighter">Balanço de Gols</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -343,7 +333,6 @@ export default function TeamDetails() {
                   </div>
                 </div>
 
-                {/* Top Scorers */}
                 <div className="space-y-8">
                   <h3 className="text-2xl font-display font-black text-white uppercase tracking-tighter">Artilharia</h3>
                   <div className="space-y-4">

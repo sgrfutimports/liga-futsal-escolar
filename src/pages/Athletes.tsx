@@ -48,7 +48,7 @@ export default function Athletes() {
   const categories = ["TODOS", "SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"];
 
   return (
-    <div className="min-h-screen bg-dark py-12">
+    <div className="min-h-screen bg-[#020617] py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
@@ -70,14 +70,14 @@ export default function Athletes() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="block w-full pl-10 pr-3 py-4 border border-dark-border rounded-xl leading-5 bg-dark-card text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary sm:text-sm font-sans transition-all shadow-lg"
+              className="block w-full pl-10 pr-3 py-4 border border-white/5 rounded-xl leading-5 bg-[#0f172a] text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary sm:text-sm font-sans transition-all shadow-lg"
               placeholder="Buscar atleta por nome..."
             />
           </div>
         </div>
 
         {/* Category Filters */}
-        <div className="flex flex-wrap gap-2 mb-10 pb-6 border-b border-dark-border/30">
+        <div className="flex flex-wrap gap-2 mb-10 pb-6 border-b border-white/5">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -86,7 +86,7 @@ export default function Athletes() {
                 "px-6 py-2.5 font-display text-sm rounded-full transition-all border uppercase tracking-wider",
                 activeCategory === cat 
                   ? "bg-primary text-dark border-primary shadow-[0_0_20px_rgba(204,255,0,0.2)]" 
-                  : "bg-dark-card text-gray-500 border-dark-border hover:border-gray-600 hover:text-white"
+                  : "bg-[#0f172a] text-gray-500 border-white/5 hover:border-gray-600 hover:text-white"
               )}>
               {cat}
             </button>
@@ -97,7 +97,6 @@ export default function Athletes() {
           {filteredAthletes.map((athlete: any) => {
             const team = teams.find((t: any) => String(t.id) === String(athlete.team_id || athlete.teamId));
             const playerStats = getAthleteStats(athlete.id, athlete.team_id || athlete.teamId);
-            const safeName = String(athlete.name || "Uniformado").trim();
 
             return (
               <PlayerCard 
@@ -106,7 +105,6 @@ export default function Athletes() {
                 teamLogo={team?.logo}
                 stats={playerStats}
               />
-            );
             );
           })}
         </div>
