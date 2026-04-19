@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { User, LogIn, Trophy, ArrowRight, ChevronLeft, Building2 } from "lucide-react";
 import { Link } from "react-router";

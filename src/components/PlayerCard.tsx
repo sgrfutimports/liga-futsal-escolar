@@ -12,7 +12,7 @@ interface PlayerCardProps {
   className?: string;
 }
 
-export default function PlayerCard({ player, teamLogo, stats, className }: PlayerCardProps) {
+export default function PlayerCard({ player, teamLogo, stats, className }: any) {
   const safeName = String(player.name || "Uniformado").trim();
 
   return (

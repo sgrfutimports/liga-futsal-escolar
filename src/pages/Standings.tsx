@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Trophy, Shield, Goal, Star, Calendar, AlertTriangle } from "lucide-react";
 import { cn } from "@/src/lib/utils";

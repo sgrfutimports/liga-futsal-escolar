@@ -30,7 +30,8 @@ export type TableName =
   | 'lfe_sponsors'
   | 'lfe_gallery'
   | 'lfe_technical_documents'
-  | 'lfe_settings';
+  | 'lfe_settings'
+  | 'lfe_news';
 
 // ─── Tipos TypeScript das entidades ──────────────────────────────────────────
 
