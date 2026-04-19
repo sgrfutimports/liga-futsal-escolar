@@ -241,7 +241,7 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <div className="lg:col-span-2 space-y-6">
-              <div className="flex items-center justify-between border-b border-dark-border pb-4">
+              <div className="flex items-center justify-between border-b border-white/5 pb-4">
                 <h2 className="text-3xl font-display text-white flex items-center gap-3">
                   <Calendar className="text-primary w-8 h-8" />
                   PRÓXIMOS JOGOS
@@ -252,10 +252,10 @@ export default function Home() {
               </div>
 
               {Object.keys(groupedNextGames).length > 0 ? (
-                <div className="space-y-8">
+                <div className="space-y-12">
                   {Object.entries(groupedNextGames).sort().map(([category, catGames]: [string, any]) => (
                     <div key={category} className="space-y-4">
-                      <h3 className="text-sm font-display text-primary/80 uppercase tracking-widest border-b border-dark-border pb-1">{category}</h3>
+                      <h3 className="text-xs font-display text-primary/60 uppercase tracking-[0.3em] ml-1">{category}</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {catGames.slice(0, 4).map((game: any) => {
                           const home = loadedTeams.find((t: any) => String(t.id) === String(game.homeTeamId || game.home_team_id));
@@ -268,7 +268,7 @@ export default function Home() {
                               </div>
                               <div className="flex justify-between items-center">
                                 <div className="flex flex-col items-center gap-2 w-[40%]">
-                                  <div className="w-12 h-12 bg-dark rounded-full flex items-center justify-center border border-dark-border group-hover:border-primary transition-colors overflow-hidden p-1 shadow-md">
+                                  <div className="w-12 h-12 bg-dark rounded-full flex items-center justify-center border border-white/5 group-hover:border-primary transition-colors overflow-hidden p-1 shadow-md">
                                      {home?.logo && !home.logo.includes('undefined') ? <img src={home.logo} className="w-full h-full object-contain rounded-full bg-white"/> : <Shield className="w-6 h-6 text-gray-500" />}
                                   </div>
                                   <span className="font-display text-xs md:text-sm text-center line-clamp-1">{home?.name || "-"}</span>
@@ -278,7 +278,7 @@ export default function Home() {
                                   <span className="text-[9px] md:text-[10px] text-gray-500 mt-1 line-clamp-1 text-center uppercase">{game.location}</span>
                                 </div>
                                 <div className="flex flex-col items-center gap-2 w-[40%]">
-                                  <div className="w-12 h-12 bg-dark rounded-full flex items-center justify-center border border-dark-border group-hover:border-primary transition-colors overflow-hidden p-1 shadow-md">
+                                  <div className="w-12 h-12 bg-dark rounded-full flex items-center justify-center border border-white/5 group-hover:border-primary transition-colors overflow-hidden p-1 shadow-md">
                                      {away?.logo && !away.logo.includes('undefined') ? <img src={away.logo} className="w-full h-full object-contain rounded-full bg-white"/> : <Shield className="w-6 h-6 text-gray-500" />}
                                   </div>
                                   <span className="font-display text-xs md:text-sm text-center line-clamp-1">{away?.name || "-"}</span>
@@ -299,26 +299,26 @@ export default function Home() {
             </div>
 
             <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-dark-border pb-4">
+              <div className="flex items-center justify-between border-b border-white/5 pb-4">
                 <h2 className="text-3xl font-display text-white flex items-center gap-3">
                   <Trophy className="text-primary w-8 h-8" />
                   TOP 5 POR SÉRIE
                 </h2>
               </div>
-              <div className="space-y-8">
+              <div className="space-y-10">
                 {Object.keys(groupedStandings).length === 0 ? (
                   <div className="text-gray-500 font-display py-8 text-center border border-dark-border rounded-lg border-dashed">
                     Nenhuma classificação registrada ainda.
                   </div>
                 ) : Object.entries(groupedStandings).sort().map(([category, standings]: [string, any]) => (
                   <div key={category} className="space-y-3">
-                    <h3 className="text-sm font-display text-primary/80 uppercase tracking-widest border-b border-dark-border pb-1">
-                      TOP 5 - {category}
+                    <h3 className="text-xs font-display text-primary/60 uppercase tracking-[0.3em] ml-1">
+                      {category}
                     </h3>
-                    <div className="bg-dark-card border border-dark-border rounded-lg overflow-hidden shadow-lg">
+                    <div className="bg-dark-card border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
                       <table className="w-full text-left border-collapse">
                         <thead>
-                          <tr className="bg-dark text-gray-400 font-display text-[10px] md:text-sm border-b border-dark-border">
+                          <tr className="bg-dark text-gray-400 font-display text-[10px] md:text-sm border-b border-white/5">
                             <th className="p-2 md:p-3 font-normal lg:w-16">POS</th>
                             <th className="p-2 md:p-3 font-normal">EQUIPE</th>
                             <th className="p-2 md:p-3 font-normal text-center lg:w-16">PTS</th>
@@ -326,7 +326,7 @@ export default function Home() {
                         </thead>
                         <tbody>
                           {standings.map((team: any, idx: number) => (
-                            <tr key={team.id} className="border-b border-dark-border/50 hover:bg-dark transition-colors">
+                            <tr key={team.id} className="border-b border-white/5 hover:bg-dark transition-colors">
                               <td className="p-2 md:p-3 font-display">
                                 <span className={cn(
                                   "w-5 h-5 md:w-6 md:h-6 mx-auto rounded flex items-center justify-center text-[10px] md:text-xs",
@@ -375,7 +375,7 @@ export default function Home() {
               </p>
             </div>
             <div className="w-full md:w-1/2">
-              <div className="relative aspect-video rounded-xl overflow-hidden border border-dark-border group shadow-2xl shadow-primary/5">
+              <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 group shadow-2xl shadow-primary/5">
                 <iframe 
                   className="w-full h-full"
                   src={settings.institutionalVideoUrl}

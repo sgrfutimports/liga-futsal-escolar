@@ -7,7 +7,7 @@ export default function Footer() {
   const settings = settingsArr[0] || {};
 
   return (
-    <footer className="bg-surface border-t border-border pt-16 pb-8 transition-colors mt-auto">
+    <footer className="bg-surface border-t border-white/5 pt-16 pb-8 transition-colors mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
@@ -71,7 +71,7 @@ export default function Footer() {
                 <span>{settings.contact_email || "contato@ligafutsalescolar.com"}</span>
               </li>
               {settings.whatsapp_number && (
-                <li className="flex items-center gap-3 text-text-muted text-sm border-t border-border mt-3 pt-3">
+                <li className="flex items-center gap-3 text-text-muted text-sm border-t border-white/5 mt-3 pt-3">
                   <Phone className="w-4 h-4 text-primary shrink-0" />
                   <span>WhatsApp: {settings.whatsapp_number}</span>
                 </li>
@@ -80,7 +80,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-text-muted text-sm">
             © {new Date().getFullYear()} {settings.league_name || "Liga de Futsal Escolar"}. Todos os direitos reservados.
           </p>

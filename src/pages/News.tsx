@@ -74,7 +74,7 @@ export default function News() {
               type="text"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="block w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:ring-2 focus:ring-primary/50 outline-none transition-all"
+              className="block w-full pl-12 pr-4 py-4 bg-white/5 border border-white/5 rounded-2xl text-white placeholder-gray-500 focus:ring-2 focus:ring-primary/50 outline-none transition-all"
               placeholder="Buscar notícias..."
             />
           </div>
@@ -90,7 +90,7 @@ export default function News() {
                 "px-8 py-3 rounded-full font-display text-xs uppercase tracking-[0.2em] transition-all border whitespace-nowrap",
                 activeCategory === cat 
                   ? "bg-primary text-black border-primary shadow-[0_0_20px_rgba(204,255,0,0.3)]" 
-                  : "bg-white/5 text-gray-400 border-white/10 hover:border-white/30 hover:text-white"
+                  : "bg-white/5 text-gray-400 border-white/5 hover:border-white/30 hover:text-white"
               )}
             >
               {cat}
@@ -104,7 +104,7 @@ export default function News() {
             <Link 
               to={`/noticias/${news.slug}`}
               key={news.id}
-              className="group flex flex-col bg-[#0f172a] border border-white/5 rounded-[2.5rem] overflow-hidden transition-all duration-500 hover:-translate-y-3 hover:border-primary/50 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+              className="group flex flex-col bg-[#0f172a] border border-white/3 rounded-[2.5rem] overflow-hidden transition-all duration-500 hover:-translate-y-3 hover:border-primary/50 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
             >
               {/* Image Container */}
               <div className="aspect-[16/10] relative overflow-hidden bg-white/5">
