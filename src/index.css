@@ -11,7 +11,7 @@
   --color-accent: #0162CA; 
   --color-danger: #C81010;
 
-  /* Theme Dynamic Variables (Fixed to Dark) */
+  /* Theme Dynamic Variables */
   --color-bg: var(--bg-color);
   --color-surface: var(--surface-color);
   --color-border: var(--border-color);
@@ -19,17 +19,26 @@
   --color-text-muted: var(--text-muted-color);
 }
 
+/* Light Theme Variables */
 :root {
-  /* DARK THEME ONLY */
-  --bg-color: #020617;
-  --surface-color: #0f172a;
-  --border-color: #1e293b;
-  --text-color: #ffffff;
+  --bg-color: #f8fafc;
+  --surface-color: #ffffff;
+  --border-color: #e2e8f0;
+  --text-color: #0f172a;
   --text-muted-color: #64748b;
 
   --color-dark: #0a0a0a;
   --color-dark-card: #171717;
   --color-dark-border: #262626;
+}
+
+/* Dark Theme Overrides */
+.dark {
+  --bg-color: #020617;
+  --surface-color: #0f172a;
+  --border-color: #1e293b;
+  --text-color: #ffffff;
+  --text-muted-color: #64748b;
 }
 
 body {
