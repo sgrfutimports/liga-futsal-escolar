@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router";
 import { Menu, X, Trophy, LogOut, User } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
+import NotificationBell from "./NotificationBell";
 
 const navLinks = [
   { name: "Início", path: "/" },
@@ -48,13 +49,7 @@ export default function Navbar() {
                 src="/logos/logo.jpg" 
                 alt="Liga de Futsal Escolar" 
                 className="w-full h-full object-contain scale-[1.2]"
-                onError={(e) => {
-                  // Fallback if image not found
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement?.classList.add('bg-primary', 'rounded-lg');
-                }}
               />
-              {/* Fallback Icon (hidden if image loads) */}
               <Trophy className="w-6 h-6 text-dark absolute inset-0 m-auto opacity-0 group-data-[error=true]:opacity-100" />
             </div>
             <div className="flex flex-col leading-none">
@@ -67,8 +62,12 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Nav */}
+          {/* Wrapper for Search/Notify and Nav */}
           <div className="hidden md:flex items-center space-x-8">
+            <div className="flex items-center space-x-6 mr-6 border-r border-dark-border pr-6 font-display font-medium">
+               <NotificationBell />
+            </div>
+            
             {mergedLinks.map((link) => (
               <Link
                 key={link.path}
@@ -97,14 +96,14 @@ export default function Navbar() {
                     <User className="w-4 h-4" />
                   </div>
                   <span className="max-w-[100px] truncate">
-                    {isAdmin ? "Administrador" : "Chefe Delegação"}
+                    {isAdmin ? "Admin" : "Chefe"}
                   </span>
                 </div>
                 <div className="w-px h-6 bg-dark-border"></div>
                 <button
                   onClick={handleLogout}
                   className="text-gray-400 hover:text-red-500 transition-colors"
-                  title="Sair da Conta"
+                  title="Sair"
                 >
                   <LogOut className="w-5 h-5" />
                 </button>
@@ -114,13 +113,14 @@ export default function Navbar() {
                 to="/chefes-login"
                 className="px-4 py-2 bg-primary/10 border border-primary/20 rounded-md font-display text-sm text-primary hover:bg-primary hover:text-dark transition-all uppercase tracking-widest font-bold"
               >
-                Área do Chefe
+                Login
               </Link>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          {/* Mobile Actions */}
+          <div className="flex md:hidden items-center gap-4">
+            <NotificationBell />
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-400 hover:text-white p-2"
@@ -157,30 +157,7 @@ export default function Navbar() {
                 </Link>
               ))}
               
-              {(isAdmin || isChefe) ? (
-                <div className="mt-4 pt-4 border-t border-dark-border">
-                  <div className="flex items-center gap-3 px-3 py-3 mb-2 rounded-md bg-dark-card border border-dark-border">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                      <User className="w-5 h-5" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs text-gray-500 font-display uppercase tracking-widest">Logado como</span>
-                      <span className="text-white font-display text-sm">
-                        {isAdmin ? "Administrador da Liga" : "Chefe de Delegação"}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setIsOpen(false);
-                      handleLogout();
-                    }}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-md font-display text-lg text-red-500 bg-red-500/10 hover:bg-red-500/20 transition-colors border border-red-500/20"
-                  >
-                    <LogOut className="w-5 h-5" /> Sair da Conta
-                  </button>
-                </div>
-              ) : (
+              {!isChefe && !isAdmin && (
                 <Link
                   to="/chefes-login"
                   onClick={() => setIsOpen(false)}
