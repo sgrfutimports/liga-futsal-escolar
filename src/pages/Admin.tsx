@@ -23,17 +23,33 @@ export default function Admin() {
 
   // Auth Check
   useEffect(() => {
-    const auth = localStorage.getItem('lfe_admin_authenticated');
-    if (auth !== 'true') {
-      navigate("/admin/login");
-    } else {
-      setIsLogged(true);
-    }
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/admin/login");
+      } else {
+        setIsLogged(true);
+      }
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        navigate("/admin/login");
+        setIsLogged(false);
+      } else {
+        setIsLogged(true);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     localStorage.removeItem('lfe_admin_authenticated');
-    navigate("/");
+    navigate("/admin/login");
   };
 
   if (!isLogged) return null;
