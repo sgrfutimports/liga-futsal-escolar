@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 
 const navLinks = [
   { name: "Início", path: "/" },
+  { name: "Notícias", path: "/noticias" },
   { name: "Classificação", path: "/classificacao" },
   { name: "Jogos", path: "/jogos" },
   { name: "Equipes", path: "/equipes" },

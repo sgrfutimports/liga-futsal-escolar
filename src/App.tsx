@@ -14,6 +14,8 @@ import Admin from "./pages/Admin";
 import EnviarElenco from "./pages/EnviarElenco";
 import Games from "./pages/Games";
 import GameDetails from "./pages/GameDetails";
+import News from "./pages/News";
+import NewsDetail from "./pages/NewsDetail";
 
 export default function App() {
   useEffect(() => {
@@ -79,6 +81,8 @@ export default function App() {
           <Route path="atletas" element={<Athletes />} />
           <Route path="jogos" element={<Games />} />
           <Route path="jogos/:id" element={<GameDetails />} />
+          <Route path="noticias" element={<News />} />
+          <Route path="noticias/:slug" element={<NewsDetail />} />
           <Route path="galeria" element={<Gallery />} />
           <Route path="dep-tecnico" element={<TechnicalDepartment />} />
           <Route path="chefes-login" element={<ChefesLogin />} />
