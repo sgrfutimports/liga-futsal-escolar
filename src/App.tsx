@@ -38,9 +38,9 @@ export default function App() {
 
         // Add missing local partners if they don't exist
         const newPartners = [
-          { id: 11, name: "IAUPE", logo: "/logos/IAUPE LOGO.jfif" },
-          { id: 12, name: "CMA", logo: "/logos/CMA LOGO.jpg" },
-          { id: 13, name: "GRE", logo: "/logos/GRE  LOGO.png" }
+          { id: 11, name: "IAUPE", logo: "/logos/IAUPE_LOGO.jfif" },
+          { id: 12, name: "CMA", logo: "/logos/CMA_LOGO.jpg" },
+          { id: 13, name: "GRE", logo: "/logos/GRE_LOGO.png" }
         ];
         
         let needsUpdate = filtered.length !== parsed.length;
