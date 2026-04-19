@@ -4,6 +4,8 @@ import { Menu, X, Trophy, LogOut, User } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import NotificationBell from "./NotificationBell";
+import { useSupaData } from "@/src/lib/store";
+import { supabase } from "@/src/lib/supabase";
 
 const navLinks = [
   { name: "Início", path: "/" },
@@ -19,6 +21,8 @@ const navLinks = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { data: settingsArr } = useSupaData('lfe_settings', []);
+  const settings = settingsArr[0] || {};
 
   const isAdmin = localStorage.getItem('lfe_admin_authenticated') === 'true';
   const isChefe = localStorage.getItem('lfe_is_chefe') === 'true';

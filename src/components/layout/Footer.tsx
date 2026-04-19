@@ -1,12 +1,13 @@
 import { Link } from "react-router";
-import { Instagram, MapPin, Mail, Trophy } from "lucide-react";
+import { Instagram, MapPin, Mail, Phone } from "lucide-react";
+import { useSupaData } from "@/src/lib/store";
 
 export default function Footer() {
   const { data: settingsArr } = useSupaData('lfe_settings', []);
   const settings = settingsArr[0] || {};
 
   return (
-    <footer className="bg-surface border-t border-border pt-16 pb-8 transition-colors">
+    <footer className="bg-surface border-t border-border pt-16 pb-8 transition-colors mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
@@ -20,7 +21,7 @@ export default function Footer() {
                 />
               </div>
               <div className="flex flex-col leading-none">
-                <span className="font-display text-xl font-bold tracking-tight text-text group-hover:text-primary transition-colors uppercase">
+                <span className="font-display text-xl font-bold tracking-tight text-text group-hover:text-primary transition-colors uppercase text-white">
                   {settings.league_name || "LIGA"}
                 </span>
                 <span className="text-[8px] font-sans font-medium text-text-muted tracking-[0.2em] uppercase">
@@ -48,7 +49,7 @@ export default function Footer() {
 
           {/* Links */}
           <div>
-            <h3 className="font-display text-lg mb-4 text-text uppercase">Competição</h3>
+            <h3 className="font-display text-lg mb-4 text-white uppercase tracking-tighter">Competição</h3>
             <ul className="space-y-2">
               <li><Link to="/classificacao" className="text-text-muted hover:text-primary text-sm transition-colors">Classificação</Link></li>
               <li><Link to="/equipes" className="text-text-muted hover:text-primary text-sm transition-colors">Equipes</Link></li>
@@ -59,7 +60,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-display text-lg mb-4 text-text uppercase">Contato</h3>
+            <h3 className="font-display text-lg mb-4 text-white uppercase tracking-tighter">Contato</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-text-muted text-sm">
                 <MapPin className="w-5 h-5 text-primary shrink-0" />
@@ -77,7 +78,6 @@ export default function Footer() {
               )}
             </ul>
           </div>
-
         </div>
 
         <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -89,8 +89,6 @@ export default function Footer() {
             <Link to="/privacidade" className="hover:text-primary transition-colors">Privacidade</Link>
           </div>
         </div>
-      </div>
-    </footer>
       </div>
     </footer>
   );
