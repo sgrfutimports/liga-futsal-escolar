@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Users, Trophy, Goal, Calendar, Clock, User, MapPin, ChevronRight, BarChart3, Info, Award } from "lucide-react";
+import { Users, Trophy, Goal, Calendar, Clock, User, MapPin, ChevronRight, BarChart3, Info, Award, Shield } from "lucide-react";
 import { useParams, Link } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { useSupaData } from "@/src/lib/store";
@@ -76,10 +76,16 @@ export default function TeamDetails() {
     else stats.losses++;
   });
 
-  const topScorers = players
-    .map(p => ({ ...p, goals: getAthleteStats(p.id, p.team_id || p.teamId).goals }))
-    .filter(p => p.goals > 0)
-    .sort((a: any, b: any) => b.goals - a.goals)
+  const playersWithStats = useMemo(() => {
+    return players.map(p => ({
+      ...p,
+      stats: getAthleteStats(p.id, p.team_id || p.teamId)
+    }));
+  }, [players, allGames]);
+
+  const topScorers = [...playersWithStats]
+    .filter(p => p.stats.goals > 0)
+    .sort((a: any, b: any) => b.stats.goals - a.stats.goals)
     .slice(0, 3);
 
   return (
@@ -166,7 +172,7 @@ export default function TeamDetails() {
                          </div>
                          <div>
                             <p className="font-display font-black text-xs uppercase text-white truncate max-w-[120px]">{p.name}</p>
-                            <p className="text-[10px] font-display font-bold text-primary italic uppercase">{p.goals} GOLS</p>
+                            <p className="text-[10px] font-display font-bold text-primary italic uppercase">{p.stats.goals} GOLS</p>
                          </div>
                       </div>
                    ))}
@@ -201,8 +207,13 @@ export default function TeamDetails() {
                      exit={{ opacity: 0, x: -20 }}
                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
                    >
-                     {players.map((p) => (
-                       <PlayerCard key={p.id} athlete={p} showStats={true} />
+                     {playersWithStats.map((p) => (
+                       <PlayerCard 
+                          key={p.id} 
+                          player={p} 
+                          stats={p.stats} 
+                          teamLogo={team.logo}
+                       />
                      ))}
                    </motion.div>
                  )}
