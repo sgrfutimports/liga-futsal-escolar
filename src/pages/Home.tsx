@@ -125,16 +125,16 @@ export default function Home() {
               className="flex flex-wrap gap-8"
             >
               {currentBanner?.link ? (
-                <a href={currentBanner.link} className="group px-10 py-5 bg-secondary text-white font-display text-2xl font-black rounded-[2rem] flex items-center gap-4 hover:bg-white hover:text-dark transition-all shadow-[0_30px_60px_rgba(245,135,41,0.2)] active:scale-95">
+                <a href={currentBanner.link} className="group px-10 py-5 bg-primary text-dark font-display text-2xl font-black rounded-[2rem] flex items-center gap-4 hover:bg-white hover:text-dark transition-all shadow-[0_20px_40px_rgba(204,255,0,0.2)] active:scale-95">
                   SAIBA MAIS <ChevronRight className="group-hover:translate-x-2 transition-transform" />
                 </a>
               ) : (
-                <Link to="/jogos" className="group px-10 py-5 bg-secondary text-white font-display text-2xl font-black rounded-[2rem] flex items-center gap-4 hover:bg-white hover:text-dark transition-all shadow-[0_30px_60px_rgba(245,135,41,0.2)] active:scale-95">
+                <Link to="/jogos" className="group px-10 py-5 bg-primary text-dark font-display text-2xl font-black rounded-[2rem] flex items-center gap-4 hover:bg-white hover:text-dark transition-all shadow-[0_20px_40px_rgba(204,255,0,0.2)] active:scale-95">
                   VER JOGOS <ChevronRight className="group-hover:translate-x-2 transition-transform" />
                 </Link>
               )}
               {settings.registrationPeriod === 'aberto' && (
-                <Link to="/inscricao" className="px-10 py-5 bg-white/5 border border-white/20 text-white font-display text-2xl font-black rounded-[2rem] flex items-center gap-4 hover:bg-white/10 transition-all backdrop-blur-xl active:scale-95">
+                <Link to="/inscricao" className="px-10 py-5 bg-white/10 border border-white/20 text-white font-display text-2xl font-black rounded-[2rem] flex items-center gap-4 hover:bg-white/20 transition-all backdrop-blur-xl active:scale-95">
                   INSCREVER ESCOLA
                 </Link>
               )}
@@ -148,9 +148,9 @@ export default function Home() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           
           {/* Card: Próximo Jogo */}
-          <div className="bg-white/5 backdrop-blur-3xl border border-white/10 p-8 rounded-[3rem] shadow-2xl hover:bg-white/10 hover:-translate-y-2 transition-all duration-300 group overflow-hidden relative">
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors" />
-            <span className="text-[10px] font-display font-black text-gray-500 uppercase tracking-[0.3em] block mb-8 relative z-10">Próximo Jogo</span>
+          <div className="bg-white/10 backdrop-blur-3xl border border-white/20 p-8 rounded-[3rem] shadow-2xl hover:bg-white/15 hover:-translate-y-2 transition-all duration-300 group overflow-hidden relative">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/30 transition-colors" />
+            <span className="text-[10px] font-display font-black text-primary uppercase tracking-[0.3em] block mb-8 relative z-10">Próximo Jogo</span>
             {nextGame ? (
               <div className="flex flex-col gap-6 relative z-10">
                 <div className="flex items-center justify-between">
@@ -167,16 +167,16 @@ export default function Home() {
                 </div>
                 <div>
                    <p className="font-display font-black text-primary text-sm uppercase italic tracking-[0.2em] mb-1">{nextGame.date}</p>
-                   <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest opacity-60 truncate">{nextGame.location}</p>
+                   <p className="text-[9px] text-primary font-display font-black text-sm uppercase italic tracking-[0.2em] mb-1">{nextGame.location}</p>
                 </div>
               </div>
-            ) : <p className="text-gray-600 font-display font-black text-center py-4 italic uppercase tracking-widest text-[10px]">Sem agenda</p>}
+            ) : <p className="text-gray-400 font-display font-black text-center py-4 italic uppercase tracking-widest text-[10px]">Sem agenda</p>}
           </div>
 
           {/* Card: Líder do Geral */}
-          <div className="bg-white/5 backdrop-blur-3xl border border-white/10 p-8 rounded-[3rem] shadow-2xl hover:bg-white/10 hover:-translate-y-2 transition-all duration-300 group overflow-hidden relative">
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors" />
-            <span className="text-[10px] font-display font-black text-gray-500 uppercase tracking-[0.3em] block mb-8 relative z-10">Líder do Geral</span>
+          <div className="bg-white/10 backdrop-blur-3xl border border-white/20 p-8 rounded-[3rem] shadow-2xl hover:bg-white/15 hover:-translate-y-2 transition-all duration-300 group overflow-hidden relative">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-colors" />
+            <span className="text-[10px] font-display font-black text-blue-400 uppercase tracking-[0.3em] block mb-8 relative z-10">Líder do Geral</span>
             {leader ? (
               <div className="flex items-center gap-6 relative z-10">
                 <div className="w-20 h-20 bg-white rounded-[1.8rem] p-3 shadow-2xl group-hover:rotate-6 transition-transform">
@@ -189,7 +189,7 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            ) : <p className="text-gray-600 font-display font-black text-center py-4 italic uppercase tracking-widest text-[10px]">Indisponível</p>}
+            ) : <p className="text-gray-400 font-display font-black text-center py-4 italic uppercase tracking-widest text-[10px]">Indisponível</p>}
           </div>
 
           {/* Card: Artilheiro (Destaque Neon) */}
@@ -208,9 +208,9 @@ export default function Home() {
           </Link>
 
           {/* Card: Último Resultado */}
-          <div className="bg-white/5 backdrop-blur-3xl border border-white/10 p-8 rounded-[3rem] shadow-2xl hover:bg-white/10 hover:-translate-y-2 transition-all duration-300 group overflow-hidden relative">
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors" />
-            <span className="text-[10px] font-display font-black text-gray-500 uppercase tracking-[0.3em] block mb-8 relative z-10">Último Resultado</span>
+          <div className="bg-white/10 backdrop-blur-3xl border border-white/20 p-8 rounded-[3rem] shadow-2xl hover:bg-white/15 hover:-translate-y-2 transition-all duration-300 group overflow-hidden relative">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/30 transition-colors" />
+            <span className="text-[10px] font-display font-black text-primary uppercase tracking-[0.3em] block mb-8 relative z-10">Último Resultado</span>
             {lastResult ? (
               <div className="flex flex-col items-center relative z-10">
                  <div className="flex items-center justify-center gap-8 mb-4">
@@ -223,7 +223,7 @@ export default function Home() {
                     <p className="text-[9px] font-display font-black text-primary uppercase tracking-[0.4em]">PLACAR FINAL</p>
                  </div>
               </div>
-            ) : <p className="text-gray-600 font-display font-black text-center py-4 italic uppercase tracking-widest text-[10px]">Sem registros</p>}
+            ) : <p className="text-gray-400 font-display font-black text-center py-4 italic uppercase tracking-widest text-[10px]">Sem registros</p>}
           </div>
 
         </div>
@@ -236,8 +236,8 @@ export default function Home() {
               <h2 className="text-6xl md:text-8xl font-display font-black uppercase tracking-tighter mb-4 leading-none">Próximos <br/><span className="text-primary italic">Confrontos</span></h2>
               <div className="h-2 w-32 bg-primary rounded-full shadow-[0_0_20px_rgba(204,255,0,0.5)]" />
            </div>
-           <Link to="/jogos" className="font-display text-sm font-black text-gray-500 hover:text-white uppercase tracking-widest flex items-center gap-3 transition-colors shrink-0">
-             Calendário completo <ArrowUpRight className="w-5 h-5 bg-white/5 rounded-full p-1" />
+           <Link to="/jogos" className="font-display text-sm font-black text-primary hover:text-white uppercase tracking-widest flex items-center gap-3 transition-colors shrink-0">
+             Calendário completo <ArrowUpRight className="w-5 h-5 bg-primary/20 rounded-full p-1" />
            </Link>
         </div>
         <div className="grid grid-cols-1 gap-6">
@@ -245,7 +245,7 @@ export default function Home() {
              const hT = (teams || []).find((t: any) => String(t.id) === String(game.homeTeamId || game.home_team_id));
              const aT = (teams || []).find((t: any) => String(t.id) === String(game.awayTeamId || game.away_team_id));
              return (
-               <div key={game.id} className="bg-white/[0.02] border border-white/[0.05] p-10 rounded-[4rem] flex flex-col lg:flex-row items-center justify-between gap-12 group hover:bg-white/[0.05] transition-all">
+               <div key={game.id} className="bg-white/10 border border-white/20 p-10 rounded-[4rem] flex flex-col lg:flex-row items-center justify-between gap-12 group hover:bg-white/[0.05] transition-all">
                   <div className="flex items-center gap-12 w-full lg:w-auto justify-center">
                      <div className="flex items-center gap-8 text-right">
                         <span className="font-display font-black text-2xl uppercase tracking-tighter hidden sm:block">{hT?.name}</span>
@@ -285,7 +285,7 @@ export default function Home() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center">
             <div className="order-2 lg:order-1">
-               <div className="bg-white/5 border border-white/10 rounded-[4rem] p-12 backdrop-blur-3xl shadow-3xl relative">
+               <div className="bg-white/10 border border-white/20 rounded-[4rem] p-12 backdrop-blur-3xl shadow-3xl relative">
                   <div className="absolute -top-10 -left-10 w-24 h-24 bg-primary rounded-[2rem] flex items-center justify-center text- dark shadow-[0_20px_40px_rgba(204,255,0,0.4)]">
                      <Trophy className="w-12 h-12 text-dark" />
                   </div>
@@ -331,11 +331,11 @@ export default function Home() {
                </h2>
                <p className="text-gray-400 text-2xl mb-12 max-w-lg leading-snug">Estes são os times que dão o tom da temporada. Cada ponto conta na jornada épica rumo ao título de {settings.yearEdition || '2026'}.</p>
                <div className="grid grid-cols-2 gap-8">
-                  <div className="p-8 bg-white/5 border border-white/10 rounded-3xl">
+                  <div className="p-8 bg-white/15 border border-white/20 rounded-3xl">
                      <p className="text-4xl font-display font-black text-white mb-2">{teams.length}</p>
                      <p className="text-[10px] font-display font-black text-gray-600 uppercase tracking-widest">EQUIPES</p>
                   </div>
-                  <div className="p-8 bg-white/5 border border-white/10 rounded-3xl">
+                  <div className="p-8 bg-white/15 border border-white/20 rounded-3xl">
                      <p className="text-4xl font-display font-black text-white mb-2">{games.length}</p>
                      <p className="text-[10px] font-display font-black text-gray-600 uppercase tracking-widest">CONFRONTOS</p>
                   </div>
@@ -353,7 +353,7 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
            {recentNews.length > 0 ? recentNews.map((n, i) => (
-             <Link to={`/noticias/${n.slug}`} key={n.id} className="group relative overflow-hidden rounded-[4rem] bg-white/[0.03] border border-white/10 hover:border-primary/50 transition-all flex flex-col h-full">
+             <Link to={`/noticias/${n.slug}`} key={n.id} className="group relative overflow-hidden rounded-[4rem] bg-white/10 border border-white/20 hover:border-primary/50 transition-all flex flex-col h-full">
                 <div className="aspect-[16/10] overflow-hidden relative">
                    <img src={n.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-60 mix-blend-screen" />
                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-dark to-transparent" />
@@ -371,7 +371,7 @@ export default function Home() {
              { title: "Inscrições Próximas do Encerramento", category: "ADMIN", img: "https://images.unsplash.com/photo-1543326131-de94b150c18d?auto=format&fit=crop&q=80&w=800" },
              { title: "Melhor Jogador do Mês é Revelado", category: "DESTAQUE", img: "https://images.unsplash.com/photo-1517603951034-af241c2c3dc4?auto=format&fit=crop&q=80&w=800" }
            ].map((n, i) => (
-             <Link to="/noticias" key={i} className="group relative overflow-hidden rounded-[4rem] bg-white/[0.03] border border-white/10 hover:border-primary/50 transition-all flex flex-col h-full">
+             <Link to="/noticias" key={i} className="group relative overflow-hidden rounded-[4rem] bg-white/10 border border-white/20 hover:border-primary/50 transition-all flex flex-col h-full">
                 <div className="aspect-[16/10] overflow-hidden relative">
                    <img src={n.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-60 mix-blend-screen" />
                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-dark to-transparent" />
