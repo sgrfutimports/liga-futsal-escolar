@@ -145,7 +145,7 @@ export default function Home() {
 
       {/* 2. DESTAQUES RÁPIDOS */}
       <section className="-mt-32 relative z-30 container mx-auto px-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           
           {/* Card: Próximo Jogo */}
           <div className="bg-white/10 backdrop-blur-3xl border border-white/20 p-8 rounded-[3rem] shadow-2xl hover:bg-white/15 hover:-translate-y-2 transition-all duration-300 group overflow-hidden relative">
@@ -191,21 +191,6 @@ export default function Home() {
               </div>
             ) : <p className="text-gray-400 font-display font-black text-center py-4 italic uppercase tracking-widest text-[10px]">Indisponível</p>}
           </div>
-
-          {/* Card: Artilheiro (Destaque Neon) */}
-          <Link to="/fama" className="bg-primary backdrop-blur-3xl border border-primary/20 p-8 rounded-[3rem] shadow-[0_20px_50px_rgba(204,255,0,0.3)] hover:scale-105 hover:-translate-y-2 transition-all duration-300 group overflow-hidden relative block">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(255,255,255,0.4),transparent)] opacity-30" />
-            <span className="text-[10px] font-display font-black text-dark/40 uppercase tracking-[0.3em] block mb-8 relative z-10">Artilheiro</span>
-            <div className="flex items-center gap-6 relative z-10">
-              <div className="w-20 h-20 bg-dark rounded-[1.8rem] p-4 flex items-center justify-center shadow-3xl group-hover:scale-110 transition-transform">
-                <Users className="w-12 h-12 text-primary" />
-              </div>
-              <div className="text-dark">
-                <p className="font-display font-black text-2xl md:text-3xl uppercase leading-[0.85] mb-2 tracking-tighter">CRAQUES<br/>LFE</p>
-                <div className="inline-block bg-dark/10 px-3 py-1 rounded-full text-[9px] font-display font-black uppercase tracking-widest">Ver Rankings</div>
-              </div>
-            </div>
-          </Link>
 
           {/* Card: Último Resultado */}
           <div className="bg-white/10 backdrop-blur-3xl border border-white/20 p-8 rounded-[3rem] shadow-2xl hover:bg-white/15 hover:-translate-y-2 transition-all duration-300 group overflow-hidden relative">
