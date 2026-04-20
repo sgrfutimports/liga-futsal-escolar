@@ -172,6 +172,8 @@ export default function Standings() {
           </motion.div>
         </div>
       </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
           
           {/* Sub-navigation Tabs */}
           <div className="flex items-center gap-8 border-b border-white/5 pb-2 overflow-x-auto hide-scrollbar">
@@ -192,7 +194,6 @@ export default function Standings() {
               </button>
             ))}
           </div>
-        </div>
 
         {/* Content Area */}
         <div className="relative">
