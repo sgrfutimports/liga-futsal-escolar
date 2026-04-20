@@ -77,16 +77,16 @@ export default function GameDetails() {
             {/* Score */}
             <div className="flex flex-col items-center gap-6 w-full md:w-1/3">
                <div className="flex items-center gap-8 md:gap-12">
-                  <span className={cn("text-7xl md:text-9xl font-display font-black", isFinal ? "text-white" : "text-gray-800")}>
-                    {isFinal ? game.home_score : "--"}
+                  <span className={cn("text-7xl md:text-9xl font-display font-black tracking-tighter drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]", isFinal ? "text-white" : "text-gray-900")}>
+                    {isFinal ? (game.homeScore ?? 0) : "--"}
                   </span>
                   <div className="flex flex-col items-center">
-                    <div className="w-1 h-12 bg-primary/20 rounded-full mb-4" />
-                    <span className="text-xs font-display font-black text-primary italic uppercase tracking-widest">VS</span>
-                    <div className="w-1 h-12 bg-primary/20 rounded-full mt-4" />
+                    <div className="w-1.5 h-16 bg-primary/20 rounded-full mb-4 shadow-[0_0_15px_rgba(204,255,0,0.1)]" />
+                    <span className="text-3xl font-display font-black text-primary italic uppercase tracking-widest opacity-40">VS</span>
+                    <div className="w-1.5 h-16 bg-primary/20 rounded-full mt-4 shadow-[0_0_15px_rgba(204,255,0,0.1)]" />
                   </div>
-                  <span className={cn("text-7xl md:text-9xl font-display font-black", isFinal ? "text-white" : "text-gray-800")}>
-                    {isFinal ? game.away_score : "--"}
+                  <span className={cn("text-7xl md:text-9xl font-display font-black tracking-tighter drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]", isFinal ? "text-white" : "text-gray-900")}>
+                    {isFinal ? (game.awayScore ?? 0) : "--"}
                   </span>
                </div>
                <div className="flex flex-col items-center text-center">

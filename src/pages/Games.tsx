@@ -97,8 +97,8 @@ export default function Games() {
         <div className="space-y-6">
           {filteredGames.length > 0 ? (
             filteredGames.map((game: any) => {
-              const hTeam = teams.find((t: any) => String(t.id) === String(game.home_team_id || game.homeTeamId));
-              const aTeam = teams.find((t: any) => String(t.id) === String(game.away_team_id || game.awayTeamId));
+              const hTeam = teams.find((t: any) => String(t.id) === String(game.homeTeamId));
+              const aTeam = teams.find((t: any) => String(t.id) === String(game.awayTeamId));
               const isFinal = String(game.status).toLowerCase() === "finalizado";
 
               return (
@@ -127,25 +127,25 @@ export default function Games() {
                     <div className="flex flex-col items-center gap-4 w-full md:w-1/3">
                       <div className="flex items-center gap-6 md:gap-10">
                         <span className={cn(
-                          "text-5xl md:text-7xl font-display font-black tracking-tighter",
+                          "text-6xl md:text-8xl font-display font-black tracking-tighter shadow-primary/20 drop-shadow-xl",
                           isFinal ? "text-white" : "text-gray-800"
                         )}>
-                          {isFinal ? game.home_score : "--"}
+                          {isFinal ? (game.homeScore ?? 0) : "--"}
                         </span>
                         <div className="flex flex-col items-center">
-                          <span className="text-xs font-display font-black text-primary italic mb-1 uppercase tracking-widest">vs</span>
+                          <span className="text-xl font-display font-black text-primary italic mb-2 uppercase tracking-widest opacity-50">vs</span>
                           <div className={cn(
-                            "px-4 py-1.5 rounded-full text-[10px] font-display font-bold uppercase tracking-widest border",
-                            isFinal ? "bg-white/5 border-white/10 text-gray-400" : "bg-primary/20 border-primary/30 text-primary animate-pulse"
+                            "px-5 py-2 rounded-xl text-[10px] font-display font-black uppercase tracking-[0.2em] border shadow-lg",
+                            isFinal ? "bg-white/5 border-white/10 text-gray-400" : "bg-primary text-black border-primary animate-pulse"
                           )}>
                             {isFinal ? "Encerrado" : "Em Breve"}
                           </div>
                         </div>
                         <span className={cn(
-                          "text-5xl md:text-7xl font-display font-black tracking-tighter",
+                          "text-6xl md:text-8xl font-display font-black tracking-tighter shadow-primary/20 drop-shadow-xl",
                           isFinal ? "text-white" : "text-gray-800"
                         )}>
-                          {isFinal ? game.away_score : "--"}
+                          {isFinal ? (game.awayScore ?? 0) : "--"}
                         </span>
                       </div>
                       

@@ -251,8 +251,8 @@ export default function TeamDetails() {
                         const hTeam = allTeams.find((t: any) => String(t.id) === String(game.home_team_id || game.homeTeamId));
                         const aTeam = allTeams.find((t: any) => String(t.id) === String(game.away_team_id || game.awayTeamId));
                         const isHome = String(hTeam?.id) === String(id);
-                        const win = isHome ? (game.home_score > game.away_score) : (game.away_score > game.home_score);
-                        const draw = game.home_score === game.away_score;
+                        const win = isHome ? ((game.homeScore ?? 0) > (game.awayScore ?? 0)) : ((game.awayScore ?? 0) > (game.homeScore ?? 0));
+                        const draw = (game.homeScore ?? 0) === (game.awayScore ?? 0);
 
                         return (
                           <div key={game.id} className="bg-[#0f172a] border border-white/5 rounded-2xl p-6 relative overflow-hidden">
@@ -276,10 +276,10 @@ export default function TeamDetails() {
                                   <img src={hTeam?.logo} className="w-8 h-8 object-contain" alt="" />
                                   <span className="truncate hidden md:block">{hTeam?.name}</span>
                                </div>
-                               <div className="flex items-center gap-6 px-6 py-2 bg-[#020617] rounded-full border border-white/5">
-                                 <span className={cn(isHome ? "text-primary" : "text-white")}>{game.home_score}</span>
-                                 <span className="text-gray-700">-</span>
-                                 <span className={cn(!isHome ? "text-primary" : "text-white")}>{game.away_score}</span>
+                               <div className="flex items-center gap-6 px-8 py-3 bg-[#020617] rounded-2xl border border-white/5 shadow-inner">
+                                 <span className={cn("text-2xl font-display font-black", isHome ? "text-primary" : "text-white")}>{game.homeScore ?? 0}</span>
+                                 <span className="text-gray-700 font-black">-</span>
+                                 <span className={cn(!isHome ? "text-primary" : "text-white")}>{game.awayScore ?? 0}</span>
                                </div>
                                <div className="flex items-center justify-end gap-4 w-1/3 text-right">
                                   <span className="truncate hidden md:block">{aTeam?.name}</span>
