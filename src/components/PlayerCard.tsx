@@ -27,6 +27,13 @@ export default function PlayerCard({ player, teamLogo, stats, className }: any) 
         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
           <Trophy className="w-64 h-64 -rotate-12" />
         </div>
+
+        {/* Watermark Name Behind */}
+        <div className="absolute bottom-20 left-12 right-12 z-0 opacity-[0.05] pointer-events-none">
+          <h4 className="font-display font-black text-7xl md:text-8xl text-slate-900 leading-[0.8] uppercase tracking-tighter whitespace-pre-wrap break-words">
+            {safeName}
+          </h4>
+        </div>
         
         {player.photo ? (
           <img 
@@ -46,7 +53,7 @@ export default function PlayerCard({ player, teamLogo, stats, className }: any) 
       </div>
 
       {/* 2. ESTATÍSTICAS ESTILO CARTA ESPORTIVA */}
-      <div className="absolute left-6 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-3">
+      <div className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-3">
         {[
           { label: "GOL", value: stats.goals, icon: Goal },
           { label: "AST", value: stats.assists, icon: Star },
@@ -92,8 +99,8 @@ export default function PlayerCard({ player, teamLogo, stats, className }: any) 
 
       {/* 4. NOME NA BASE */}
       <div className="relative z-10 mt-auto p-10 flex flex-col items-center">
-        <div className="w-full h-[2px] bg-slate-900/5 mb-6 group-hover:bg-primary/20 transition-colors" />
-        <h3 className="font-display font-black text-4xl text-slate-900 text-center uppercase leading-none tracking-tighter group-hover:scale-110 transition-transform">
+        <div className="w-full h-px bg-slate-900/20 mb-4 group-hover:bg-primary/50 transition-colors" />
+        <h3 className="font-display font-black text-5xl text-slate-950 text-center uppercase leading-none tracking-tighter group-hover:scale-110 transition-all duration-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)] group-hover:text-primary">
           {safeName}
         </h3>
         <div className="flex items-center gap-2 mt-4">
