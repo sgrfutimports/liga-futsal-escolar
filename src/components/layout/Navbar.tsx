@@ -8,13 +8,10 @@ import { useSupaData } from "@/src/lib/store";
 
 const navLinks = [
   { name: "Início", path: "/" },
-  { name: "Notícias", path: "/noticias" },
-  { name: "Classificação", path: "/classificacao" },
   { name: "Jogos", path: "/jogos" },
-  { name: "Equipes", path: "/equipes" },
-  { name: "Atletas", path: "/atletas" },
-  { name: "Galeria", path: "/galeria" },
-  { name: "Inscrição", path: "/inscricao" },
+  { name: "Tabela", path: "/classificacao" },
+  { name: "Times", path: "/equipes" },
+  { name: "Notícias", path: "/noticias" },
 ];
 
 export default function Navbar() {
@@ -29,7 +26,6 @@ export default function Navbar() {
   let mergedLinks = [...navLinks];
   if (isAdmin || isChefe) {
     if (isChefe) {
-      mergedLinks = mergedLinks.filter(link => link.name !== "Inscrição");
       mergedLinks.push({ name: "Enviar Elenco", path: "/enviar-elenco" });
     }
     mergedLinks.push({ name: "Dep. Técnico", path: "/dep-tecnico" });
@@ -65,18 +61,14 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8">
-            <div className="flex items-center space-x-4 mr-4 border-r border-white/5 pr-8">
-               <NotificationBell />
-            </div>
-            
+          <div className="hidden lg:flex items-center space-x-10">
             {mergedLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 className={cn(
-                  "font-display text-base font-bold tracking-tight transition-all hover:text-primary relative py-2",
-                  location.pathname === link.path ? "text-primary shadow-primary/20" : "text-gray-400"
+                  "font-display text-sm font-black tracking-widest transition-all hover:text-primary relative py-2 uppercase",
+                  location.pathname === link.path ? "text-primary" : "text-gray-400"
                 )}
               >
                 {link.name}
@@ -85,27 +77,39 @@ export default function Navbar() {
                 )}
               </Link>
             ))}
-            
-            {(isAdmin || isChefe) && (
-              <button
-                onClick={handleLogout}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-red-500 hover:bg-red-500/10 hover:border-red-500/20 transition-all ml-4"
-                title="Sair"
-              >
-                <LogOut className="w-5 h-5" />
-              </button>
-            )}
           </div>
 
-          {/* Mobile Actions */}
-          <div className="flex md:hidden items-center gap-4">
-            <NotificationBell />
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="w-12 h-12 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-all active:scale-95"
-            >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+          {/* Actions */}
+          <div className="flex items-center gap-6">
+            <div className="hidden lg:flex items-center gap-6 border-l border-white/10 pl-8">
+              <NotificationBell />
+              <Link
+                to="/inscricao"
+                className="bg-primary text-dark font-display text-xs font-black px-6 py-2.5 rounded-xl hover:bg-white transition-all shadow-[0_0_20px_rgba(204,255,0,0.2)] hover:shadow-white/20 uppercase tracking-widest"
+              >
+                Inscritpizar Equipe
+              </Link>
+              {(isAdmin || isChefe) && (
+                <button
+                  onClick={handleLogout}
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-red-500 hover:bg-red-500/10 hover:border-red-500/20 transition-all"
+                  title="Sair"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+
+            {/* Mobile Toggle */}
+            <div className="lg:hidden flex items-center gap-4">
+              <NotificationBell />
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-12 h-12 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-all active:scale-95"
+              >
+                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -118,7 +122,7 @@ export default function Navbar() {
             animate={{ opacity: 1, height: "auto", y: 0 }}
             exit={{ opacity: 0, height: 0, y: -20 }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="md:hidden bg-[#050505] border-b border-white/10 backdrop-blur-2xl overflow-hidden shadow-2xl"
+            className="lg:hidden bg-[#050505] border-b border-white/10 backdrop-blur-2xl overflow-hidden shadow-2xl"
           >
             <div className="px-6 py-10 flex flex-col space-y-4">
               {mergedLinks.map((link, idx) => (
@@ -141,6 +145,14 @@ export default function Navbar() {
                 </motion.div>
               ))}
               
+              <Link
+                to="/inscricao"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center justify-center w-full p-6 mt-4 rounded-3xl bg-primary text-dark font-display text-xl font-black uppercase tracking-tighter shadow-[0_0_30px_rgba(204,255,0,0.3)] shadow-primary/20"
+              >
+                INSCREVER EQUIPE
+              </Link>
+
               {(isAdmin || isChefe) && (
                 <motion.button
                   initial={{ opacity: 0, y: 20 }}
@@ -150,7 +162,7 @@ export default function Navbar() {
                     handleLogout();
                     setIsOpen(false);
                   }}
-                  className="flex items-center justify-between w-full p-6 mt-8 rounded-3xl bg-red-600/10 border border-red-600/20 text-red-500 font-display text-xl font-black uppercase tracking-tighter"
+                  className="flex items-center justify-between w-full p-6 mt-4 rounded-3xl bg-red-600/10 border border-red-600/20 text-red-500 font-display text-xl font-black uppercase tracking-tighter"
                 >
                   SAIR DO SISTEMA
                   <LogOut className="w-6 h-6" />
