@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { 
   ChevronRight, Trophy, Calendar, 
   Shield, Users, MapPin, ArrowUpRight
