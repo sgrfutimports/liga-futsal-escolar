@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
-import { FileText, Download, Notebook as Folder, Search, Filter, Calendar, ExternalLink, LogOut, User as UserIcon, Users } from "lucide-react";
+import { FileText, Download, Notebook as Folder, Search, Filter, Calendar, ExternalLink, LogOut, User as UserIcon, Users, Shield, ArrowRight, LayoutDashboard } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useSupaData } from "@/src/lib/store";
@@ -53,7 +54,7 @@ export default function TechnicalDepartment() {
   const { data: allAthletes } = useSupaData('lfe_athletes', []);
 
   // Find school team and athletes
-  const myReg = registrations.find((r: any) => r.email?.toLowerCase() === session?.email?.toLowerCase());
+  const myReg = registrations.find((r: any) => String(r.email || '').toLowerCase() === String(session?.email || '').toLowerCase());
   const myAthletes = myReg?.teamId || myReg?.team_id ? allAthletes.filter((a: any) => String(a.team_id || a.teamId) === String(myReg?.teamId || myReg?.team_id)) : [];
   
   const filteredDocs = storedDocs.filter((doc: any) => {
@@ -101,194 +102,221 @@ export default function TechnicalDepartment() {
   };
 
   return (
-    <div className="min-h-screen bg-dark py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#020617] text-white">
+      
+      {/* Session/User Bar */}
+      {session && (
+        <section className="bg-white/5 border-b border-white/10 py-4 sticky top-20 z-50 backdrop-blur-2xl">
+          <div className="container mx-auto px-4 flex items-center justify-between">
+            <div className="flex items-center gap-6">
+               <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center p-2">
+                 <UserIcon className="w-6 h-6 text-primary" />
+               </div>
+               <div>
+                 <h4 className="font-display font-black text-xs uppercase tracking-widest leading-none mb-1">{session.name}</h4>
+                 <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{session.isAdmin ? 'Admin' : 'Chefe de Equipe'} • Online</span>
+                 </div>
+               </div>
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="px-6 py-2 rounded-xl bg-white/5 border border-white/10 text-gray-500 hover:text-white transition-all font-display font-black text-[10px] uppercase tracking-widest flex items-center gap-3"
+            >
+              <LogOut className="w-4 h-4" /> Finalizar Sessão
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* Hero Header */}
+      <section className="relative pt-24 pb-20 overflow-hidden">
+        <div className="absolute inset-0 z-0 opacity-10">
+           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 blur-[150px] rounded-full" />
+           <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-500/10 blur-[100px] rounded-full" />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="flex flex-col md:flex-row items-end justify-between gap-12">
+             <div className="max-w-3xl">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex items-center gap-3 mb-6"
+                >
+                  <LayoutDashboard className="w-6 h-6 text-primary" />
+                  <span className="text-gray-500 font-display font-black text-xs uppercase tracking-[0.4em]">Painel do Dep. Técnico</span>
+                </motion.div>
+                <motion.h1 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-6xl md:text-8xl font-display font-black uppercase tracking-tighter leading-none mb-8"
+                >
+                  Gestão & <span className="text-primary italic">Documentação</span>
+                </motion.h1>
+             </div>
+
+             <motion.div 
+               initial={{ opacity: 0, scale: 0.9 }}
+               animate={{ opacity: 1, scale: 1 }}
+               transition={{ delay: 0.2 }}
+               className="relative w-full md:w-96 group"
+             >
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 group-focus-within:text-primary transition-colors" />
+                <input 
+                  type="text" 
+                  placeholder="Buscar arquivos oficiais..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-8 text-white font-display font-black uppercase tracking-widest text-[10px] focus:outline-none focus:border-primary/50 transition-all placeholder:text-gray-700"
+                />
+             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      <main className="container mx-auto px-4 pb-40">
         
-        {/* User Info Bar */}
-        {session && (
-          <div className="flex items-center justify-between bg-dark-card border border-dark-border rounded-2xl p-4 mb-10 shadow-lg">
-             <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
-                   <UserIcon className="w-6 h-6 text-primary" />
-                </div>
+        {/* Roster Highlight (Chefe only) */}
+        {!session?.isAdmin && myAthletes.length > 0 && (
+          <motion.section 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-20 bg-white/5 border border-white/5 rounded-[3rem] p-12 relative overflow-hidden backdrop-blur-3xl shadow-3xl"
+          >
+             <div className="absolute -top-20 -right-20 opacity-[0.03] rotate-12">
+               <Shield className="w-80 h-80 text-primary" />
+             </div>
+
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
                 <div>
-                   <h4 className="text-white font-display text-sm font-bold uppercase tracking-tight">{session.name}</h4>
-                   <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                      <p className="text-gray-500 text-[10px] uppercase tracking-widest">{session.isAdmin ? "ACESSO ADMINISTRATIVO" : "CHETE DE EQUIPE AUTORIZADO"}</p>
+                   <h5 className="text-primary font-display font-black text-[10px] uppercase tracking-[0.4em] mb-4">Elenco Homologado 2026</h5>
+                   <h2 className="text-4xl md:text-6xl font-display font-black uppercase tracking-tighter leading-none mb-6">{session?.name}</h2>
+                   <div className="flex gap-4">
+                      <div className="bg-white/5 px-6 py-4 rounded-2xl border border-white/10">
+                         <span className="block text-[8px] font-black text-gray-600 uppercase tracking-widest mb-1">Status</span>
+                         <span className="text-primary font-display font-black text-xl uppercase italic">Ativo</span>
+                      </div>
+                      <div className="bg-white/5 px-6 py-4 rounded-2xl border border-white/10">
+                         <span className="block text-[8px] font-black text-gray-600 uppercase tracking-widest mb-1">Efetivo</span>
+                         <span className="text-white font-display font-black text-xl italic">{myAthletes.length} ATLETAS</span>
+                      </div>
                    </div>
+                </div>
+                <div className="flex flex-col gap-4">
+                   <button 
+                     onClick={exportRosterPDF}
+                     className="w-full py-6 bg-primary text-dark font-display font-black text-sm uppercase tracking-[0.2em] rounded-3xl hover:scale-[1.02] transition-all shadow-2xl flex items-center justify-center gap-4"
+                   >
+                     <Download className="w-6 h-6" /> Exportar Ficha Oficial (PDF)
+                   </button>
+                   <p className="text-[9px] font-black text-gray-700 text-center uppercase tracking-widest">Este documento deve ser apresentado em todas as partidas da temporada.</p>
                 </div>
              </div>
-             <button 
-               onClick={handleLogout}
-               className="flex items-center gap-2 px-4 py-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all text-xs border border-transparent hover:border-white/10"
-             >
-               <LogOut className="w-4 h-4" /> Sair
-             </button>
-          </div>
+          </motion.section>
         )}
 
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <Folder className="w-10 h-10 text-primary" />
-              <span className="text-primary font-display tracking-widest text-sm uppercase">Secretaria / Técnica</span>
-            </div>
-            <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-4 uppercase">
-              DEP. <span className="text-primary">TÉCNICO</span>
-            </h1>
-            <p className="text-gray-400 text-lg max-w-2xl">
-              Acesso centralizado a documentos oficiais, normas, regulamentos e boletins informativos da Liga.
-            </p>
-          </div>
-
-          <div className="relative w-full md:w-80">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-primary" />
-            </div>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="block w-full pl-10 pr-3 py-4 border border-dark-border rounded-xl leading-5 bg-dark-card text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary sm:text-sm font-sans transition-all shadow-lg"
-              placeholder="Buscar documento..."
-            />
-          </div>
-        </div>
-
-        {/* My Roster Section (Only for homologated Chefes) */}
-        {!session?.isAdmin && myAthletes.length > 0 && (
-          <div className="mb-12 bg-dark-card border border-primary/20 rounded-2xl p-8 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <Users className="w-32 h-32 text-primary" />
-            </div>
-            
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-              <div>
-                <h2 className="text-primary font-display text-xs uppercase tracking-[0.3em] mb-2">Seu Elenco Homologado</h2>
-                <h3 className="text-3xl text-white font-display uppercase font-bold mb-4">{session?.name}</h3>
-                <div className="flex flex-wrap gap-4">
-                   <div className="px-4 py-2 bg-dark rounded-lg border border-dark-border">
-                      <span className="text-gray-500 text-[10px] uppercase block mb-1">Total de Atletas</span>
-                      <span className="text-white font-display text-xl">{myAthletes.length}</span>
-                   </div>
-                   <div className="px-4 py-2 bg-dark rounded-lg border border-dark-border">
-                      <span className="text-gray-500 text-[10px] uppercase block mb-1">Status</span>
-                      <span className="text-success font-display text-xl uppercase">Ativo</span>
-                   </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                <button 
-                  onClick={exportRosterPDF}
-                  className="flex items-center justify-center gap-3 px-8 py-4 bg-primary text-dark font-display font-bold rounded-xl hover:bg-primary-dark transition-all shadow-xl uppercase tracking-widest text-sm"
-                >
-                  <Download className="w-5 h-5" /> Baixar Elenco PDF
-                </button>
-              </div>
-            </div>
-
-            {/* List Preview */}
-            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-               {myAthletes.slice(0, 4).map((a: any) => (
-                 <div key={a.id} className="bg-dark/50 p-3 rounded-lg border border-dark-border/50 text-sm">
-                    <span className="text-primary font-display mr-2">#{a.number}</span>
-                    <span className="text-gray-300 uppercase text-xs">{a.name}</span>
-                 </div>
-               ))}
-               {myAthletes.length > 4 && (
-                 <div className="bg-dark/50 p-3 rounded-lg border border-dark-border/50 text-sm flex items-center justify-center text-gray-500 italic">
-                   + {myAthletes.length - 4} outros atletas
-                 </div>
+        {/* Categories Bar */}
+        <section className="mb-16 flex items-center gap-4 overflow-x-auto no-scrollbar pb-4">
+           <Filter className="w-5 h-5 text-gray-800 shrink-0" />
+           {categories.map((cat) => (
+             <button
+               key={cat}
+               onClick={() => setActiveCategory(cat)}
+               className={cn(
+                 "px-8 py-3 rounded-2xl font-display text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border",
+                 activeCategory === cat 
+                   ? "bg-primary border-primary text-dark shadow-2xl shadow-primary/20" 
+                   : "bg-white/5 border-white/10 text-gray-500 hover:text-white"
                )}
-            </div>
-          </div>
-        )}
-
-        {/* Category Filters */}
-        <div className="flex flex-wrap gap-2 mb-10 pb-6 border-b border-dark-border/30">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={cn(
-                "px-6 py-2.5 font-display text-sm rounded-full transition-all border uppercase tracking-wider",
-                activeCategory === cat 
-                  ? "bg-primary text-dark border-primary shadow-[0_0_20px_rgba(204,255,0,0.2)]" 
-                  : "bg-dark-card text-gray-500 border-dark-border hover:border-gray-600 hover:text-white"
-              )}>
-              {cat}
-            </button>
-          ))}
-        </div>
+             >
+               {cat}
+             </button>
+           ))}
+        </section>
 
         {/* Documents Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredDocs.map((doc: any) => (
-            <div key={doc.id} className="bg-dark-card border border-dark-border rounded-xl p-6 hover:border-primary/50 transition-all group flex flex-col h-full">
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-dark rounded-lg group-hover:bg-primary/10 transition-colors">
-                  <FileText className="w-8 h-8 text-primary" />
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+           {filteredDocs.map((doc: any) => (
+             <motion.div 
+               key={doc.id}
+               initial={{ opacity: 0, scale: 0.95 }}
+               whileInView={{ opacity: 1, scale: 1 }}
+               viewport={{ once: true }}
+               className="bg-white/5 border border-white/5 rounded-[2.5rem] p-10 hover:bg-white/10 hover:border-primary/30 transition-all group relative backdrop-blur-xl shadow-2xl flex flex-col"
+             >
+                <div className="flex items-start justify-between mb-8">
+                  <div className="w-16 h-16 rounded-[1.5rem] bg-dark/50 border border-white/5 flex items-center justify-center group-hover:border-primary/50 transition-colors">
+                    <FileText className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
+                  </div>
+                  <span className="text-[8px] font-black text-gray-600 uppercase tracking-widest border border-white/5 px-3 py-1 rounded-full">{doc.category}</span>
                 </div>
-                <span className="px-3 py-1 bg-dark text-gray-400 text-[10px] rounded-full border border-dark-border uppercase font-display">
-                  {doc.category}
-                </span>
-              </div>
-              
-              <h3 className="font-display text-xl text-white mb-2 line-clamp-2 min-h-[3.5rem]">{doc.title}</h3>
-              
-              <div className="flex items-center gap-4 text-xs text-gray-500 mt-auto pt-6 border-t border-dark-border/50">
-                 <div className="flex items-center gap-1.5 uppercase tracking-wider">
-                   <Calendar className="w-3.5 h-3.5" />
-                   {doc.date}
+
+                <h3 className="font-display text-2xl font-black text-white uppercase tracking-tighter leading-tight mb-8 group-hover:text-primary transition-colors line-clamp-2 h-14">{doc.title}</h3>
+
+                <div className="mt-auto pt-8 border-t border-white/5 flex items-center justify-between">
+                   <div className="flex items-center gap-2 text-[9px] font-black text-gray-700 uppercase tracking-widest">
+                      <Calendar className="w-3.5 h-3.5 text-primary" /> {doc.date}
+                   </div>
+                   <span className="text-[8px] font-black text-gray-800 uppercase tracking-widest">{doc.size || 'PDF'}</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mt-8">
+                   <a 
+                     href={doc.url} 
+                     target="_blank"
+                     className="py-4 rounded-2xl bg-white/5 border border-white/10 text-gray-500 hover:text-white transition-all text-[9px] font-black uppercase text-center tracking-widest flex items-center justify-center gap-2"
+                   >
+                     <ExternalLink className="w-4 h-4" /> Visualizar
+                   </a>
+                   <a 
+                     href={doc.url} 
+                     download
+                     className="py-4 rounded-2xl bg-primary text-dark font-black transition-all text-[9px] uppercase text-center tracking-widest flex items-center justify-center gap-2 shadow-lg"
+                   >
+                     <Download className="w-4 h-4" /> Baixar
+                   </a>
+                </div>
+             </motion.div>
+           ))}
+
+           {filteredDocs.length === 0 && (
+            <div className="col-span-full py-40 text-center border-2 border-dashed border-white/5 rounded-[4rem]">
+                 <Folder className="w-20 h-20 text-gray-800 mx-auto mb-6 opacity-20" />
+                 <h3 className="text-2xl font-display font-black text-gray-600 uppercase tracking-widest">Nenhum documento listado</h3>
+                 <p className="text-gray-700 mt-2 font-display uppercase text-xs tracking-widest">Verifique os filtros ou tente outra busca.</p>
+            </div>
+           )}
+        </section>
+
+        {/* Channel Info */}
+        <section className="mt-40 bg-white/[0.02] border border-white/5 rounded-[4rem] p-12 md:p-20 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden backdrop-blur-3xl shadow-3xl">
+           <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_100%_0%,rgba(204,255,0,0.05),transparent)] pointer-events-none" />
+           <div className="w-28 h-28 md:w-40 md:h-40 rounded-[3rem] bg-primary/20 flex items-center justify-center shrink-0 border border-primary/30 shadow-2xl shadow-primary/10">
+             <Users className="w-12 h-12 md:w-16 md:h-16 text-primary" />
+           </div>
+           <div className="text-center md:text-left">
+              <h2 className="text-4xl font-display font-black uppercase tracking-tighter leading-none mb-6">Canal Direto com os <span className="text-primary italic">Chefes de Equipe</span></h2>
+              <p className="text-gray-500 font-display font-bold uppercase tracking-tight text-lg mb-8 leading-relaxed opacity-70">
+                 Este espaço é dedicado à transparência e agilidade técnica. Se você é um chefe de equipe e não encontrou um boletim ou súmula específica, entre em contato imediatamente.
+              </p>
+              <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                 <div className="flex items-center gap-3 bg-white/5 px-6 py-4 rounded-2xl border border-white/10">
+                    <ArrowRight className="w-5 h-5 text-primary" /> 
+                    <span className="text-[10px] font-black uppercase tracking-widest">Prioridade Técnica</span>
                  </div>
-                 {doc.size && <div className="ml-auto font-sans">{doc.size}</div>}
+                 <div className="flex items-center gap-3 bg-white/5 px-6 py-4 rounded-2xl border border-white/10">
+                    <ArrowRight className="w-5 h-5 text-primary" /> 
+                    <span className="text-[10px] font-black uppercase tracking-widest">Atualizações em Tempo Real</span>
+                 </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-3 mt-6">
-                <a 
-                  href={doc.url} 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-dark border border-dark-border text-white text-sm font-display rounded-lg hover:border-primary/50 hover:text-primary transition-all"
-                >
-                  <ExternalLink className="w-4 h-4" /> VER
-                </a>
-                <a 
-                  href={doc.url} 
-                  download 
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-primary text-dark text-sm font-display font-bold rounded-lg hover:bg-primary-dark transition-all"
-                >
-                  <Download className="w-4 h-4" /> BAIXAR
-                </a>
-              </div>
-            </div>
-          ))}
-
-          {filteredDocs.length === 0 && (
-            <div className="col-span-full py-20 text-center flex flex-col items-center justify-center bg-dark-card border border-dark-border rounded-xl">
-               <FileText className="w-16 h-16 text-gray-700 opacity-20 mb-4" />
-               <p className="text-gray-400 font-display text-xl">Nenhum documento encontrado para os critérios selecionados.</p>
-               <button onClick={() => { setActiveCategory("TODOS"); setSearchQuery(""); }} className="mt-4 text-primary hover:underline font-display uppercase tracking-widest text-sm">Limpar filtros</button>
-            </div>
-          )}
-        </div>
-
-        {/* Info Box */}
-        <div className="mt-16 bg-primary/5 border border-primary/20 rounded-2xl p-8 flex flex-col md:flex-row items-center gap-8">
-           <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center shrink-0">
-             <Folder className="w-10 h-10 text-primary" />
            </div>
-           <div>
-             <h4 className="font-display text-2xl text-white mb-2 uppercase tracking-tight">CANAL DO <span className="text-primary">CHEFES DE EQUIPE</span></h4>
-             <p className="text-gray-400 font-sans leading-relaxed">
-               Este espaço é dedicado à transparência e agilidade técnica. Se você é um chefe de equipe e não encontrou um boletim ou súmula específica, entre em contato com o Dep. Técnico via WhatsApp para solicitação imediata.
-             </p>
-           </div>
-        </div>
-      </div>
+        </section>
+
+      </main>
+
     </div>
   );
 }

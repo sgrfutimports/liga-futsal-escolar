@@ -1,6 +1,7 @@
-import { Search, Shield } from "lucide-react";
+import { Search, Shield, Trophy, Filter, MapPin, Users } from "lucide-react";
 import { Link } from "react-router";
 import { useState } from "react";
+import { motion } from "motion/react";
 import { useSupaData } from "@/src/lib/store";
 import { cn } from "@/src/lib/utils";
 
@@ -13,11 +14,11 @@ const TeamLogo = ({ teamName, logo }: { teamName: string, logo?: string }) => {
       : "??";
 
   return (
-    <div className="w-24 h-24 bg-dark rounded-full border-2 border-dark-border flex items-center justify-center mb-4 group-hover:border-primary group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300 shadow-lg group-hover:shadow-primary/20 z-10 overflow-hidden shrink-0">
+    <div className="w-28 h-28 bg-white rounded-[2rem] border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-500 shadow-2xl z-10 overflow-hidden shrink-0 p-4">
       {logo ? (
-        <img src={logo} alt={safeName} className="w-full h-full object-contain p-2 bg-white" referrerPolicy="no-referrer" />
+        <img src={logo} alt={safeName} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
       ) : (
-        <span className="font-display text-3xl text-gray-600 group-hover:text-primary transition-all duration-300 inline-block">
+        <span className="font-display text-4xl text-gray-400 font-black">
           {initials}
         </span>
       )}
@@ -40,58 +41,86 @@ export default function Teams() {
     const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = activeCategory === "TODOS" || categories.includes(activeCategory);
     return matchesSearch && matchesCategory;
-  });
+  }).sort((a: any, b: any) => a.name.localeCompare(b.name));
 
   const categoriesSet = ["TODOS", ...(settings.categories ? String(settings.categories).split(',').map((c: string) => c.trim()) : ["SUB-11", "SUB-12", "SUB-13", "SUB-14", "SUB-15", "SUB-16", "SUB-17", "SUB-18"])];
 
   return (
-    <div className="min-h-screen bg-dark py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-          <div>
-            <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-4 uppercase">
-              NOSSAS <span className="text-primary">EQUIPES</span>
-            </h1>
-            <p className="text-gray-400 text-lg max-w-2xl">
-              Conheça as escolas e projetos que fazem parte da Liga de Futsal Escolar.
-            </p>
-          </div>
-          
-          <div className="relative w-full md:w-72">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-primary" />
-            </div>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-3 py-4 border border-dark-border rounded-xl leading-5 bg-dark-card text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary sm:text-sm font-sans transition-all shadow-lg"
-              placeholder="Buscar equipe por nome..."
-            />
-          </div>
+    <div className="min-h-screen bg-[#020617] text-white">
+      
+      {/* Hero Header */}
+      <section className="relative pt-32 pb-24 overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-transparent opacity-30" />
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
         </div>
 
-        {/* Category Filters */}
-        <div className="flex flex-wrap gap-2 mb-10 pb-6 border-b border-dark-border/30">
-          {categoriesSet.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={cn(
-                "px-6 py-2.5 font-display text-sm rounded-full transition-all border uppercase tracking-wider",
-                activeCategory === cat 
-                  ? "bg-primary text-dark border-primary shadow-[0_0_20px_rgba(204,255,0,0.2)]" 
-                  : "bg-dark-card text-gray-500 border-dark-border hover:border-gray-600 hover:text-white"
-              )}>
-              {cat}
-            </button>
-          ))}
+        <div className="container mx-auto px-4 relative z-10 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-gray-500 font-display text-[10px] font-black uppercase tracking-[0.3em] mb-8"
+          >
+            <Shield className="w-4 h-4 text-primary" /> Instituições Filiadas
+          </motion.div>
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-7xl md:text-9xl font-display font-black uppercase tracking-tighter mb-8 leading-none"
+          >
+            Nossas <span className="text-primary italic">Equipes</span>
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-gray-400 text-xl max-w-2xl mx-auto font-medium uppercase tracking-widest opacity-60"
+          >
+            Conheça as escolas e projetos que fazem o futsal escolar acontecer.
+          </motion.p>
         </div>
+      </section>
 
-        {/* Teams Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Filters & Search */}
+      <section className="sticky top-20 z-40 bg-[#020617]/80 backdrop-blur-3xl border-y border-white/5 py-6">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+             <div className="relative w-full md:w-96 group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 group-focus-within:text-primary transition-colors" />
+                <input 
+                  type="text" 
+                  placeholder="Buscar equipe pelo nome..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-white font-display font-bold focus:outline-none focus:border-primary/50 transition-all placeholder:text-gray-700"
+                />
+             </div>
+
+             <div className="flex items-center gap-4 overflow-x-auto no-scrollbar w-full md:w-auto">
+                <Filter className="w-5 h-5 text-gray-700 shrink-0" />
+                {categoriesSet.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={cn(
+                      "px-6 py-3 rounded-xl font-display text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap border",
+                      activeCategory === cat 
+                        ? "bg-primary border-primary text-dark shadow-[0_0_20px_rgba(204,255,0,0.3)]" 
+                        : "bg-white/5 border-white/10 text-gray-500 hover:text-white"
+                    )}
+                  >
+                    {cat}
+                  </button>
+                ))}
+             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Teams Grid */}
+      <section className="py-20 container mx-auto px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {teams.map((team: any) => {
              const teamAthletesCount = athletes.filter((a: any) => 
                String(a.teamId || a.team_id) === String(team.id)
@@ -102,40 +131,53 @@ export default function Teams() {
               <Link 
                 to={`/equipes/${team.id}`} 
                 key={team.id} 
-                className="bg-dark-card border border-dark-border rounded-xl p-6 hover:border-primary/50 transition-all group cursor-pointer flex flex-col items-center text-center relative overflow-hidden"
+                className="bg-white/5 border border-white/5 rounded-[3rem] p-8 hover:bg-white/10 hover:border-primary/30 transition-all group flex flex-col items-center text-center relative overflow-hidden backdrop-blur-xl shadow-2xl"
               >
-                <div className="absolute -top-10 -right-10 opacity-5 group-hover:opacity-10 transition-opacity">
-                  <Shield className="w-40 h-40" />
+                <div className="absolute -top-10 -right-10 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
+                  <Shield className="w-48 h-48" />
                 </div>
                 
                 <TeamLogo teamName={team.name} logo={team.logo} />
                 
-                <h3 className="font-display text-xl text-white mb-1 z-10">{team.name}</h3>
-                <p className="text-sm text-gray-400 font-sans mb-4 z-10">{team.city || "-"}</p>
+                <h3 className="font-display text-2xl text-white font-black uppercase tracking-tighter mb-2 group-hover:text-primary transition-colors leading-none">{team.name}</h3>
+                <div className="flex items-center gap-2 text-gray-500 font-display font-black text-[10px] uppercase tracking-widest mb-8 opacity-60">
+                   <MapPin className="w-3 h-3 text-primary" />
+                   {team.city || "REPRESENTANTE"}
+                </div>
                 
-                <div className="w-full grid grid-cols-2 gap-2 border-t border-dark-border pt-4 mt-auto z-10">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Categorias</span>
-                    <div className="flex flex-wrap gap-1 justify-center">
-                      {categoryArray.map((cat: string) => (
-                        <span key={cat} className="px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[9px] font-display">
+                <div className="w-full grid grid-cols-2 gap-4 border-t border-white/5 pt-6 mt-auto z-10">
+                  <div className="flex flex-col text-center">
+                    <span className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-3">Categorias</span>
+                    <div className="flex flex-wrap gap-1 justify-center max-h-12 overflow-hidden">
+                      {categoryArray.slice(0, 3).map((cat: string) => (
+                        <span key={cat} className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-lg text-[8px] font-display font-black uppercase">
                           {cat}
                         </span>
                       ))}
+                      {categoryArray.length > 3 && <span className="text-gray-600 font-black text-[8px]">+{categoryArray.length - 3}</span>}
                     </div>
                   </div>
-                  <div className="flex flex-col border-l border-dark-border pl-2 justify-center">
-                    <span className="text-[10px] text-gray-500 uppercase tracking-wider">Atletas</span>
-                    <span className="font-display text-sm text-white">{teamAthletesCount}</span>
+                  <div className="flex flex-col border-l border-white/5 pl-4 justify-center items-center">
+                    <span className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-1">Efetivo</span>
+                    <div className="flex items-center gap-2">
+                       <Users className="w-3 h-3 text-primary" />
+                       <span className="font-display text-lg text-white font-black italic">{teamAthletesCount}</span>
+                    </div>
                   </div>
                 </div>
               </Link>
              )
           })}
-          {teams.length === 0 && <div className="col-span-1 sm:col-span-2 lg:col-span-4 p-12 text-center text-gray-500 font-display">NENHUMA EQUIPE ENCONTRADA</div>}
+          {teams.length === 0 && (
+            <div className="col-span-full py-40 text-center border-2 border-dashed border-white/5 rounded-[4rem]">
+                 <Shield className="w-20 h-20 text-gray-800 mx-auto mb-6 opacity-20" />
+                 <h3 className="text-2xl font-display font-black text-gray-600 uppercase tracking-widest">Nenhuma equipe encontrada</h3>
+                 <p className="text-gray-700 mt-2 font-display uppercase text-xs tracking-widest">Tente ajustar sua busca ou categoria.</p>
+            </div>
+          )}
         </div>
+      </section>
 
-      </div>
     </div>
   );
 }
