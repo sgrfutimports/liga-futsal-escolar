@@ -1,9 +1,8 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Bebas Neue", cursive, sans-serif;
+  --font-sans: "Titillium Web", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Titillium Web", sans-serif;
   
   /* Brand Colors */
   --color-primary: #8BC040; 
