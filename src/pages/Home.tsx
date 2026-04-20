@@ -145,62 +145,83 @@ export default function Home() {
       <section className="-mt-32 relative z-30 container mx-auto px-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           
-          <div className="bg-white/5 backdrop-blur-3xl border border-white/10 p-8 rounded-[3rem] shadow-2xl hover:bg-white/10 transition-all">
-            <span className="text-[10px] font-display font-black text-gray-600 uppercase tracking-widest block mb-6">Próximo Jogo</span>
+          {/* Card: Próximo Jogo */}
+          <div className="bg-white/5 backdrop-blur-3xl border border-white/10 p-8 rounded-[3rem] shadow-2xl hover:bg-white/10 hover:-translate-y-2 transition-all duration-300 group overflow-hidden relative">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors" />
+            <span className="text-[10px] font-display font-black text-gray-500 uppercase tracking-[0.3em] block mb-8 relative z-10">Próximo Jogo</span>
             {nextGame ? (
-              <div className="flex flex-col gap-6 text-center">
-                <div className="flex items-center justify-between gap-4">
-                   <div className="w-12 h-12 bg-white rounded-xl p-2"><img src={(teams || []).find((t: any) => String(t.id) === String(nextGame.homeTeamId || nextGame.home_team_id))?.logo} className="w-full h-full object-contain" /></div>
-                   <span className="text-gray-700 font-display font-black text-xs italic">VS</span>
-                   <div className="w-12 h-12 bg-white rounded-xl p-2"><img src={(teams || []).find((t: any) => String(t.id) === String(nextGame.awayTeamId || nextGame.away_team_id))?.logo} className="w-full h-full object-contain" /></div>
+              <div className="flex flex-col gap-6 relative z-10">
+                <div className="flex items-center justify-between">
+                   <div className="w-14 h-14 bg-white rounded-2xl p-2.5 shadow-2xl transition-transform group-hover:scale-110">
+                     <img src={(teams || []).find((t: any) => String(t.id) === String(nextGame.homeTeamId || nextGame.home_team_id))?.logo || "/logos/placeholder.png"} className="w-full h-full object-contain" />
+                   </div>
+                   <div className="flex flex-col items-center">
+                     <span className="text-gray-700 font-display font-black text-sm italic mb-1 uppercase tracking-widest">VS</span>
+                     <div className="h-0.5 w-8 bg-primary/30 rounded-full" />
+                   </div>
+                   <div className="w-14 h-14 bg-white rounded-2xl p-2.5 shadow-2xl transition-transform group-hover:scale-110">
+                     <img src={(teams || []).find((t: any) => String(t.id) === String(nextGame.awayTeamId || nextGame.away_team_id))?.logo || "/logos/placeholder.png"} className="w-full h-full object-contain" />
+                   </div>
                 </div>
-                <div className="space-y-1">
-                   <p className="font-display font-black text-primary text-xs uppercase italic tracking-widest">{nextGame.date}</p>
-                   <p className="text-[9px] text-gray-500 font-black uppercase tracking-tight truncate">{nextGame.location}</p>
+                <div>
+                   <p className="font-display font-black text-primary text-sm uppercase italic tracking-[0.2em] mb-1">{nextGame.date}</p>
+                   <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest opacity-60 truncate">{nextGame.location}</p>
                 </div>
               </div>
-            ) : <p className="text-gray-700 font-display font-black text-center py-4 italic">Sem agenda</p>}
+            ) : <p className="text-gray-600 font-display font-black text-center py-4 italic uppercase tracking-widest text-[10px]">Sem agenda</p>}
           </div>
 
-          <div className="bg-white/5 backdrop-blur-3xl border border-white/10 p-8 rounded-[3rem] shadow-2xl hover:bg-white/10 transition-all">
-            <span className="text-[10px] font-display font-black text-gray-600 uppercase tracking-widest block mb-6">Líder do Geral</span>
+          {/* Card: Líder do Geral */}
+          <div className="bg-white/5 backdrop-blur-3xl border border-white/10 p-8 rounded-[3rem] shadow-2xl hover:bg-white/10 hover:-translate-y-2 transition-all duration-300 group overflow-hidden relative">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors" />
+            <span className="text-[10px] font-display font-black text-gray-500 uppercase tracking-[0.3em] block mb-8 relative z-10">Líder do Geral</span>
             {leader ? (
-              <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-white rounded-2xl p-2 shadow-2xl"><img src={leader.logo} className="w-full h-full object-contain" /></div>
+              <div className="flex items-center gap-6 relative z-10">
+                <div className="w-20 h-20 bg-white rounded-[1.8rem] p-3 shadow-2xl group-hover:rotate-6 transition-transform">
+                  <img src={leader.logo || "/logos/placeholder.png"} className="w-full h-full object-contain" />
+                </div>
                 <div>
-                  <p className="font-display font-black text-xl uppercase leading-none mb-1">{leader.name}</p>
+                  <p className="font-display font-black text-xl md:text-2xl uppercase leading-none mb-2 tracking-tighter group-hover:text-primary transition-colors">{leader.name}</p>
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                    <span className="text-primary font-display font-black text-2xl italic">{leader.pts} PTS</span>
+                    <span className="text-primary font-display font-black text-3xl italic drop-shadow-[0_0_15px_rgba(204,255,0,0.3)]">{leader.pts} PTS</span>
                   </div>
                 </div>
               </div>
-            ) : <p className="text-gray-700 font-display font-black text-center py-4 italic">---</p>}
+            ) : <p className="text-gray-600 font-display font-black text-center py-4 italic uppercase tracking-widest text-[10px]">Indisponível</p>}
           </div>
 
-          <div className="bg-[#ccff00] backdrop-blur-3xl border border-white/10 p-8 rounded-[3rem] shadow-2xl group cursor-pointer hover:scale-105 transition-all">
-            <span className="text-[10px] font-display font-black text-dark/40 uppercase tracking-widest block mb-6">Artilheiro</span>
-            <div className="flex items-center gap-6">
-              <div className="w-16 h-16 bg-dark rounded-2xl p-2 flex items-center justify-center border border-white/10"><Users className="w-10 h-10 text-primary" /></div>
+          {/* Card: Artilheiro (Destaque Neon) */}
+          <Link to="/fama" className="bg-primary backdrop-blur-3xl border border-primary/20 p-8 rounded-[3rem] shadow-[0_20px_50px_rgba(204,255,0,0.3)] hover:scale-105 hover:-translate-y-2 transition-all duration-300 group overflow-hidden relative block">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(255,255,255,0.4),transparent)] opacity-30" />
+            <span className="text-[10px] font-display font-black text-dark/40 uppercase tracking-[0.3em] block mb-8 relative z-10">Artilheiro</span>
+            <div className="flex items-center gap-6 relative z-10">
+              <div className="w-20 h-20 bg-dark rounded-[1.8rem] p-4 flex items-center justify-center shadow-3xl group-hover:scale-110 transition-transform">
+                <Users className="w-12 h-12 text-primary" />
+              </div>
               <div className="text-dark">
-                <p className="font-display font-black text-xl uppercase leading-none mb-1">CRAQUES LFE</p>
-                <p className="font-display font-black text-[9px] uppercase tracking-widest bg-dark/10 px-2 py-0.5 rounded">Ver Rankings</p>
+                <p className="font-display font-black text-2xl md:text-3xl uppercase leading-[0.85] mb-2 tracking-tighter">CRAQUES<br/>LFE</p>
+                <div className="inline-block bg-dark/10 px-3 py-1 rounded-full text-[9px] font-display font-black uppercase tracking-widest">Ver Rankings</div>
               </div>
             </div>
-          </div>
+          </Link>
 
-          <div className="bg-white/5 backdrop-blur-3xl border border-white/10 p-8 rounded-[3rem] shadow-2xl hover:bg-white/10 transition-all">
-            <span className="text-[10px] font-display font-black text-gray-600 uppercase tracking-widest block mb-6">Último Resultado</span>
+          {/* Card: Último Resultado */}
+          <div className="bg-white/5 backdrop-blur-3xl border border-white/10 p-8 rounded-[3rem] shadow-2xl hover:bg-white/10 hover:-translate-y-2 transition-all duration-300 group overflow-hidden relative">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors" />
+            <span className="text-[10px] font-display font-black text-gray-500 uppercase tracking-[0.3em] block mb-8 relative z-10">Último Resultado</span>
             {lastResult ? (
-              <div className="flex flex-col items-center">
-                 <div className="flex items-center gap-6 mb-2">
-                    <span className="text-4xl font-display font-black text-white">{lastResult.homeScore ?? lastResult.home_score ?? 0}</span>
-                    <div className="w-0.5 h-10 bg-primary/20 rounded-full" />
-                    <span className="text-4xl font-display font-black text-white">{lastResult.awayScore ?? lastResult.away_score ?? 0}</span>
+              <div className="flex flex-col items-center relative z-10">
+                 <div className="flex items-center justify-center gap-8 mb-4">
+                    <span className="text-6xl md:text-7xl font-display font-black text-white italic drop-shadow-2xl">{lastResult.homeScore ?? lastResult.home_score ?? 0}</span>
+                    <div className="w-1 h-12 bg-primary/20 rounded-full" />
+                    <span className="text-6xl md:text-7xl font-display font-black text-white italic drop-shadow-2xl">{lastResult.awayScore ?? lastResult.away_score ?? 0}</span>
                  </div>
-                 <p className="text-[8px] font-display font-black text-primary uppercase tracking-[0.4em] bg-primary/5 px-4 py-1.5 rounded-full border border-primary/20">PLACAR FINAL</p>
+                 <div className="flex items-center gap-3 bg-primary/10 border border-primary/20 px-6 py-2 rounded-full backdrop-blur-md">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                    <p className="text-[9px] font-display font-black text-primary uppercase tracking-[0.4em]">PLACAR FINAL</p>
+                 </div>
               </div>
-            ) : <p className="text-gray-700 font-display font-black text-center py-4 italic">---</p>}
+            ) : <p className="text-gray-600 font-display font-black text-center py-4 italic uppercase tracking-widest text-[10px]">Sem registros</p>}
           </div>
 
         </div>
