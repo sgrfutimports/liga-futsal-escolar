@@ -33,7 +33,7 @@ export const defaultData: Record<string, any> = {
 
 // ─── CRUD Supabase ────────────────────────────────────────────────────────────
 
-function snakeToCamel(obj: any): any {
+export function snakeToCamel(obj: any): any {
   if (Array.isArray(obj)) {
     return obj.map(v => snakeToCamel(v));
   } else if (obj !== null && obj.constructor === Object) {
@@ -48,7 +48,7 @@ function snakeToCamel(obj: any): any {
   return obj;
 }
 
-function camelToSnake(obj: any): any {
+export function camelToSnake(obj: any): any {
   if (Array.isArray(obj)) {
     return obj.map(v => camelToSnake(v));
   } else if (obj !== null && obj.constructor === Object) {

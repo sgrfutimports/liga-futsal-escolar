@@ -7,9 +7,9 @@ import {
   ChevronRight, Calendar, MapPin, Goal
 } from "lucide-react";
 import { Link, useNavigate } from "react-router";
-import { useSupaData, supaFetch } from "@/src/lib/store";
+import { useSupaData, supaFetch, camelToSnake, snakeToCamel } from "@/src/lib/store";
 import { cn } from "@/src/lib/utils";
-import { supabase } from "@/src/lib/supabase";
+import { supabase, TableName } from "@/src/lib/supabase";
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -27,6 +27,8 @@ export default function Admin() {
   const { data: registrations, refresh: refreshRegistrations } = useSupaData('lfe_registrations', []);
   const { data: gallery, refresh: refreshGallery } = useSupaData('lfe_gallery', []);
   const { data: sponsors, refresh: refreshSponsors } = useSupaData('lfe_sponsors', []);
+  const { data: banners, refresh: refreshBanners } = useSupaData('lfe_banners', []);
+  const { data: docs, refresh: refreshDocs } = useSupaData('lfe_technical_documents', []);
   const { data: settingsArr, refresh: refreshSettings } = useSupaData('lfe_settings', []);
   const settings = settingsArr[0] || {};
   
@@ -86,6 +88,7 @@ export default function Admin() {
   const refreshAll = () => {
     refreshTeams(); refreshAthletes(); refreshGames(); refreshNews();
     refreshRegistrations(); refreshGallery(); refreshSponsors(); refreshSettings();
+    refreshBanners(); refreshDocs();
   };
 
   if (!isLogged) return null;
@@ -104,8 +107,10 @@ export default function Admin() {
              { id: 'lfe_athletes', label: 'Atletas', icon: Users },
              { id: 'lfe_games', label: 'Jogos', icon: Clock },
              { id: 'lfe_news', label: 'Notícias', icon: Newspaper },
+             { id: 'lfe_banners', label: 'Banner Topo', icon: ImageIcon },
              { id: 'lfe_gallery', label: 'Galeria', icon: ImageIcon },
              { id: 'lfe_sponsors', label: 'Patrocinadores', icon: Shield },
+             { id: 'lfe_technical_documents', label: 'Documentos', icon: FileText },
              { id: 'lfe_registrations', label: 'Inscrições', icon: UserCheck },
              { id: 'push', label: 'Notificações', icon: Bell },
              { id: 'config', label: 'Configurações', icon: Settings },
@@ -138,8 +143,10 @@ export default function Admin() {
                       {activeTab === 'lfe_athletes' && "Atletas da Liga"}
                       {activeTab === 'lfe_games' && "Placares & Resultados"}
                       {activeTab === 'lfe_news' && "Notícias"}
+                      {activeTab === 'lfe_banners' && "Banner de Destaque"}
                       {activeTab === 'lfe_gallery' && "Fotos da Galeria"}
                       {activeTab === 'lfe_sponsors' && "Patrocinadores"}
+                      {activeTab === 'lfe_technical_documents' && "Documentos Técnicos"}
                       {activeTab === 'lfe_registrations' && "Inscrições"}
                       {activeTab === 'push' && "Central Push"}
                       {activeTab === 'config' && "Configurações"}
@@ -155,7 +162,17 @@ export default function Admin() {
                {activeTab === 'config' && <AdminSettingsPanel settings={settings} onSave={refreshAll} />}
                {activeTab.startsWith('lfe_') && (
                  <AdminListTable 
-                   data={activeTab === 'lfe_teams' ? teams : activeTab === 'lfe_athletes' ? athletes : activeTab === 'lfe_games' ? games : activeTab === 'lfe_news' ? news : activeTab === 'lfe_gallery' ? gallery : activeTab === 'lfe_sponsors' ? sponsors : registrations} 
+                   data={
+                     activeTab === 'lfe_teams' ? teams : 
+                     activeTab === 'lfe_athletes' ? athletes : 
+                     activeTab === 'lfe_games' ? games : 
+                     activeTab === 'lfe_news' ? news : 
+                     activeTab === 'lfe_gallery' ? gallery : 
+                     activeTab === 'lfe_sponsors' ? sponsors : 
+                     activeTab === 'lfe_banners' ? banners :
+                     activeTab === 'lfe_technical_documents' ? docs :
+                     registrations
+                   } 
                    type={activeTab} 
                    onEdit={openForm} 
                    onDelete={(id) => handleDelete(id, activeTab)}
@@ -184,7 +201,7 @@ export default function Admin() {
 function AdminFormModal({ item, type, onClose, onSave, context }: { item: any, type: string, onClose: () => void, onSave: () => void, context: any }) {
   const [formData, setFormData] = useState(item || {});
   const [loading, setLoading] = useState(false);
-  const isNew = !item.id;
+  const isNew = !item?.id;
 
   const handleFormSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,15 +224,21 @@ function AdminFormModal({ item, type, onClose, onSave, context }: { item: any, t
     }
 
     setLoading(true);
-    const table = type === 'push' || type === 'config' ? 'lfe_settings' : type;
+    const table = type;
     
-    // Clean data (prevent sending _type)
+    // Clean data (prevent sending _type or local UI fields)
     const { _type, ...cleanData } = formData;
+    const finalData = camelToSnake(cleanData);
     
-    const { error } = isNew 
-      ? await supabase.from(table).insert([cleanData])
-      : await supabase.from(table).update(cleanData).eq('id', item.id);
-
+    let error;
+    if (isNew) {
+      const { error: err } = await supabase.from(table).insert([finalData]);
+      error = err;
+    } else {
+      const { error: err } = await supabase.from(table).update(finalData).eq('id', item.id);
+      error = err;
+    }
+    
     if (error) alert("Erro: " + error.message);
     else { onSave(); onClose(); }
     setLoading(false);
@@ -248,7 +271,7 @@ function AdminFormModal({ item, type, onClose, onSave, context }: { item: any, t
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-gray-500">Equipe</label>
-                    <select required value={formData.team_id || ""} onChange={e => setFormData({...formData, team_id: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm">
+                    <select required value={formData.teamId || ""} onChange={e => setFormData({...formData, teamId: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm">
                       <option value="">Selecionar Equipe</option>
                       {context.teams.map((t:any) => <option key={t.id} value={t.id}>{t.name}</option>)}
                     </select>
@@ -263,19 +286,19 @@ function AdminFormModal({ item, type, onClose, onSave, context }: { item: any, t
                 <div className="grid grid-cols-2 gap-8 items-center bg-black/20 p-6 rounded-2xl border border-white/5">
                    <div className="space-y-4">
                       <label className="text-[10px] uppercase font-black text-gray-500 text-center block">Mandante</label>
-                      <select required value={formData.home_team_id || ""} onChange={e => setFormData({...formData, home_team_id: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl text-xs">
+                      <select required value={formData.homeTeamId || ""} onChange={e => setFormData({...formData, homeTeamId: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl text-xs">
                         <option value="">Selecione...</option>
                         {context.teams.map((t:any) => <option key={t.id} value={t.id}>{t.name}</option>)}
                       </select>
-                      <input type="number" placeholder="Gols" value={formData.home_score || 0} onChange={e => setFormData({...formData, home_score: parseInt(e.target.value)})} className="w-full bg-black border border-white/10 p-4 rounded-xl text-center text-2xl font-black text-primary" />
+                      <input type="number" placeholder="Gols" value={formData.homeScore || 0} onChange={e => setFormData({...formData, homeScore: parseInt(e.target.value)})} className="w-full bg-black border border-white/10 p-4 rounded-xl text-center text-2xl font-black text-primary" />
                    </div>
                    <div className="space-y-4">
                       <label className="text-[10px] uppercase font-black text-gray-500 text-center block">Visitante</label>
-                      <select required value={formData.away_team_id || ""} onChange={e => setFormData({...formData, away_team_id: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl text-xs">
+                      <select required value={formData.awayTeamId || ""} onChange={e => setFormData({...formData, awayTeamId: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl text-xs">
                         <option value="">Selecione...</option>
                         {context.teams.map((t:any) => <option key={t.id} value={t.id}>{t.name}</option>)}
                       </select>
-                      <input type="number" placeholder="Gols" value={formData.away_score || 0} onChange={e => setFormData({...formData, away_score: parseInt(e.target.value)})} className="w-full bg-black border border-white/10 p-4 rounded-xl text-center text-2xl font-black text-primary" />
+                      <input type="number" placeholder="Gols" value={formData.awayScore || 0} onChange={e => setFormData({...formData, awayScore: parseInt(e.target.value)})} className="w-full bg-black border border-white/10 p-4 rounded-xl text-center text-2xl font-black text-primary" />
                    </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -292,8 +315,70 @@ function AdminFormModal({ item, type, onClose, onSave, context }: { item: any, t
             {type === 'lfe_news' && (
               <>
                 <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Título da Notícia</label><input required value={formData.title || ""} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
-                <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Conteúdo (HTML/Texto)</label><textarea rows={6} required value={formData.content || ""} onChange={e => setFormData({...formData, content: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
-                <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">URL da Imagem de Capa</label><input value={formData.image || ""} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Categoria</label><input value={formData.category || "Notícia"} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+                  <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Autor</label><input value={formData.author || ""} onChange={e => setFormData({...formData, author: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+                </div>
+                <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Conteúdo (Texto ou HTML)</label><textarea rows={8} required value={formData.content || ""} onChange={e => setFormData({...formData, content: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+                <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">URL da Imagem</label><input value={formData.image || ""} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+              </>
+            )}
+            
+            {type === 'lfe_gallery' && (
+              <>
+                <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Título / Legenda</label><input required value={formData.title || ""} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+                <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">URL da Imagem</label><input required value={formData.url || ""} onChange={e => setFormData({...formData, url: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+              </>
+            )}
+
+            {type === 'lfe_sponsors' && (
+              <>
+                <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Nome do Patrocinador</label><input required value={formData.name || ""} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Tipo</label><select value={formData.type || "official"} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl text-xs"><option value="official">Oficial</option><option value="premium">Premium</option></select></div>
+                  <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Ordem</label><input type="number" value={formData.sortOrder || 0} onChange={e => setFormData({...formData, sortOrder: parseInt(e.target.value)})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-sm" /></div>
+                </div>
+                <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">URL do Logo</label><input required value={formData.logo || ""} onChange={e => setFormData({...formData, logo: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+              </>
+            )}
+
+            {type === 'lfe_technical_documents' && (
+              <>
+                <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Título do Documento</label><input required value={formData.title || ""} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Categoria</label><select value={formData.category || "NOTAS OFICIAIS"} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl text-xs">{["NOTAS OFICIAIS", "REGULAMENTOS", "NORMAS", "SÚMULAS", "COMUNICADOS", "BOLETIM", "FORMULÁRIOS"].map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+                  <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Data (DD/MM/AAAA)</label><input value={formData.date || ""} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-sm" /></div>
+                </div>
+                <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">URL do Documento (PDF)</label><input required value={formData.url || ""} onChange={e => setFormData({...formData, url: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+              </>
+            )}
+
+            {type === 'lfe_banners' && (
+              <>
+                <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Título</label><input required value={formData.title || ""} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+                <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Subtítulo</label><input value={formData.subtitle || ""} onChange={e => setFormData({...formData, subtitle: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+                <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Descrição</label><textarea value={formData.description || ""} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+                <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">URL da Imagem</label><input required value={formData.image || ""} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm" /></div>
+              </>
+            )}
+
+            {type === 'lfe_registrations' && (
+              <>
+                <div className="p-6 bg-primary/10 border border-primary/20 rounded-2xl mb-6">
+                   <p className="text-primary font-display font-black text-xs uppercase tracking-widest mb-2">Atenção</p>
+                   <p className="text-gray-400 text-[10px] leading-relaxed">Você está editando uma inscrição. Para homologar, altere o status para "Homologada" e vincule a uma equipe se necessário.</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Escola</label><input disabled value={formData.school || ""} className="w-full bg-white/5 border border-white/10 p-4 rounded-xl opacity-50 cursor-not-allowed text-sm" /></div>
+                  <div className="space-y-1"><label className="text-[10px] uppercase font-black text-gray-500">Status</label><select value={formData.status || "Pendente"} onChange={e => setFormData({...formData, status: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl text-xs"><option value="Pendente">Pendente</option><option value="Homologada">Homologada</option><option value="Recusada">Recusada</option></select></div>
+                </div>
+                 <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-gray-500">Vincular Equipe Criada</label>
+                    <select value={formData.teamId || ""} onChange={e => setFormData({...formData, teamId: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:border-primary text-sm">
+                      <option value="">Não vinculado</option>
+                      {context.teams.map((t:any) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    </select>
+                  </div>
               </>
             )}
 
@@ -311,7 +396,8 @@ function AdminDashboard({ stats }: { stats: any }) {
     { label: "Equipes", value: stats.teams.length, icon: Trophy, color: "text-primary" },
     { label: "Atletas", value: stats.athletes.length, icon: Users, color: "text-blue-400" },
     { label: "Partidas", value: stats.games.length, icon: Clock, color: "text-green-400" },
-    { label: "Solicitações", value: stats.registrations.length, icon: UserCheck, color: "text-yellow-400" },
+    { label: "Inscrições", value: stats.registrations.length, icon: UserCheck, color: "text-yellow-400" },
+    { label: "Notícias", value: stats.news.length, icon: Newspaper, color: "text-purple-400" },
   ];
   return (
     <div className="space-y-12">
@@ -392,7 +478,8 @@ function AdminSettingsPanel({ settings, onSave }: { settings: any, onSave: () =>
   const [formData, setFormData] = useState(settings || {});
 
   const handleSave = async () => {
-    const { error } = await supabase.from('lfe_settings').upsert({ id: settings?.id || undefined, ...formData });
+    const finalData = camelToSnake(formData);
+    const { error } = await supabase.from('lfe_settings').upsert({ id: settings?.id || undefined, ...finalData });
     if (error) alert("Erro ao salvar: " + error.message);
     else { alert("Configurações atualizadas com sucesso!"); onSave(); }
   };
@@ -402,37 +489,37 @@ function AdminSettingsPanel({ settings, onSave }: { settings: any, onSave: () =>
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-white">
           <div className="space-y-4">
              <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">Nome Oficial da Liga</label>
-             <input type="text" value={formData.league_name || ""} onChange={e => setFormData({...formData, league_name: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="Ex: Liga de Futsal Escolar" />
+             <input type="text" value={formData.eventName || ""} onChange={e => setFormData({...formData, eventName: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="Ex: Liga de Futsal Escolar" />
           </div>
           <div className="space-y-4">
              <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">URL da Logo (PNG/JPG)</label>
-             <input type="text" value={formData.league_logo || ""} onChange={e => setFormData({...formData, league_logo: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="https://..." />
+             <input type="text" value={formData.leagueLogo || ""} onChange={e => setFormData({...formData, leagueLogo: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="https://..." />
           </div>
           <div className="space-y-4">
              <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">Ano da Edição</label>
-             <input type="text" value={formData.year || ""} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm font-display tracking-widest text-primary" placeholder="2026" />
+             <input type="text" value={formData.yearEdition || ""} onChange={e => setFormData({...formData, yearEdition: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm font-display tracking-widest text-primary" placeholder="2026" />
           </div>
           
           <div className="space-y-4">
              <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">Instagram (Link Completo)</label>
-             <input type="text" value={formData.instagram_url || ""} onChange={e => setFormData({...formData, instagram_url: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="https://instagram.com/..." />
+             <input type="text" value={formData.instagramUrl || ""} onChange={e => setFormData({...formData, instagramUrl: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="https://instagram.com/..." />
           </div>
           <div className="space-y-4">
              <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">WhatsApp (Apenas Números)</label>
-             <input type="text" value={formData.whatsapp_number || ""} onChange={e => setFormData({...formData, whatsapp_number: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="11999999999" />
+             <input type="text" value={formData.whatsappNumber || ""} onChange={e => setFormData({...formData, whatsappNumber: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="11999999999" />
           </div>
           <div className="space-y-4">
              <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">E-mail de Contato</label>
-             <input type="email" value={formData.contact_email || ""} onChange={e => setFormData({...formData, contact_email: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="contato@liga.com" />
+             <input type="email" value={formData.contactEmail || ""} onChange={e => setFormData({...formData, contactEmail: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="contato@liga.com" />
           </div>
 
           <div className="md:col-span-2 space-y-4">
              <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">Endereço / Sede</label>
-             <input type="text" value={formData.contact_address || ""} onChange={e => setFormData({...formData, contact_address: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="Av. Principal, 123 - Centro" />
+             <input type="text" value={formData.contactAddress || ""} onChange={e => setFormData({...formData, contactAddress: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" placeholder="Av. Principal, 123 - Centro" />
           </div>
           <div className="md:col-span-1 space-y-4">
              <label className="text-[10px] font-display font-black text-gray-500 uppercase tracking-widest block ml-1">Vídeo Banner (URL)</label>
-             <input type="text" value={formData.video_url || ""} onChange={e => setFormData({...formData, video_url: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" />
+             <input type="text" value={formData.videoUrl || ""} onChange={e => setFormData({...formData, videoUrl: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-5 outline-none focus:border-primary transition-all text-sm" />
           </div>
 
           <div className="md:col-span-3 space-y-4">
@@ -440,7 +527,7 @@ function AdminSettingsPanel({ settings, onSave }: { settings: any, onSave: () =>
              <textarea value={formData.categories || ""} onChange={e => setFormData({...formData, categories: e.target.value})} className="w-full bg-[#020617] border border-white/10 rounded-2xl p-6 outline-none focus:border-primary transition-all font-display text-xl" rows={3} placeholder="SUB-11, SUB-12, SUB-13..." />
           </div>
        </div>
-       <button onClick={handleSave} className="bg-primary hover:bg-white text-black px-12 py-6 rounded-2xl font-display font-black uppercase tracking-[0.2em] flex items-center gap-4 transition-all shadow-xl shadow-primary/10 active:scale-95"><Save className="w-6 h-6" /> Aplicar Identidade Visual</button>
+       <button onClick={handleSave} className="bg-primary hover:bg-white text-black px-12 py-6 rounded-2xl font-display font-black uppercase tracking-[0.2em] flex items-center gap-4 transition-all shadow-xl shadow-primary/10 active:scale-95"><Save className="w-6 h-6" /> Atualizar Configurações Global</button>
     </div>
   );
 }

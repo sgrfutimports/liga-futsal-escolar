@@ -12,6 +12,7 @@ import Sponsors from "@/src/components/layout/Sponsors";
 export default function Home() {
   const { data: teams } = useSupaData('lfe_teams', []);
   const { data: games } = useSupaData('lfe_games', []);
+  const { data: news } = useSupaData('lfe_news', []);
   const { data: settingsArr } = useSupaData('lfe_settings', []);
   const settings = settingsArr?.[0] || {};
 
@@ -78,6 +79,12 @@ export default function Home() {
       .filter((g: any) => String(g.status || '').toLowerCase() !== 'finalizado')
       .slice(0, 3);
   }, [games]);
+
+  const recentNews = useMemo(() => {
+    return (news || [])
+      .sort((a: any, b: any) => new Date(b.publishedAt || b.published_at || b.createdAt || b.created_at).getTime() - new Date(a.publishedAt || a.published_at || a.createdAt || a.created_at).getTime())
+      .slice(0, 3);
+  }, [news]);
 
   return (
     <div className="min-h-screen bg-bg text-white">
@@ -350,19 +357,33 @@ export default function Home() {
            <p className="text-gray-500 text-xl max-w-md md:text-right uppercase font-black tracking-widest leading-tight opacity-40">As notícias que agitaram as quadras nos últimos dias.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-           {[
-             { title: "Virada Épica na Categoria Sub-15", category: "NOTÍCIA", img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=800" },
-             { title: "Inscrições Próximas do Encerramento", category: "ADMIN", img: "https://images.unsplash.com/photo-1543326131-de94b150c18d?auto=format&fit=crop&q=80&w=800" },
-             { title: "Melhor Jogador do Mês é Revelado", category: "DESTAQUE", img: "https://images.unsplash.com/photo-1517603951034-af241c2c3dc4?auto=format&fit=crop&q=80&w=800" }
-           ].map((news, i) => (
-             <Link to="/noticias" key={i} className="group relative overflow-hidden rounded-[4rem] bg-white/[0.03] border border-white/10 hover:border-primary/50 transition-all flex flex-col h-full">
+           {recentNews.length > 0 ? recentNews.map((n, i) => (
+             <Link to={`/noticias/${n.slug}`} key={n.id} className="group relative overflow-hidden rounded-[4rem] bg-white/[0.03] border border-white/10 hover:border-primary/50 transition-all flex flex-col h-full">
                 <div className="aspect-[16/10] overflow-hidden relative">
-                   <img src={news.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-60 mix-blend-screen" />
+                   <img src={n.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-60 mix-blend-screen" />
                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-dark to-transparent" />
                 </div>
                 <div className="p-10 flex flex-col flex-grow">
-                   <span className="text-[10px] font-display font-black text-primary uppercase tracking-[0.4em] mb-6 block">{news.category}</span>
-                   <h3 className="text-3xl font-display font-black leading-[1.1] mb-6 uppercase tracking-tighter group-hover:text-primary transition-colors">{news.title}</h3>
+                   <span className="text-[10px] font-display font-black text-primary uppercase tracking-[0.4em] mb-6 block">{n.category}</span>
+                   <h3 className="text-3xl font-display font-black leading-[1.1] mb-6 uppercase tracking-tighter group-hover:text-primary transition-colors line-clamp-2 h-14">{n.title}</h3>
+                   <div className="mt-auto flex items-center gap-3 text-white font-display font-black text-xs uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-all">
+                     Ler Mais <ChevronRight className="w-4 h-4" />
+                   </div>
+                </div>
+             </Link>
+           )) : [
+             { title: "Virada Épica na Categoria Sub-15", category: "NOTÍCIA", img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=800" },
+             { title: "Inscrições Próximas do Encerramento", category: "ADMIN", img: "https://images.unsplash.com/photo-1543326131-de94b150c18d?auto=format&fit=crop&q=80&w=800" },
+             { title: "Melhor Jogador do Mês é Revelado", category: "DESTAQUE", img: "https://images.unsplash.com/photo-1517603951034-af241c2c3dc4?auto=format&fit=crop&q=80&w=800" }
+           ].map((n, i) => (
+             <Link to="/noticias" key={i} className="group relative overflow-hidden rounded-[4rem] bg-white/[0.03] border border-white/10 hover:border-primary/50 transition-all flex flex-col h-full">
+                <div className="aspect-[16/10] overflow-hidden relative">
+                   <img src={n.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-60 mix-blend-screen" />
+                   <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-dark to-transparent" />
+                </div>
+                <div className="p-10 flex flex-col flex-grow">
+                   <span className="text-[10px] font-display font-black text-primary uppercase tracking-[0.4em] mb-6 block">{n.category}</span>
+                   <h3 className="text-3xl font-display font-black leading-[1.1] mb-6 uppercase tracking-tighter group-hover:text-primary transition-colors">{n.title}</h3>
                    <div className="mt-auto flex items-center gap-3 text-white font-display font-black text-xs uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-all">
                      Ler Mais <ChevronRight className="w-4 h-4" />
                    </div>

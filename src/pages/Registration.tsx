@@ -186,6 +186,10 @@ export default function Registration() {
         resp: formData.respName,
         city: formData.city,
         status: "Pendente",
+        logo: formData.logo,
+        categories: formData.categories.join(', '),
+        cnpj: formData.cnpj,
+        phone: formData.phone,
         created_at: new Date().toISOString()
       };
 
