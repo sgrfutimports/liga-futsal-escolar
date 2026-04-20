@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, Shield, Goal, Star, Calendar, AlertTriangle, ChevronRight } from "lucide-react";
 import { cn } from "@/src/lib/utils";
-import { useSupaData } from "@/src/lib/store";
+import { useSupaData, calculateStandings } from "@/src/lib/store";
 
 const TeamLogoSmall = ({ teamId, teamName, logo, className }: { teamId: any, teamName: string, logo?: string, className?: string }) => {
   const safeName = String(teamName || "").trim();
@@ -50,33 +50,7 @@ export default function Standings() {
   const categoryGames = games.filter((g: any) => (g.category || "") === activeCategory);
   const categoryTeams = teams.filter((t: any) => String(t.categories || "").includes(activeCategory));
 
-  const standings = categoryTeams.map((t: any) => {
-    let pts = 0, j = 0, v = 0, e = 0, d = 0, gp = 0, gc = 0;
-    categoryGames.forEach((g: any) => {
-      if (String(g.status || '').toLowerCase() === 'finalizado') {
-        const homeScore = Number(g.homeScore ?? g.home_score ?? 0);
-        const awayScore = Number(g.awayScore ?? g.away_score ?? 0);
-        const homeId = String(g.homeTeamId || g.home_team_id || '').toLowerCase().trim();
-        const awayId = String(g.away_team_id || g.awayTeamId || '').toLowerCase().trim();
-        const currentId = String(t.id || '').toLowerCase().trim();
-
-        if (homeId === currentId) {
-          j++; gp += homeScore; gc += awayScore;
-          if (homeScore > awayScore) v++;
-          else if (homeScore === awayScore) e++;
-          else d++;
-        } else if (awayId === currentId) {
-          j++; gp += awayScore; gc += homeScore;
-          if (awayScore > homeScore) v++;
-          else if (awayScore === homeScore) e++;
-          else d++;
-        }
-      }
-    });
-    pts = (v * 3) + (e * 1);
-    const sg = gp - gc;
-    return { ...t, pts, j, v, e, d, gp, gc, sg };
-  }).sort((a: any, b: any) => b.pts - a.pts || b.v - a.v || b.sg - a.sg || b.gp - a.gp)
+  const standings = calculateStandings(categoryTeams, categoryGames)
     .map((t: any, idx: number) => ({ ...t, pos: idx + 1 }));
 
   const playerStats = athletes.map((a: any) => {

@@ -16,17 +16,17 @@ export default function Footer() {
             <Link to="/" className="flex items-center gap-4 group">
               <div className="w-16 h-16 bg-white rounded-2xl p-2 flex items-center justify-center overflow-hidden shadow-2xl group-hover:scale-110 transition-transform">
                 <img 
-                  src={settings.league_logo || "/logos/logo.jpg"} 
-                  alt={settings.league_name || "LFE"} 
+                  src={settings.leagueLogo || "/logos/logo.jpg"} 
+                  alt={settings.leagueName || "LFE"} 
                   className="w-full h-full object-contain"
                 />
               </div>
               <div>
                 <span className="font-display text-2xl font-black text-white uppercase tracking-tighter block leading-none">
-                  {settings.league_name || "LIGA"}
+                  {settings.leagueName || "LIGA"}
                 </span>
                 <span className="text-[10px] font-sans font-black text-gray-600 tracking-[0.3em] uppercase">
-                  Escolar 2026
+                  Escolar {settings.yearEdition || "2026"}
                 </span>
               </div>
             </Link>
@@ -35,11 +35,11 @@ export default function Footer() {
               <ul className="space-y-4">
                 <li className="flex items-start gap-4 text-gray-400 group">
                   <MapPin className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-                  <span className="text-sm font-medium">{settings.contact_address || "Garanhuns, Pernambuco - Brasil"}</span>
+                  <span className="text-sm font-medium">{settings.contactAddress || "Garanhuns, Pernambuco - Brasil"}</span>
                 </li>
                 <li className="flex items-center gap-4 text-gray-400 group">
                   <Mail className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-                  <span className="text-sm font-medium">{settings.contact_email || "contato@ligafutsalescolar.com"}</span>
+                  <span className="text-sm font-medium">{settings.contactEmail || "contato@ligafutsalescolar.com"}</span>
                 </li>
               </ul>
             </div>
@@ -70,7 +70,7 @@ export default function Footer() {
               <h3 className="text-[10px] font-display font-black text-gray-700 uppercase tracking-[0.5em]">REDES SOCIAIS</h3>
               <div className="flex gap-4">
                 <a 
-                  href={settings.instagram_url || "https://www.instagram.com/ligadefutsalescolar/"} 
+                  href={settings.instagramUrl || "https://www.instagram.com/ligadefutsalescolar/"} 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="w-14 h-14 rounded-2xl flex items-center justify-center text-white transition-all hover:scale-110 shadow-2xl active:scale-95 border border-white/5 bg-white/5"
@@ -88,7 +88,7 @@ export default function Footer() {
 
         <div className="border-t border-white/5 pt-12 flex flex-col md:flex-row items-center justify-between gap-8">
           <p className="text-center md:text-left text-[10px] font-display font-black text-gray-800 uppercase tracking-[0.3em]">
-            © {new Date().getFullYear()} {settings.league_name || "Liga de Futsal Escolar"} • TODOS OS DIREITOS RESERVADOS
+            © {new Date().getFullYear()} {settings.leagueName || "Liga de Futsal Escolar"} • TODOS OS DIREITOS RESERVADOS
           </p>
           <div className="flex items-center gap-2">
              <div className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,1)] animate-pulse" />

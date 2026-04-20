@@ -45,17 +45,17 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-3 group">
             <div className="relative w-14 h-14 md:w-16 md:h-16 bg-white rounded-2xl flex items-center justify-center overflow-hidden group-hover:scale-105 transition-all duration-500 shadow-2xl border border-white/10">
               <img 
-                src={settings.league_logo || "/logos/logo.jpg"} 
-                alt={settings.league_name || "Liga de Futsal Escolar"} 
+                src={settings.leagueLogo || "/logos/logo.jpg"} 
+                alt={settings.leagueName || "Liga de Futsal Escolar"} 
                 className="w-full h-full object-contain scale-[1.1]"
               />
             </div>
             <div className="flex flex-col leading-none">
               <span className="font-display text-xl md:text-2xl font-black tracking-tighter text-white group-hover:text-primary transition-colors uppercase">
-                {settings.league_name || "LIGA"}
+                {settings.leagueName || "LIGA"}
               </span>
               <span className="text-[10px] font-sans font-black text-gray-500 tracking-[0.2em] uppercase">
-                Futsal Escolar
+                {settings.eventName?.includes('Futsal') ? settings.eventName : 'Futsal Escolar'}
               </span>
             </div>
           </Link>
@@ -170,7 +170,7 @@ export default function Navbar() {
               )}
             </div>
             <div className="px-6 py-6 border-t border-white/5 bg-black/40">
-               <p className="text-[10px] font-display font-bold text-gray-700 tracking-[0.3em] uppercase text-center">Liga de Futsal Escolar • 2026</p>
+               <p className="text-[10px] font-display font-bold text-gray-700 tracking-[0.3em] uppercase text-center">{settings.leagueName || "Liga de Futsal Escolar"} • {settings.yearEdition || "2026"}</p>
             </div>
           </motion.div>
         )}

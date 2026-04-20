@@ -6,15 +6,29 @@ import {
   Shield, Users, MapPin, ArrowUpRight
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
-import { useSupaData } from "@/src/lib/store";
+import { useSupaData, calculateStandings } from "@/src/lib/store";
 import Sponsors from "@/src/components/layout/Sponsors";
+import { AnimatePresence } from "motion/react";
 
 export default function Home() {
   const { data: teams } = useSupaData('lfe_teams', []);
   const { data: games } = useSupaData('lfe_games', []);
   const { data: news } = useSupaData('lfe_news', []);
+  const { data: banners } = useSupaData('lfe_banners', []);
   const { data: settingsArr } = useSupaData('lfe_settings', []);
   const settings = settingsArr?.[0] || {};
+
+  const [activeBannerIndex, setActiveBannerIndex] = useState(0);
+  const activeBanners = banners.filter((b: any) => b.active) || [];
+  const currentBanner = activeBanners[activeBannerIndex];
+
+  useEffect(() => {
+    if (activeBanners.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveBannerIndex(prev => (prev + 1) % activeBanners.length);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [activeBanners.length]);
 
   // Calculations for highlights
   const nextGame = useMemo(() => {
@@ -34,44 +48,12 @@ export default function Home() {
   }, [games]);
 
   const leader = useMemo(() => {
-    if (!teams || teams.length === 0 || !games || games.length === 0) return null;
-    const cat = games[0]?.category || "Geral";
-    const teamsInCat = teams.map((t: any) => {
-       let pts = 0;
-       games.filter((g: any) => g.category === cat && String(g.status).toLowerCase() === 'finalizado').forEach((g: any) => {
-          const isHome = String(g.homeTeamId || g.home_team_id) === String(t.id);
-          const isAway = String(g.awayTeamId || g.away_team_id) === String(t.id);
-          if (isHome || isAway) {
-            const hScore = Number(g.homeScore ?? g.home_score ?? 0);
-            const aScore = Number(g.awayScore ?? g.away_score ?? 0);
-            if (isHome) {
-              if (hScore > aScore) pts += 3; else if (hScore === aScore) pts += 1;
-            } else {
-              if (aScore > hScore) pts += 3; else if (hScore === aScore) pts += 1;
-            }
-          }
-       });
-       return { ...t, pts };
-    }).sort((a: any, b: any) => b.pts - a.pts);
-    return teamsInCat[0];
+    const standings = calculateStandings(teams, games);
+    return standings[0] || null;
   }, [teams, games]);
 
   const top5 = useMemo(() => {
-    if (!teams || teams.length === 0) return [];
-    return teams.map((t: any) => {
-      let pts = 0;
-      (games || []).filter((g: any) => String(g.status).toLowerCase() === 'finalizado').forEach((g: any) => {
-        const isHome = String(g.homeTeamId || g.home_team_id) === String(t.id);
-        const isAway = String(g.awayTeamId || g.away_team_id) === String(t.id);
-        if (isHome || isAway) {
-          const hScore = Number(g.homeScore ?? g.home_score ?? 0);
-          const aScore = Number(g.awayScore ?? g.away_score ?? 0);
-          if (isHome) { if (hScore > aScore) pts += 3; else if (hScore === aScore) pts += 1; }
-          else { if (aScore > hScore) pts += 3; else if (hScore === aScore) pts += 1; }
-        }
-      });
-      return { ...t, pts };
-    }).sort((a: any, b: any) => b.pts - a.pts).slice(0, 5);
+    return calculateStandings(teams, games).slice(0, 5);
   }, [teams, games]);
 
   const upcomingList = useMemo(() => {
@@ -93,11 +75,18 @@ export default function Home() {
       <section className="relative min-h-[95vh] flex items-center pt-24 pb-32 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-b from-bg/20 via-bg/80 to-bg z-10" />
-          <img 
-            src="/banner-principal.png" 
-            className="w-full h-full object-cover scale-105 animate-slow-zoom opacity-50" 
-            alt="Futsal Action"
-          />
+          <AnimatePresence mode="wait">
+            <motion.img 
+              key={currentBanner?.id || 'default'}
+              initial={{ scale: 1.1, opacity: 0 }}
+              animate={{ scale: 1.05, opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5 }}
+              src={currentBanner?.image || settings.leagueLogo || "/banner-principal.png"} 
+              className="w-full h-full object-cover" 
+              alt="Futsal Action"
+            />
+          </AnimatePresence>
         </div>
 
         <div className="container mx-auto px-4 relative z-20">
@@ -107,18 +96,17 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-display text-xs font-black uppercase tracking-[0.3em] mb-10"
             >
-              <Trophy className="w-5 h-5" /> Temporada 2026
+              <Trophy className="w-5 h-5" /> {settings.yearEdition || 'Temporada 2026'}
             </motion.div>
             
             <motion.h1 
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.8 }}
-              className="text-7xl md:text-9xl font-display font-black leading-[0.82] uppercase tracking-tighter mb-10"
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="text-7xl md:text-[11rem] font-display font-black uppercase tracking-tighter leading-[0.85] mb-12 drop-shadow-2xl"
             >
-              A Maior <br/>
-              <span className="text-primary italic">Liga Escolar</span> <br/>
-              da Região
+              {settings.eventName || "Liga de Futsal Escolar"}<br/>
+              <span className="text-primary italic">Oficial {settings.yearEdition || "2026"}</span>
             </motion.h1>
 
             <motion.p 
@@ -127,8 +115,7 @@ export default function Home() {
               transition={{ delay: 0.2, duration: 0.8 }}
               className="text-2xl md:text-3xl text-gray-400 font-medium max-w-3xl mb-14 leading-tight border-l-4 border-primary/30 pl-8"
             >
-              Competição, talento e emoção dentro das quadras. 
-              O palco onde nascem os grandes campeões.
+              {currentBanner?.title || "O palco onde nascem os grandes campeões do Agreste Meridional."}
             </motion.p>
 
             <motion.div 
@@ -137,12 +124,20 @@ export default function Home() {
               transition={{ delay: 0.3, duration: 0.8 }}
               className="flex flex-wrap gap-8"
             >
-              <Link to="/jogos" className="group px-10 py-5 bg-secondary text-white font-display text-2xl font-black rounded-[2rem] flex items-center gap-4 hover:bg-white hover:text-dark transition-all shadow-[0_30px_60px_rgba(245,135,41,0.2)] active:scale-95">
-                VER JOGOS <ChevronRight className="group-hover:translate-x-2 transition-transform" />
-              </Link>
-              <Link to="/inscricao" className="px-10 py-5 bg-white/5 border border-white/20 text-white font-display text-2xl font-black rounded-[2rem] flex items-center gap-4 hover:bg-white/10 transition-all backdrop-blur-xl active:scale-95">
-                INSCREVER ESCOLA
-              </Link>
+              {currentBanner?.link ? (
+                <a href={currentBanner.link} className="group px-10 py-5 bg-secondary text-white font-display text-2xl font-black rounded-[2rem] flex items-center gap-4 hover:bg-white hover:text-dark transition-all shadow-[0_30px_60px_rgba(245,135,41,0.2)] active:scale-95">
+                  SAIBA MAIS <ChevronRight className="group-hover:translate-x-2 transition-transform" />
+                </a>
+              ) : (
+                <Link to="/jogos" className="group px-10 py-5 bg-secondary text-white font-display text-2xl font-black rounded-[2rem] flex items-center gap-4 hover:bg-white hover:text-dark transition-all shadow-[0_30px_60px_rgba(245,135,41,0.2)] active:scale-95">
+                  VER JOGOS <ChevronRight className="group-hover:translate-x-2 transition-transform" />
+                </Link>
+              )}
+              {settings.registrationPeriod === 'aberto' && (
+                <Link to="/inscricao" className="px-10 py-5 bg-white/5 border border-white/20 text-white font-display text-2xl font-black rounded-[2rem] flex items-center gap-4 hover:bg-white/10 transition-all backdrop-blur-xl active:scale-95">
+                  INSCREVER ESCOLA
+                </Link>
+              )}
             </motion.div>
           </div>
         </div>
@@ -334,7 +329,7 @@ export default function Home() {
                <h2 className="text-7xl md:text-9xl font-display font-black uppercase tracking-tighter mb-10 leading-[0.8]">
                  Domínio <br/><span className="text-primary italic">Absoluto</span>
                </h2>
-               <p className="text-gray-400 text-2xl mb-12 max-w-lg leading-snug">Estes são os times que dão o tom da temporada. Cada ponto conta na jornada épica rumo ao título de 2026.</p>
+               <p className="text-gray-400 text-2xl mb-12 max-w-lg leading-snug">Estes são os times que dão o tom da temporada. Cada ponto conta na jornada épica rumo ao título de {settings.yearEdition || '2026'}.</p>
                <div className="grid grid-cols-2 gap-8">
                   <div className="p-8 bg-white/5 border border-white/10 rounded-3xl">
                      <p className="text-4xl font-display font-black text-white mb-2">{teams.length}</p>

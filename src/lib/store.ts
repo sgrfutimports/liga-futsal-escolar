@@ -190,27 +190,46 @@ export function setStoredData(key: string, data: any): void {
   }
 }
 
-// ─── Utilitário de resize de imagem ──────────────────────────────────────────
-export function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<string> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        let { width, height } = img;
-        if (width > height) {
-          if (width > maxWidth) { height = Math.round(height * maxWidth / width); width = maxWidth; }
+// ─── Utilitário de classificação ──────────────────────────────────────────
+export function calculateStandings(teams: any[], games: any[], category: string = 'Geral') {
+  if (!teams || teams.length === 0) return [];
+  
+  const relevantGames = (games || []).filter((g: any) => 
+    (category === 'Geral' || g.category === category) && 
+    String(g.status || '').toLowerCase() === 'finalizado'
+  );
+
+  return teams.map((t: any) => {
+    let pts = 0, p = 0, v = 0, e = 0, d = 0, gp = 0, gc = 0;
+    
+    relevantGames.forEach((g: any) => {
+      const hId = String(g.homeTeamId || g.home_team_id);
+      const aId = String(g.awayTeamId || g.away_team_id);
+      const tId = String(t.id);
+
+      if (hId === tId || aId === tId) {
+        p++;
+        const hScore = Number(g.homeScore ?? g.home_score ?? 0);
+        const aScore = Number(g.awayScore ?? g.away_score ?? 0);
+
+        if (hId === tId) {
+          gp += hScore; gc += aScore;
+          if (hScore > aScore) { pts += 3; v++; }
+          else if (hScore === aScore) { pts += 1; e++; }
+          else d++;
         } else {
-          if (height > maxHeight) { width = Math.round(width * maxHeight / height); height = maxHeight; }
+          gp += aScore; gc += hScore;
+          if (aScore > hScore) { pts += 3; v++; }
+          else if (hScore === aScore) { pts += 1; e++; }
+          else d++;
         }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        canvas.getContext('2d')?.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.8));
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+      }
+    });
+
+    return { ...t, pts, p, v, e, d, gp, gc, sg: gp - gc };
+  }).sort((a: any, b: any) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    if (b.sg !== a.sg) return b.sg - a.sg;
+    return b.gp - a.gp;
   });
 }

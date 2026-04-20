@@ -265,7 +265,7 @@ export default function Registration() {
             transition={{ delay: 0.2 }}
             className="text-gray-400 text-xl max-w-2xl mx-auto font-medium uppercase tracking-widest opacity-60 mb-12"
           >
-            Plataforma oficial de registros para a temporada 2026.
+            Plataforma oficial de registros para a temporada {settings.yearEdition || "2026"}.
           </motion.p>
           
           {rulesUrl && (
@@ -565,8 +565,8 @@ export default function Registration() {
                   </div>
                </button>
                <div className="mt-10 text-center text-[10px] font-black text-gray-700 uppercase tracking-[0.4em] space-y-2">
-                 <p>Ao realizar a inscrição, você aceita o Regulamento Geral da Temporada 2026.</p>
-                 <p>Ambiente seguro e criptografado Liga de Futsal Escolar.</p>
+                 <p>Ao realizar a inscrição, você aceita o Regulamento Geral da Temporada {settings.yearEdition || "2026"}.</p>
+                 <p>Ambiente seguro e criptografado {settings.leagueName || "Liga de Futsal Escolar"}.</p>
                </div>
             </div>
           </form>

@@ -12,6 +12,8 @@ export default function TeamDetails() {
   const { data: allTeams } = useSupaData('lfe_teams', []);
   const { data: allAthletes } = useSupaData('lfe_athletes', []);
   const { data: allGames } = useSupaData('lfe_games', []);
+  const { data: settingsArr } = useSupaData('lfe_settings', []);
+  const settings = settingsArr[0] || {};
 
   const team = allTeams.find((t: any) => String(t.id) === String(id)) || {};
   const players = allAthletes.filter((a: any) => String(a.teamId || a.team_id) === String(id));
@@ -125,7 +127,7 @@ export default function TeamDetails() {
                {team.city || "Representante Oficial"}
                <span className="mx-2 text-white/10">|</span>
                <Calendar className="w-4 h-4 text-primary" />
-               Temporada 2026
+               Temporada {settings.yearEdition || "2026"}
             </div>
           </motion.div>
         </div>
