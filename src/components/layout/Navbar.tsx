@@ -87,7 +87,7 @@ export default function Navbar() {
                 to="/inscricao"
                 className="bg-primary text-dark font-display text-xs font-black px-6 py-2.5 rounded-xl hover:bg-white transition-all shadow-[0_0_20px_rgba(204,255,0,0.2)] hover:shadow-white/20 uppercase tracking-widest"
               >
-                Inscritpizar Equipe
+                INSCREVER EQUIPE
               </Link>
               {(isAdmin || isChefe) && (
                 <button

@@ -10,14 +10,20 @@ import { useSupaData } from "@/src/lib/store";
 import Sponsors from "@/src/components/layout/Sponsors";
 
 export default function Home() {
-  const { teams } = useSupaData('lfe_teams', []);
-  const { games } = useSupaData('lfe_games', []);
+  const { data: teams } = useSupaData('lfe_teams', []);
+  const { data: games } = useSupaData('lfe_games', []);
+  const { data: settingsArr } = useSupaData('lfe_settings', []);
+  const settings = settingsArr?.[0] || {};
 
   // Calculations for highlights
   const nextGame = useMemo(() => {
     return (games || [])
-      .filter((g: any) => String(g.status || '').toLowerCase() !== 'finalizado')
-      .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
+      .filter((g: any) => String(g?.status || '').toLowerCase() !== 'finalizado')
+      .sort((a: any, b: any) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        return dateA - dateB;
+      })[0];
   }, [games]);
 
   const lastResult = useMemo(() => {
@@ -144,9 +150,9 @@ export default function Home() {
             {nextGame ? (
               <div className="flex flex-col gap-6 text-center">
                 <div className="flex items-center justify-between gap-4">
-                   <div className="w-12 h-12 bg-white rounded-xl p-2"><img src={teams.find((t: any) => String(t.id) === String(nextGame.homeTeamId || nextGame.home_team_id))?.logo} className="w-full h-full object-contain" /></div>
+                   <div className="w-12 h-12 bg-white rounded-xl p-2"><img src={(teams || []).find((t: any) => String(t.id) === String(nextGame.homeTeamId || nextGame.home_team_id))?.logo} className="w-full h-full object-contain" /></div>
                    <span className="text-gray-700 font-display font-black text-xs italic">VS</span>
-                   <div className="w-12 h-12 bg-white rounded-xl p-2"><img src={teams.find((t: any) => String(t.id) === String(nextGame.awayTeamId || nextGame.away_team_id))?.logo} className="w-full h-full object-contain" /></div>
+                   <div className="w-12 h-12 bg-white rounded-xl p-2"><img src={(teams || []).find((t: any) => String(t.id) === String(nextGame.awayTeamId || nextGame.away_team_id))?.logo} className="w-full h-full object-contain" /></div>
                 </div>
                 <div className="space-y-1">
                    <p className="font-display font-black text-primary text-xs uppercase italic tracking-widest">{nextGame.date}</p>
