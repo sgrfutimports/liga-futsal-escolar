@@ -33,6 +33,36 @@ export const defaultData: Record<string, any> = {
 
 // ─── CRUD Supabase ────────────────────────────────────────────────────────────
 
+function snakeToCamel(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(v => snakeToCamel(v));
+  } else if (obj !== null && obj.constructor === Object) {
+    return Object.keys(obj).reduce(
+      (result, key) => ({
+        ...result,
+        [key.replace(/(_\w)/g, (m) => m[1].toUpperCase())]: snakeToCamel(obj[key]),
+      }),
+      {}
+    );
+  }
+  return obj;
+}
+
+function camelToSnake(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(v => camelToSnake(v));
+  } else if (obj !== null && obj.constructor === Object) {
+    return Object.keys(obj).reduce(
+      (result, key) => ({
+        ...result,
+        [key.replace(/[A-Z]/g, (m) => `_${m.toLowerCase()}`)]: camelToSnake(obj[key]),
+      }),
+      {}
+    );
+  }
+  return obj;
+}
+
 export async function supaFetch(table: TableName): Promise<any[] | null> {
   const getMockData = () => {
     if (table === 'lfe_teams') return mockTeams;
@@ -57,7 +87,7 @@ export async function supaFetch(table: TableName): Promise<any[] | null> {
       if (mockResult) return mockResult;
     }
     
-    return data ?? [];
+    return data ? snakeToCamel(data) : [];
   } catch (e) {
     console.error(`[Supabase] Network error [${table}]:`, e);
     return getMockData();
@@ -65,25 +95,25 @@ export async function supaFetch(table: TableName): Promise<any[] | null> {
 }
 
 export async function supaUpsert(table: TableName, data: any): Promise<any> {
-  const { data: result, error } = await supabase.from(table).upsert(data).select();
+  const { data: result, error } = await supabase.from(table).upsert(camelToSnake(data)).select();
   if (error) {
     console.error(`[Supabase] Upsert error [${table}]:`, error.message);
     throw error;
   }
-  return result;
+  return snakeToCamel(result);
 }
 
 export async function supaInsert(table: TableName, data: any): Promise<any> {
-  const { data: result, error } = await supabase.from(table).insert(data).select().single();
+  const { data: result, error } = await supabase.from(table).insert(camelToSnake(data)).select().single();
   if (error) {
     console.error(`[Supabase] Insert error [${table}]:`, error.message);
     throw error;
   }
-  return result;
+  return snakeToCamel(result);
 }
 
 export async function supaUpdate(table: TableName, id: any, data: any): Promise<void> {
-  const { error } = await supabase.from(table).update(data).eq('id', id);
+  const { error } = await supabase.from(table).update(camelToSnake(data)).eq('id', id);
   if (error) {
     console.error(`[Supabase] Update error [${table}]:`, error.message);
     throw error;
