@@ -80,12 +80,12 @@ export default function Home() {
   }, [games]);
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white">
+    <div className="min-h-screen bg-bg text-white">
       
       {/* 1. HERO SECTION - DOBRA 1 */}
       <section className="relative min-h-[95vh] flex items-center pt-24 pb-32 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#020617]/20 via-[#020617]/80 to-[#020617] z-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-bg/20 via-bg/80 to-bg z-10" />
           <img 
             src="/banner-principal.png" 
             className="w-full h-full object-cover scale-105 animate-slow-zoom opacity-50" 
@@ -130,7 +130,7 @@ export default function Home() {
               transition={{ delay: 0.3, duration: 0.8 }}
               className="flex flex-wrap gap-8"
             >
-              <Link to="/jogos" className="group px-10 py-5 bg-primary text-dark font-display text-2xl font-black rounded-[2rem] flex items-center gap-4 hover:bg-white transition-all shadow-[0_30px_60px_rgba(204,255,0,0.2)] active:scale-95">
+              <Link to="/jogos" className="group px-10 py-5 bg-secondary text-white font-display text-2xl font-black rounded-[2rem] flex items-center gap-4 hover:bg-white hover:text-dark transition-all shadow-[0_30px_60px_rgba(245,135,41,0.2)] active:scale-95">
                 VER JOGOS <ChevronRight className="group-hover:translate-x-2 transition-transform" />
               </Link>
               <Link to="/inscricao" className="px-10 py-5 bg-white/5 border border-white/20 text-white font-display text-2xl font-black rounded-[2rem] flex items-center gap-4 hover:bg-white/10 transition-all backdrop-blur-xl active:scale-95">
@@ -372,22 +372,21 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 7. CTA FINAL */}
-      <section className="relative py-60 overflow-hidden text-center bg-[#ccff00]">
-         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
-         <div className="container mx-auto px-4 relative z-10">
-            <h2 className="text-7xl md:text-9xl font-display font-black uppercase tracking-tighter mb-12 leading-none text-dark">
-              Quer fazer <br/>História?
-            </h2>
-            <p className="text-2xl md:text-3xl text-dark/60 mb-20 uppercase font-black tracking-[0.2em] italic max-w-3xl mx-auto">Inscreva sua equipe agora e dispute a maior liga estudantil da região.</p>
-            <Link to="/inscricao" className="inline-block group active:scale-95 transition-all">
-               <div className="relative px-16 py-8 bg-dark text-white rounded-[3.5rem] font-display text-4xl font-black uppercase tracking-tighter shadow-3xl hover:bg-[#020617] transition-all flex items-center gap-8">
-                 INSCREVER EQUIPE
-                 <ArrowUpRight className="w-12 h-12 text-primary group-hover:translate-x-3 group-hover:-translate-y-3 transition-transform" />
-               </div>
-            </Link>
-         </div>
-      </section>
+       <section className="relative py-60 overflow-hidden text-center bg-secondary">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
+          <div className="container mx-auto px-4 relative z-10">
+             <h2 className="text-7xl md:text-9xl font-display font-black uppercase tracking-tighter mb-12 leading-none text-white">
+               Quer fazer <br/>História?
+             </h2>
+             <p className="text-2xl md:text-3xl text-white/80 mb-20 uppercase font-black tracking-[0.2em] italic max-w-3xl mx-auto">Inscreva sua equipe agora e dispute a maior liga estudantil da região.</p>
+             <Link to="/inscricao" className="inline-block group active:scale-95 transition-all">
+                <div className="relative px-16 py-8 bg-dark text-white rounded-[3.5rem] font-display text-4xl font-black uppercase tracking-tighter shadow-3xl hover:bg-bg transition-all flex items-center gap-8">
+                  INSCREVER EQUIPE
+                  <ArrowUpRight className="w-12 h-12 text-secondary group-hover:translate-x-3 group-hover:-translate-y-3 transition-transform" />
+                </div>
+             </Link>
+          </div>
+       </section>
 
     </div>
   );

@@ -6,10 +6,10 @@
   --font-display: "Bebas Neue", cursive, sans-serif;
   
   /* Brand Colors */
-  --color-primary: #76A911; 
-  --color-primary-dark: #5C850D;
-  --color-secondary: #E85F01; 
-  --color-accent: #0162CA; 
+  --color-primary: #8BC040; 
+  --color-primary-dark: #6a922f;
+  --color-secondary: #F58729; 
+  --color-accent: #187BCD; 
   --color-danger: #C81010;
 
   /* Theme Dynamic Variables (Fixed to Dark) */
@@ -22,7 +22,7 @@
 
 :root {
   /* DARK THEME AS ABSOLUTE DEFAULT */
-  --bg-color: #020617;
+  --bg-color: #024788;
   --surface-color: #0f172a;
   --border-color: rgba(255, 255, 255, 0.03);
   --text-color: #ffffff;
