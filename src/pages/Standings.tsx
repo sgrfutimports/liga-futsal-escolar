@@ -118,39 +118,60 @@ export default function Standings() {
   return (
     <div className="min-h-screen bg-dark text-white selection:bg-primary selection:text-dark">
       {/* Dynamic Header with glass effect */}
-      <section className="relative pt-24 pb-16 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_-20%,rgba(118,169,17,0.1),transparent)] pointer-events-none" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-primary text-[11px] tracking-[0.2em] font-display font-bold mb-6">
-             <Trophy className="w-4 h-4" /> ESTATÍSTICAS OFICIAIS
-          </div>
-          <h1 className="text-6xl md:text-8xl font-display font-black tracking-tighter mb-4 leading-none uppercase">
-            TABELA E <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-dark">ESTATÍSTICAS</span>
-          </h1>
-          <p className="text-gray-300 text-lg md:text-2xl max-w-2xl font-sans leading-relaxed font-medium">
-            Acompanhe o desempenho das equipes, artilharia, resultados e cartões de forma totalmente automatizada e em tempo real.
-          </p>
+      <header className="relative pt-32 pb-24 overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#76A911]/5 via-transparent to-transparent opacity-30" />
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#76A911]/5 blur-[120px] rounded-full pointer-events-none" />
         </div>
-      </section>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
-        {/* Modern Pill Category Switcher */}
-        <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between mb-12">
-          <div className="bg-dark-card/50 backdrop-blur-xl border border-white/5 p-1.5 rounded-2xl flex flex-wrap items-center gap-2">
+        <div className="container mx-auto px-4 relative z-10 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-gray-500 font-display text-[10px] font-black uppercase tracking-[0.3em] mb-8"
+          >
+            <Trophy className="w-4 h-4 text-primary" /> Estatísticas Oficiais
+          </motion.div>
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-7xl md:text-9xl font-display font-black uppercase tracking-tighter mb-8 leading-none"
+          >
+            Elite em <span className="text-primary italic">Alta Performance</span>
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-gray-400 text-xl max-w-2xl mx-auto font-medium uppercase tracking-widest opacity-60 mb-16"
+          >
+            Acompanhe o desempenho das equipes e atletas em tempo real.
+          </motion.p>
+
+          <motion.div 
+             initial={{ opacity: 0, scale: 0.9 }}
+             animate={{ opacity: 1, scale: 1 }}
+             transition={{ delay: 0.3 }}
+             className="flex flex-wrap justify-center gap-2 p-1.5 bg-white/5 border border-white/10 rounded-[2.5rem] backdrop-blur-3xl inline-flex mx-auto"
+          >
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
                 className={cn(
-                  "px-8 py-3 rounded-xl font-display text-base tracking-wide transition-all duration-300",
+                  "px-8 py-3 rounded-full font-display font-black text-[10px] uppercase tracking-[0.2em] transition-all",
                   activeCategory === cat 
-                    ? "bg-primary text-dark font-black shadow-[0_0_30px_rgba(204,255,0,0.4)] scale-105" 
-                    : "text-gray-300 hover:text-white hover:bg-white/10"
-                )}>
+                    ? "bg-primary text-dark shadow-[0_10px_30px_rgba(204,255,0,0.3)]" 
+                    : "text-gray-500 hover:text-white"
+                )}
+              >
                 {cat}
               </button>
             ))}
-          </div>
+          </motion.div>
+        </div>
+      </header>
           
           {/* Sub-navigation Tabs */}
           <div className="flex items-center gap-8 border-b border-white/5 pb-2 overflow-x-auto hide-scrollbar">

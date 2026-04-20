@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Calendar, MapPin, Clock, ChevronRight, Filter, Search, Trophy } from "lucide-react";
 import { Link } from "react-router";
+import { motion } from "motion/react";
 import { useSupaData } from "@/src/lib/store";
 import { cn } from "@/src/lib/utils";
 
@@ -26,37 +27,59 @@ export default function Games() {
   const rounds = Array.from(new Set(allGames.map((g: any) => String(g.round)))).sort();
 
   return (
-    <div className="min-h-screen bg-[#020617] py-12">
+    <div className="min-h-screen bg-[#020617] pt-32 pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
-          <div className="space-y-4">
-            <h1 className="text-5xl md:text-7xl font-display font-black text-white uppercase tracking-tighter">
-              CENTRAL DE <span className="text-primary italic">JOGOS</span>
-            </h1>
-            <p className="text-gray-400 text-lg max-w-xl font-sans">
-              Acompanhe resultados, próximos confrontos e a agenda completa da Liga.
-            </p>
-          </div>
+        {/* Header Section */}
+        <div className="text-center mb-24 relative">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 text-gray-500 font-display text-xs font-black uppercase tracking-[0.4em] mb-10"
+          >
+            <Trophy className="w-5 h-5 text-primary" /> Agenda de Confrontos
+          </motion.div>
+          
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-7xl md:text-9xl font-display font-black uppercase tracking-tighter leading-[0.82] mb-10"
+          >
+            Central de <br/><span className="text-primary italic">Jogos</span>
+          </motion.h1>
 
-          {/* Quick Filters */}
-          <div className="flex bg-white/5 p-1.5 rounded-2xl border border-white/5 backdrop-blur-md">
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-xl md:text-2xl text-gray-400 font-medium max-w-3xl mx-auto uppercase tracking-widest opacity-60 mb-16"
+          >
+            Resultados históricos e próximos grandes momentos nas quadras.
+          </motion.p>
+
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-wrap justify-center bg-white/5 p-1.5 rounded-[2rem] border border-white/10 backdrop-blur-3xl inline-flex"
+          >
             {["TODOS", "PROGRAMADO", "FINALIZADO"].map((status) => (
               <button
                 key={status}
                 onClick={() => setActiveStatus(status)}
                 className={cn(
-                  "px-6 py-2 rounded-xl font-display text-xs uppercase tracking-widest transition-all",
+                  "px-8 py-3 rounded-full font-display text-[10px] font-black uppercase tracking-[0.2em] transition-all",
                   activeStatus === status 
-                    ? "bg-primary text-black shadow-lg" 
-                    : "text-gray-400 hover:text-white"
+                    ? "bg-primary text-black shadow-[0_10px_20px_rgba(204,255,0,0.2)]" 
+                    : "text-gray-500 hover:text-white"
                 )}
               >
                 {status}
               </button>
             ))}
-          </div>
+          </motion.div>
         </div>
 
         {/* Filters Bar */}

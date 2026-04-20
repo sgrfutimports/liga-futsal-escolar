@@ -351,16 +351,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. PATROCINADORES */}
-      <section className="py-40 bg-white/5 backdrop-blur-md">
-         <div className="container mx-auto px-4 text-center mb-24">
-            <h3 className="text-[12px] font-display font-black text-gray-700 uppercase tracking-[0.6em]">Apoiadores Oficiais</h3>
-         </div>
-         <div className="container mx-auto px-4 overflow-hidden">
-            <Sponsors />
-         </div>
-      </section>
-
       {/* 7. CTA FINAL */}
       <section className="relative py-60 overflow-hidden text-center bg-[#ccff00]">
          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
